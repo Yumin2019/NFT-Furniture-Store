@@ -4,9 +4,13 @@ import { atom, useAtom } from "jotai";
 
 export const socket = io("http://localhost:3001");
 export const charactersAtom = atom([]);
+export const mapAtom = atom(null);
+export const userAtom = atom(null);
 
 export const SocketManager = () => {
   const [_characters, setCharacters] = useAtom(charactersAtom);
+  const [_map, setMap] = useAtom(mapAtom);
+  const [_user, setUser] = useAtom(userAtom);
   useEffect(() => {
     function onConnect() {
       console.log("connected");
@@ -16,8 +20,11 @@ export const SocketManager = () => {
       console.log("disconnected");
     }
 
-    function onHello() {
-      console.log("hello");
+    function onHello(value) {
+      console.log(value);
+      setMap(value.map);
+      setUser(value.id);
+      setCharacters(value.characters); // value(json) 넣어도 돌아가는게 신기하네;; 이게 왜;;
     }
 
     function onCharacters(value) {
