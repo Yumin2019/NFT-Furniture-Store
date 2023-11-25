@@ -1,3 +1,4 @@
+import pathfinding from "pathfinding";
 import { Server } from "socket.io";
 
 const io = new Server({
@@ -271,7 +272,6 @@ const items = {
   },
 };
 
-// gridDivision과 gridPosition은 블렌더의 값을 기준으로 한다. (1칸에 2개씩 잡음)
 const map = {
   size: [10, 10],
   gridDivision: 2,
@@ -298,11 +298,170 @@ const map = {
       gridPosition: [0, 5],
       rotation: 1,
     },
+    {
+      ...items.bathroomCabinetDrawer,
+      gridPosition: [3, 0],
+    },
+    {
+      ...items.bathtub,
+      gridPosition: [4, 4],
+    },
+    {
+      ...items.bathtub,
+      gridPosition: [0, 8],
+      rotation: 3,
+    },
+    {
+      ...items.bathroomCabinet,
+      gridPosition: [3, 0],
+    },
+    {
+      ...items.bathroomMirror,
+      gridPosition: [0, 8],
+      rotation: 1,
+    },
+    {
+      ...items.bathroomMirror,
+      gridPosition: [, 10],
+      rotation: 1,
+    },
+    {
+      ...items.tableCoffee,
+      gridPosition: [10, 8],
+    },
+    {
+      ...items.rugRectangle,
+      gridPosition: [8, 7],
+    },
+    {
+      ...items.loungeSofaCorner,
+      gridPosition: [6, 10],
+    },
+    {
+      ...items.bear,
+      gridPosition: [0, 3],
+      rotation: 1,
+    },
+    {
+      ...items.plant,
+      gridPosition: [11, 13],
+    },
+    {
+      ...items.cabinetBedDrawerTable,
+      gridPosition: [13, 19],
+    },
+    {
+      ...items.cabinetBedDrawer,
+      gridPosition: [19, 19],
+    },
+    {
+      ...items.bedDouble,
+      gridPosition: [14, 15],
+    },
+    {
+      ...items.bookcaseClosedWide,
+      gridPosition: [12, 0],
+      rotation: 2,
+    },
+    {
+      ...items.speaker,
+      gridPosition: [11, 0],
+    },
+    {
+      ...items.speakerSmall,
+      gridPosition: [15, 0],
+    },
+    {
+      ...items.loungeChair,
+      gridPosition: [10, 4],
+    },
+    {
+      ...items.loungeSofaOttoman,
+      gridPosition: [14, 4],
+    },
+    {
+      ...items.loungeDesignSofa,
+      gridPosition: [18, 0],
+      rotation: 1,
+    },
+    {
+      ...items.kitchenCabinetCornerRound,
+      gridPosition: [2, 18],
+      rotation: 2,
+    },
+    {
+      ...items.kitchenCabinetCornerInner,
+      gridPosition: [0, 18],
+      rotation: 2,
+    },
+    {
+      ...items.kitchenStove,
+      gridPosition: [0, 16],
+      rotation: 1,
+    },
+    {
+      ...items.dryer,
+      gridPosition: [0, 14],
+      rotation: 1,
+    },
+    {
+      ...items.lampRoundFloor,
+      gridPosition: [0, 12],
+    },
   ],
 };
 
+const grid = new pathfinding.Grid(
+  map.size[0] * map.gridDivision,
+  map.size[1] * map.gridDivision
+);
+const finder = new pathfinding.AStarFinder({
+  allowDiagonal: true,
+  dontCrossCorners: true,
+});
+
+const findPath = (start, end) => {
+  const gridClone = grid.clone();
+  const path = finder.findPath(start[0], start[1], end[0], end[1], gridClone);
+  return path;
+};
+
+const updateGrid = () => {
+  map.items.forEach((item) => {
+    // 카펫이거나 벽걸이의 경우 넘어간다.
+    if (item.walkable || item.wall) {
+      return;
+    }
+
+    // 모든 물체는 한 쪽 방향으로 바라본다.
+    const width =
+      item.rotation === 1 || item.rotation === 3 ? item.size[1] : item.size[0];
+    const height =
+      item.rotation === 1 || item.rotation === 3 ? item.size[0] : item.size[1];
+
+    for (let x = 0; x < width; ++x) {
+      for (let y = 0; y < height; ++y) {
+        grid.setWalkableAt(
+          item.gridPosition[0] + x,
+          item.gridPosition[1] + y,
+          false
+        );
+      }
+    }
+  });
+};
+
+updateGrid();
+
+// blender 상의 좌표로 잡기
 const generateRandomPosition = () => {
-  return [Math.random() * map.size[0], 0, Math.random() * map.size[1]];
+  while (true) {
+    const x = Math.floor(Math.random() * map.size[0] * map.gridDivision);
+    const y = Math.floor(Math.random() * map.size[1] * map.gridDivision);
+    if (grid.isWalkableAt(x, y)) {
+      return [x, y];
+    }
+  }
 };
 
 const generatedRandomHexColor = () => {
@@ -328,12 +487,18 @@ io.on("connection", (socket) => {
 
   io.emit("characters", characters);
 
-  socket.on("move", (position) => {
+  socket.on("move", (from, to) => {
     const character = characters.find(
       (character) => character.id === socket.id
     );
-    character.position = position;
-    io.emit("characters", characters);
+    const path = findPath(from, to);
+    if (!path) {
+      return;
+    }
+
+    character.position = from;
+    character.path = path;
+    io.emit("playerMove", character);
   });
 
   socket.on("disconnect", () => {

@@ -20,28 +20,40 @@ export const SocketManager = () => {
       console.log("disconnected");
     }
 
-    function onHello(value) {
-      console.log(value);
-      setMap(value.map);
-      setUser(value.id);
-      setCharacters(value.characters); // value(json) 넣어도 돌아가는게 신기하네;; 이게 왜;;
+    function onHello(data) {
+      setMap(data.map);
+      setUser(data.id);
+      setCharacters(data.characters); // value(json) 넣어도 돌아가는게 신기하네;; 이게 왜;;
     }
 
-    function onCharacters(value) {
-      console.log("characters", value);
-      setCharacters(value);
+    function onCharacters(characters) {
+      setCharacters(characters);
+    }
+
+    function onPlayerMove(character) {
+      console.log("playerMove");
+      setCharacters((prev) => {
+        return prev.map((_character) => {
+          if (_character.id === character.id) {
+            return character;
+          }
+          return _character;
+        });
+      });
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("hello", onHello);
     socket.on("characters", onCharacters);
+    socket.on("playerMove", onPlayerMove);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("hello", onHello);
       socket.off("characters", onCharacters);
+      socket.off("playerMove", onPlayerMove);
     };
   }, []);
 };
