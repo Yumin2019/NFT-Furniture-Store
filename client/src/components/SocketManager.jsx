@@ -42,11 +42,17 @@ export const SocketManager = () => {
       });
     }
 
+    function onMapUpdate(value) {
+      setMap(value.map);
+      setCharacters(value.characters);
+    }
+
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("hello", onHello);
     socket.on("characters", onCharacters);
     socket.on("playerMove", onPlayerMove);
+    socket.on("mapUpdate", onMapUpdate);
 
     return () => {
       socket.off("connect", onConnect);
@@ -54,6 +60,7 @@ export const SocketManager = () => {
       socket.off("hello", onHello);
       socket.off("characters", onCharacters);
       socket.off("playerMove", onPlayerMove);
+      socket.off("mapUpdate", onMapUpdate);
     };
   }, []);
 };

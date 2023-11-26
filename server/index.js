@@ -427,6 +427,12 @@ const findPath = (start, end) => {
 };
 
 const updateGrid = () => {
+  // reset grid
+  for (let x = 0; x < map.size[0] * map.gridDivision; ++x) {
+    for (let y = 0; y < map.size[1] * map.gridDivision; ++y) {
+      grid.setWalkableAt(x, y, true);
+    }
+  }
   map.items.forEach((item) => {
     // 카펫이거나 벽걸이의 경우 넘어간다.
     if (item.walkable || item.wall) {
@@ -499,6 +505,16 @@ io.on("connection", (socket) => {
     character.position = from;
     character.path = path;
     io.emit("playerMove", character);
+  });
+
+  socket.on("itemsUpdate", (items) => {
+    map.items = items;
+    characters.forEach((character) => {
+      character.path = [];
+      character.position = generateRandomPosition();
+    });
+    updateGrid();
+    io.emit("mapUpdate", { map, characters });
   });
 
   socket.on("disconnect", () => {
