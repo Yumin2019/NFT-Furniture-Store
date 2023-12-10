@@ -1,33 +1,22 @@
-import { NftCard } from "../components/NftCard";
-import { Button, Grid, Center, useDisclosure } from "@chakra-ui/react";
+import { FurnitureCard } from "../components/FurnitureCard";
+import { Button, Grid, Center, useDisclosure, Box } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import styled from "styled-components";
 import { RoomDialog } from "../components/RoomDialog";
+import { BiWorld } from "react-icons/bi";
 
-const Wrapper = styled.div`
-  nav {
-    float: right;
-  }
-
-  h1 {
-    display: inline-block;
-    vertical-align: middle;
-    color: white;
-    margin: 0.5rem;
-    padding: 0;
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-
-  header {
-    width: 100%;
-    z-index: 5;
-    position: fixed;
-    top: 0px;
-    background: #3082ce;
-    padding: 20px;
-  }
-`;
+const PageNumber = ({ number }) => {
+  return (
+    <Button
+      colorScheme="teal"
+      size="sm"
+      fontSize={18}
+      variant="ghost"
+      fontWeight="bold"
+    >
+      {number}
+    </Button>
+  );
+};
 
 export const MainPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -35,72 +24,97 @@ export const MainPage = () => {
   return (
     <>
       <RoomDialog isOpen={isOpen} onClose={onClose} />
-      <Wrapper>
+      <Box
+        w="100%"
+        zIndex={100}
+        position="fixed"
+        top="0"
+        backgroundColor="teal"
+        height={75}
+        pt={2.5}
+        pl={8}
+      >
         <header>
-          <h1>Furniture NFT Store</h1>
-          <nav style={{ margin: 10 }}>
+          <h1
+            style={{
+              color: "white",
+              display: "inline-block",
+              fontSize: 30,
+              fontWeight: "bold",
+            }}
+          >
+            Furniture NFT Store
+          </h1>
+          <div style={{ margin: 10, float: "right" }}>
             <Link to={"/login"}>
-              <Button colorScheme="teal" size="sm" mr={4}>
+              <Button colorScheme="gray" size="sm" mr={4}>
                 Login
               </Button>
             </Link>
-
-            <Button colorScheme="teal" size="sm" mr={4}>
-              My Info
-            </Button>
+            <Link to={"/userInfo"}>
+              <Button colorScheme="gray" size="sm" mr={4}>
+                My Info
+              </Button>
+            </Link>
             <Link to={"/register"}>
-              <Button colorScheme="teal" size="sm" mr={4}>
+              <Button colorScheme="gray" size="sm" mr={4}>
                 Register
               </Button>
             </Link>
-
-            <Button colorScheme="teal" size="sm" mr={4} onClick={onOpen}>
+            <Button colorScheme="gray" size="sm" mr={4} onClick={onOpen}>
               Furniture World
             </Button>
-          </nav>
+          </div>
         </header>
+      </Box>
 
-        <Center paddingTop={100}>
-          <Grid templateColumns="repeat(6, 1fr)" gap={6}>
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-          </Grid>
-        </Center>
-        <div style={{ margin: 16 }} />
-
-        <Center>
-          <Grid templateColumns="repeat(6, 1fr)" gap={6}>
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-            <NftCard w="100%" />
-          </Grid>
-        </Center>
-        <div style={{ margin: 16 }} />
-        <Center>
-          <Button colorScheme="teal" size="sm" mr={4}>
-            «
-          </Button>
-          <Button colorScheme="teal" size="sm" mr={4}>
-            1
-          </Button>
-          <Button colorScheme="teal" size="sm" mr={4}>
-            2
-          </Button>
-          <Button colorScheme="teal" size="sm" mr={4}>
-            3
-          </Button>
-          <Button colorScheme="teal" size="sm" mr={4}>
-            »
-          </Button>
-        </Center>
-      </Wrapper>
+      <Center paddingTop={100}>
+        <Grid templateColumns="repeat(6, 1fr)" gap={6}>
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+        </Grid>
+      </Center>
+      <div style={{ margin: 16 }} />
+      <Center>
+        <Grid templateColumns="repeat(6, 1fr)" gap={6}>
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+          <FurnitureCard w="100%" />
+        </Grid>
+      </Center>
+      <div style={{ margin: 16 }} />
+      <Center>
+        <Button
+          colorScheme="teal"
+          size="sm"
+          variant="ghost"
+          fontSize={30}
+          mr={1}
+          pb={1}
+        >
+          «
+        </Button>
+        <PageNumber number={1} />
+        <PageNumber number={2} />
+        <PageNumber number={3} />
+        <Button
+          colorScheme="teal"
+          size="sm"
+          variant="ghost"
+          fontSize={30}
+          ml={1}
+          pb={1}
+        >
+          »
+        </Button>
+      </Center>
     </>
   );
 };

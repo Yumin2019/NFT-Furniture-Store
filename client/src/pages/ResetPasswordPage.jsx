@@ -5,6 +5,7 @@ import {
   InputGroup,
   InputRightElement,
   Text,
+  Box,
 } from "@chakra-ui/react";
 import { useState } from "react";
 
@@ -14,49 +15,43 @@ export const ResetPasswordPage = () => {
   return (
     <>
       <Center>
-        <Text fontSize={40} mb={4} mt={100}>
-          Reset Password
-        </Text>
-      </Center>
+        <Box width="25%" textAlign="center">
+          <Text fontSize={40} mb={4} mt={100}>
+            Reset Password
+          </Text>
 
-      <Center mb={4}>
-        <Text>You can reset your password and then use it.</Text>
-      </Center>
+          <Text mb={4}>You can reset your password and then use it.</Text>
 
-      <Center>
-        <InputGroup size="md" mb={4} w="50%">
-          <Input
-            pr="4.5rem"
-            type={show ? "text" : "password"}
-            placeholder="Enter password"
-          />
-          <InputRightElement width="4.5rem">
-            <Button size="sm" onClick={handleClick}>
-              {show ? "Hide" : "Show"}
-            </Button>
-          </InputRightElement>
-        </InputGroup>
-      </Center>
+          <InputGroup size="md" mb={4}>
+            <Input
+              pr="4.5rem"
+              type={show ? "text" : "password"}
+              placeholder="Enter password"
+            />
+            <InputRightElement width="4.5rem">
+              <Button size="sm" onClick={handleClick}>
+                {show ? "Hide" : "Show"}
+              </Button>
+            </InputRightElement>
+          </InputGroup>
 
-      <Center>
-        <InputGroup size="md" mb={8} w="50%">
-          <Input
-            pr="4.5rem"
-            type={show ? "text" : "password"}
-            placeholder="Enter password again"
-          />
-          <InputRightElement width="4.5rem">
-            <Button size="sm" onClick={handleClick}>
-              {show ? "Hide" : "Show"}
-            </Button>
-          </InputRightElement>
-        </InputGroup>
-      </Center>
+          <InputGroup size="md" mb={8}>
+            <Input
+              pr="4.5rem"
+              type={show ? "text" : "password"}
+              placeholder="Enter password again"
+            />
+            <InputRightElement width="4.5rem">
+              <Button size="sm" onClick={handleClick}>
+                {show ? "Hide" : "Show"}
+              </Button>
+            </InputRightElement>
+          </InputGroup>
 
-      <Center>
-        <Button colorScheme="blue" size="md" w="50%" mb={4}>
-          Reset
-        </Button>
+          <Button colorScheme="teal" size="md" w="100%" mb={4}>
+            Reset
+          </Button>
+        </Box>
       </Center>
     </>
   );

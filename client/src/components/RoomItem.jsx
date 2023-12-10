@@ -1,9 +1,10 @@
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Button, Text, Flex, Spacer } from "@chakra-ui/react";
 
-export const RoomItem = ({ room }) => {
+export const RoomItem = ({ room, right, width }) => {
   return (
     <>
       <Box
+        w={width}
         border="0.5px solid #88888866"
         borderRadius={10}
         padding={2}
@@ -16,15 +17,12 @@ export const RoomItem = ({ room }) => {
         <Text fontSize="sm" mb={2}>
           {room.desc}
         </Text>
-        <Button
-          right={-310}
-          colorScheme="teal"
-          width="18%"
-          size="xs"
-          variant="solid"
-        >
-          Join
-        </Button>
+        <Flex>
+          <Spacer />
+          <Button alignItems="center" colorScheme="teal" size="sm">
+            Join
+          </Button>
+        </Flex>
       </Box>
     </>
   );

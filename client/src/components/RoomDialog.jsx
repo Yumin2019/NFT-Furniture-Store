@@ -17,7 +17,6 @@ import { RoomItem } from "./RoomItem";
 
 export const RoomDialog = ({ isOpen, onClose }) => {
   const cancelRef = useRef();
-
   const myRoom = {
     id: 3,
     name: "Meta World",
@@ -67,29 +66,34 @@ export const RoomDialog = ({ isOpen, onClose }) => {
           <AlertDialogCloseButton ref={cancelRef} onClick={onClose} />
           <AlertDialogBody>
             You can select Furniture World to join.
-            <Text fontSize={16} fontWeight="bold" color="teal" mt={4} mb={1}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <BiWorld fontSize={20} style={{ marginRight: 4 }} />
-                Your World
-              </div>
-            </Text>
-            <RoomItem room={myRoom} />
-            <Divider />
-            <Text
-              alignItems="center"
+            <Box
               fontSize={16}
               fontWeight="bold"
               color="teal"
+              display="flex"
+              alignItems="center"
               mt={4}
               mb={1}
             >
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <FaHeart style={{ marginRight: 6 }} /> Followings
-              </div>
-            </Text>
-            <div style={{ marginBottom: 20 }}></div>
-            {roomsOfFollwing.map((room) => (
-              <RoomItem room={room} />
+              <BiWorld fontSize={20} style={{ marginRight: 4 }} />
+              Your World
+            </Box>
+            <RoomItem room={myRoom} />
+            <Divider />
+            <Box
+              fontSize={16}
+              fontWeight="bold"
+              color="teal"
+              display="flex"
+              alignItems="center"
+              mt={4}
+              mb={1}
+            >
+              <FaHeart style={{ marginRight: 6 }} /> Followings
+            </Box>
+            <div style={{ marginBottom: 4 }}></div>
+            {roomsOfFollwing.map((room, index) => (
+              <RoomItem room={room} key={index} />
             ))}
           </AlertDialogBody>
         </AlertDialogContent>

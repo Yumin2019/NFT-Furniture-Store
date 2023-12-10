@@ -5,6 +5,7 @@ import {
   InputGroup,
   InputRightElement,
   Text,
+  Box,
 } from "@chakra-ui/react";
 import { useState } from "react";
 
@@ -14,22 +15,20 @@ export const FindPasswordPage = () => {
   return (
     <>
       <Center>
-        <Text fontSize={40} mb={4} mt={100}>
-          Forgot Password
-        </Text>
-      </Center>
+        <Box w="25%" textAlign="center">
+          <Text fontSize={40} mb={4} mt={100}>
+            Forgot Password
+          </Text>
 
-      <Center mb={4}>
-        <Text>You will receive a link to reset your password via email.</Text>
-      </Center>
-      <Center mb={4}>
-        <Input pr="4.5rem" placeholder="Enter email" mb={4} w="50%" />
-      </Center>
+          <Text mb={4}>
+            You will receive a link to reset your password via email.
+          </Text>
+          <Input pr="4.5rem" placeholder="Enter email" mb={4} />
 
-      <Center>
-        <Button colorScheme="blue" size="md" w="50%" mb={4}>
-          Continue
-        </Button>
+          <Button colorScheme="teal" size="md" w="100%" mb={4}>
+            Continue
+          </Button>
+        </Box>
       </Center>
     </>
   );

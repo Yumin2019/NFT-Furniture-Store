@@ -7,9 +7,11 @@ import {
   Image,
   Stack,
   Text,
+  Flex,
+  Spacer,
 } from "@chakra-ui/react";
 
-export const NftCard = () => {
+export const FurnitureCard = () => {
   return (
     <>
       <Card width={250} maxW="sm" border="1px solid grey">
@@ -21,15 +23,18 @@ export const NftCard = () => {
           />
           <Stack mt="6" spacing="3">
             <Heading size="md">Living room Sofa</Heading>
-            <Text>소파 아이템 1</Text>
-            <Text color="blue.600" fontSize="16">
+            <Text>Sofa Item 1</Text>
+            <Text color="teal" fontSize="16">
               0.01 MATIC
             </Text>
           </Stack>
           <Divider marginTop={2} marginBottom={2} />
-          <Button marginTop={4} variant="solid" colorScheme="blue">
-            Buy now
-          </Button>
+          <Flex>
+            <Spacer />
+            <Button marginTop={4} colorScheme="teal" size="sm">
+              Buy now
+            </Button>
+          </Flex>
         </CardBody>
       </Card>
     </>
