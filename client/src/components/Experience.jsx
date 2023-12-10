@@ -7,9 +7,16 @@ import { useGrid } from "../hooks/useGrid";
 import { AnimatedWoman } from "./AnimatedWoman";
 import { Item } from "./Item";
 import { charactersAtom, mapAtom, socket, userAtom } from "./SocketManager";
-import { buildModeAtom, draggedItemAtom, draggedItemRotationAtom } from "./UI";
+import {
+  buildModeAtom,
+  draggedItemAtom,
+  draggedItemRotationAtom,
+  shopModeAtom,
+} from "./UI";
+import { Shop } from "./Shop";
 export const Experience = () => {
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
+  const [shopMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
   const [items, setItems] = useState(map.items);
@@ -36,8 +43,9 @@ export const Experience = () => {
         if (canDrop) {
           setItems((prev) => {
             const newItems = [...prev];
+            delete newItems[draggedItem].tmp;
             newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
-            newItems[draggedItem].rotation = draggedItemRoatation;
+            newItems[draggedItem].rotation = draggedItemRotation;
             return newItems;
           });
         }
@@ -48,11 +56,17 @@ export const Experience = () => {
   };
 
   const [draggedItem, setDraggedItem] = useAtom(draggedItemAtom);
-  const [draggedItemRoatation, setDraggedItemRotation] = useAtom(
+  const [draggedItemRotation, setDraggedItemRotation] = useAtom(
     draggedItemRotationAtom
   );
-  const [dragPosition, setDragPosition] = useState(null);
+  const [dragPosition, setDragPosition] = useState([0, 0]);
   const [canDrop, setCanDrop] = useState(false);
+
+  useEffect(() => {
+    if (draggedItem === null) {
+      setItems((prev) => prev.filter((item) => !item.tmp));
+    }
+  }, [draggedItem]);
 
   useEffect(() => {
     if (draggedItem === null) {
@@ -60,9 +74,13 @@ export const Experience = () => {
     }
     const item = items[draggedItem];
     const width =
-      item.rotation === 1 || item.rotation === 3 ? item.size[1] : item.size[0];
+      draggedItemRotation === 1 || draggedItemRotation === 3
+        ? item.size[1]
+        : item.size[0];
     const height =
-      item.rotation === 1 || item.rotation === 3 ? item.size[0] : item.size[1];
+      draggedItemRotation === 1 || draggedItemRotation === 3
+        ? item.size[0]
+        : item.size[1];
 
     let droppable = true;
 
@@ -119,7 +137,7 @@ export const Experience = () => {
     }
 
     setCanDrop(droppable);
-  }, [dragPosition, draggedItem, items]);
+  }, [dragPosition, draggedItem, items, draggedItemRotation]);
 
   const controls = useRef();
   const state = useThree((state) => state);
@@ -135,10 +153,47 @@ export const Experience = () => {
     }
   }, [buildMode]);
 
+  useEffect(() => {
+    if (shopMode) {
+      state.camera.position.set(0, 4, 8);
+      controls.current.target.set(0, 0, 0);
+    } else {
+      state.camera.position.set(8, 8, 8);
+      controls.current.target.set(0, 0, 0);
+    }
+  }, [shopMode]);
+
+  const onItemSelected = (item) => {
+    console.log("adsfads");
+    setShopMode(false);
+    setItems((prev) => [
+      ...prev,
+      {
+        ...item,
+        gridPosition: [0, 0],
+        tmp: true,
+      },
+    ]);
+    setDraggedItem(items.length);
+    setDraggedItemRotation(0);
+  };
+
   return (
     <>
       <Environment preset="sunset" />
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.1} />
+      <directionalLight
+        position={[-4, 4, -4]}
+        castShadow
+        intensity={0.35}
+        shadow-mapSize={[1024, 1024]}
+      >
+        <orthographicCamera
+          attach={"shadow-camera"}
+          args={[-map.size[0], map.size[1], 10, -10]}
+          far={map.size[0] + map.size[1]}
+        />
+      </directionalLight>
       {/* 카메라 공전을 위한 컴포넌트 */}
       <OrbitControls
         ref={controls}
@@ -147,53 +202,62 @@ export const Experience = () => {
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
         screenSpacePanning={false}
+        enableZoom={!shopMode}
       />
 
-      {(buildMode ? items : map.items).map((item, idx) => (
-        <Item
-          key={`${item.name}-${idx}`}
-          item={item}
-          onClick={() => {
+      {shopMode && <Shop onItemSelected={onItemSelected} />}
+      {!shopMode &&
+        (buildMode ? items : map.items).map((item, idx) => (
+          <Item
+            key={`${item.name}-${idx}`}
+            item={item}
+            onClick={() => {
+              if (!buildMode) {
+                return;
+              }
+              setDraggedItem(idx);
+              setDraggedItemRotation(item.rotation || 0);
+            }}
+            isDragging={draggedItem === idx}
+            dragPosition={dragPosition}
+            dragRotation={draggedItemRotation}
+            canDrop={canDrop}
+          />
+        ))}
+
+      {!shopMode && (
+        <mesh
+          rotation-x={-Math.PI / 2}
+          position-y={-0.002}
+          onClick={onPlaneClick}
+          onPointerEnter={() => setOnFloor(true)}
+          onPointerLeave={() => setOnFloor(false)}
+          onPointerMove={(e) => {
             if (!buildMode) {
               return;
             }
-            setDraggedItem(idx);
-            setDraggedItemRotation(item.rotation || 0);
-          }}
-          isDragging={draggedItem === idx}
-          dragPosition={dragPosition}
-          dragRotation={draggedItemRoatation}
-          canDrop={canDrop}
-        />
-      ))}
-      <mesh
-        rotation-x={-Math.PI / 2}
-        position-y={-0.002}
-        onClick={onPlaneClick}
-        onPointerEnter={() => setOnFloor(true)}
-        onPointerLeave={() => setOnFloor(false)}
-        onPointerMove={(e) => {
-          if (!buildMode) {
-            return;
-          }
 
-          // 값이 변는 경우 업데이트를 해준다.
-          const newPosition = vector3ToGrid(e.point);
-          if (
-            !dragPosition ||
-            newPosition[0] !== dragPosition[0] ||
-            newPosition[1] !== dragPosition[1]
-          ) {
-            setDragPosition(newPosition);
-          }
-        }}
-        position-x={map.size[0] / 2}
-        position-z={map.size[1] / 2}
-      >
-        <planeGeometry args={map.size} />
-        <meshStandardMaterial color="#f0f0f0" />
-      </mesh>
-      <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
+            // 값이 변는 경우 업데이트를 해준다.
+            const newPosition = vector3ToGrid(e.point);
+            if (
+              !dragPosition ||
+              newPosition[0] !== dragPosition[0] ||
+              newPosition[1] !== dragPosition[1]
+            ) {
+              setDragPosition(newPosition);
+            }
+          }}
+          position-x={map.size[0] / 2}
+          position-z={map.size[1] / 2}
+          receiveShadow
+        >
+          <planeGeometry args={map.size} />
+          <meshStandardMaterial color="#f0f0f0" />
+        </mesh>
+      )}
+      {buildMode && !shopMode && (
+        <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
+      )}
       {!buildMode &&
         characters.map((character) => (
           <AnimatedWoman

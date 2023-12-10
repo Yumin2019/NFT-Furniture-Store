@@ -2,16 +2,27 @@ import { Canvas } from "@react-three/fiber";
 import { Experience } from "./components/Experience";
 import { SocketManager } from "./components/SocketManager";
 import { UI } from "./components/UI";
+import { ScrollControls } from "@react-three/drei";
+import { NftCard } from "./components/NftCard";
+import { MainPage } from "./pages/MainPage";
+import { LoginPage } from "./pages/LoginPage";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <>
-      <SocketManager />
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+      {/* <SocketManager />
       <Canvas shadows camera={{ position: [8, 8, 8], fov: 30 }}>
         <color attach="background" args={["#ececec"]} />
-        <Experience />
+        <ScrollControls pages={4}>
+          <Experience />
+        </ScrollControls>
       </Canvas>
-      <UI />
+      <UI /> */}
     </>
   );
 }
