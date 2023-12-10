@@ -1,7 +1,8 @@
 import { NftCard } from "../components/NftCard";
-import { Button, Grid, GridItem, position, Center } from "@chakra-ui/react";
+import { Button, Grid, Center, useDisclosure } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { RoomDialog } from "../components/RoomDialog";
 
 const Wrapper = styled.div`
   nav {
@@ -29,8 +30,11 @@ const Wrapper = styled.div`
 `;
 
 export const MainPage = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <>
+      <RoomDialog isOpen={isOpen} onClose={onClose} />
       <Wrapper>
         <header>
           <h1>Furniture NFT Store</h1>
@@ -44,8 +48,14 @@ export const MainPage = () => {
             <Button colorScheme="teal" size="sm" mr={4}>
               My Info
             </Button>
-            <Button colorScheme="teal" size="sm" mr={4}>
-              Register
+            <Link to={"/register"}>
+              <Button colorScheme="teal" size="sm" mr={4}>
+                Register
+              </Button>
+            </Link>
+
+            <Button colorScheme="teal" size="sm" mr={4} onClick={onOpen}>
+              Furniture World
             </Button>
           </nav>
         </header>
