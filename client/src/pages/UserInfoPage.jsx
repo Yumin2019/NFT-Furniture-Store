@@ -18,6 +18,9 @@ import { useRef, useState } from "react";
 import { FaRegHeart, FaHeart, FaHeartBroken } from "react-icons/fa";
 import Lottie from "lottie-react";
 import heartAnim from "../assets/HeartAnim.json";
+import { ItemTab } from "../components/tabs/ItemTab";
+import { FollowersTab } from "../components/tabs/FollowersTab";
+import { GuestBookTab } from "../components/tabs/GuestBookTab";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -26,7 +29,8 @@ const ColItem = ({ name, count, onClick }) => {
       variant="ghost"
       textAlign="center"
       margin={4}
-      padding={4}
+      paddingTop={8}
+      paddingBottom={8}
       onClick={onClick}
     >
       <div>
@@ -141,8 +145,8 @@ export const UserInfoPage = () => {
 
           <RoomItem room={myRoom} right="-91%" />
 
-          <Tabs isFitted variant="enclosed" mt={4}>
-            <TabList mb="1em">
+          <Tabs isFitted variant="enclosed" mt={4} colorScheme="teal">
+            <TabList mb={2}>
               <Tab>NFT</Tab>
               <Tab>Furniture</Tab>
               <Tab>Followers</Tab>
@@ -151,16 +155,19 @@ export const UserInfoPage = () => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <p>one!</p>
+                <ItemTab />
               </TabPanel>
               <TabPanel>
-                <p>two!</p>
+                <ItemTab />
               </TabPanel>
               <TabPanel>
-                <p>two!</p>
+                <FollowersTab />
               </TabPanel>
               <TabPanel>
-                <p>two!</p>
+                <FollowersTab />
+              </TabPanel>
+              <TabPanel key={"aa"}>
+                <GuestBookTab />
               </TabPanel>
             </TabPanels>
           </Tabs>

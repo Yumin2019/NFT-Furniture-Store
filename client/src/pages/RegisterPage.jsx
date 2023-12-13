@@ -9,6 +9,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const RegisterPage = () => {
   const [show, setShow] = useState(false);
@@ -52,10 +53,12 @@ export const RegisterPage = () => {
           <Button colorScheme="teal" size="md" w="100%" mb={4}>
             Register
           </Button>
-          <Text mr={1}>Already have a account?</Text>
-          <Button size="sm" variant="link" colorScheme="teal">
-            Login
-          </Button>
+          <Text mr={1}>Already have an account?</Text>
+          <Link to={"/login"}>
+            <Button size="sm" variant="link" colorScheme="teal">
+              Login
+            </Button>
+          </Link>
         </Box>
       </Center>
     </>
