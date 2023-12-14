@@ -1,5 +1,14 @@
-import { Button, Stack, Divider, Input, Box } from "@chakra-ui/react";
-import { Comment } from "../Comment";
+import {
+  Button,
+  Stack,
+  Divider,
+  Input,
+  Box,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { Comment } from "./item/Comment";
+import { BasicDialog } from "../dialog/BasicDialog";
+import { CommentEditDialog } from "../dialog/CommentEditDialog";
 
 export const GuestBookTab = () => {
   const comments = [
@@ -29,8 +38,27 @@ export const GuestBookTab = () => {
     },
   ];
 
+  const {
+    isOpen: isDelOpen,
+    onOpen: onDelOpen,
+    onClose: onDelClose,
+  } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+
   return (
     <>
+      <BasicDialog
+        isOpen={isDelOpen}
+        onClose={onDelClose}
+        title="Delete this Comment?"
+        text="Are you sure you want to delete your comment? This comment will be deleted."
+      />
+      <CommentEditDialog isOpen={isEditOpen} onClose={onEditClose} />
+
       <Stack direction="row" alignItems="center" mb={6}>
         <Input
           placeholder="write a comment"
@@ -53,7 +81,14 @@ export const GuestBookTab = () => {
               name={v.name}
               date={v.date}
               text={v.text}
-              deletable={v.author === "kym"}
+              deletable={true}
+              editable={true}
+              isDelOpen={isDelOpen}
+              onDelOpen={onDelOpen}
+              onDelClose={onDelClose}
+              isEditOpen={isEditOpen}
+              onEditOpen={onEditOpen}
+              onEditClose={onEditClose}
             />
             <Divider mt={2} mb={2} />
           </Box>

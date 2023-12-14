@@ -1,19 +1,17 @@
 import {
-  Button,
   AlertDialog,
   AlertDialogBody,
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
   AlertDialogCloseButton,
-  Text,
   Box,
   Divider,
 } from "@chakra-ui/react";
 import { FaHeart } from "react-icons/fa";
 import { BiWorld } from "react-icons/bi";
 import { useRef } from "react";
-import { RoomItem } from "./RoomItem";
+import { RoomItem } from "../RoomItem";
 
 export const RoomDialog = ({ isOpen, onClose }) => {
   const cancelRef = useRef();

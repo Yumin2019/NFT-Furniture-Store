@@ -1,9 +1,7 @@
 import { FurnitureCard } from "../components/FurnitureCard";
 import { Button, Grid, Center, useDisclosure, Box } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { RoomDialog } from "../components/RoomDialog";
-import { BiWorld } from "react-icons/bi";
-
+import { RoomDialog } from "../components/dialog/RoomDialog";
 const PageNumber = ({ number }) => {
   return (
     <Button

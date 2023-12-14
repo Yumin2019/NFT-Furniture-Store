@@ -20,17 +20,17 @@ export const BasicDialog = ({ isOpen, onClose, onClick, title, text }) => {
       isOpen={isOpen}
       isCentered
     >
-      <AlertDialogOverlay />
+      <AlertDialogOverlay colorScheme="teal" />
       <AlertDialogContent>
         <AlertDialogHeader>{title}</AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>{text}</AlertDialogBody>
         <AlertDialogFooter>
-          <Button ref={cancelRef} onClick={onClose}>
-            No
+          <Button ref={cancelRef} onClick={onClose} size="sm">
+            Cancel
           </Button>
-          <Button colorScheme="teal" ml={3} onClick={onClick}>
-            Yes
+          <Button colorScheme="teal" ml={3} onClick={onClick} size="sm">
+            Delete
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

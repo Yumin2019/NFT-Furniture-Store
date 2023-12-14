@@ -10,12 +10,11 @@ import {
   Tab,
   TabPanels,
   TabPanel,
-  Flex,
 } from "@chakra-ui/react";
 import { RoomItem } from "../components/RoomItem";
 import { BiWorld } from "react-icons/bi";
-import { useRef, useState } from "react";
-import { FaRegHeart, FaHeart, FaHeartBroken } from "react-icons/fa";
+import { createContext, useRef, useState } from "react";
+import { FaHeart, FaHeartBroken } from "react-icons/fa";
 import Lottie from "lottie-react";
 import heartAnim from "../assets/HeartAnim.json";
 import { ItemTab } from "../components/tabs/ItemTab";
@@ -45,19 +44,21 @@ const ColItem = ({ name, count, onClick }) => {
   );
 };
 
+export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
   console.log("UserInfoPage");
 
-  const [isFollower, setIsFollwer] = useState(false);
+  const [isHeartAnim, setIsHeartAnim] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const lottieRef = useRef();
 
-  const clickFollowButton = () => {
+  const clickFollowButton = (flag) => {
     lottieRef.current.stop();
-    if (!isFollower) {
+    if (flag) {
       lottieRef.current.play();
       lottieRef.current.setSpeed(2);
     }
-    setIsFollwer(!isFollower);
+    setIsHeartAnim(flag);
   };
 
   const user = {
@@ -122,10 +123,13 @@ export const UserInfoPage = () => {
               mt={2}
               width={100}
               size="sm"
-              rightIcon={isFollower ? <FaHeartBroken /> : <FaHeart />}
-              onClick={clickFollowButton}
+              rightIcon={isFollowing ? <FaHeartBroken /> : <FaHeart />}
+              onClick={() => {
+                setIsFollowing(!isFollowing);
+                clickFollowButton(!isFollowing);
+              }}
             >
-              {isFollower ? "Unfollow" : "Follow"}
+              {isFollowing ? "Unfollow" : "Follow"}
             </Button>
           </Box>
 
@@ -164,9 +168,11 @@ export const UserInfoPage = () => {
                 <FollowersTab />
               </TabPanel>
               <TabPanel>
-                <FollowersTab />
+                <HeartAnimContext.Provider value={clickFollowButton}>
+                  <FollowersTab />
+                </HeartAnimContext.Provider>
               </TabPanel>
-              <TabPanel key={"aa"}>
+              <TabPanel>
                 <GuestBookTab />
               </TabPanel>
             </TabPanels>
