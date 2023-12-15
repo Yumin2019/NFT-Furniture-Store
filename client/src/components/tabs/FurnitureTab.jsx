@@ -2,7 +2,7 @@ import { Box, Divider } from "@chakra-ui/react";
 import { FurnitureItem } from "./item/FurnitureItem";
 
 export const FurnitureTab = () => {
-  const comments = [
+  const furnitures = [
     {
       id: 1,
       image: "image/profile_image.png",
@@ -28,7 +28,7 @@ export const FurnitureTab = () => {
 
   return (
     <>
-      {comments.map((v, index) => {
+      {furnitures.map((v, index) => {
         return (
           <Box key={index}>
             <FurnitureItem image={v.image} name={v.name} text={v.text} />

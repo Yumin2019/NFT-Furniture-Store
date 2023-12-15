@@ -20,6 +20,7 @@ import heartAnim from "../assets/HeartAnim.json";
 import { FollowersTab } from "../components/tabs/FollowersTab";
 import { GuestBookTab } from "../components/tabs/GuestBookTab";
 import { FurnitureTab } from "../components/tabs/FurnitureTab";
+import { NftTab } from "./../components/tabs/NftTab";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -159,7 +160,7 @@ export const UserInfoPage = () => {
               </TabList>
               <TabPanels>
                 <TabPanel>
-                  <FurnitureTab />
+                  <NftTab />
                 </TabPanel>
                 <TabPanel>
                   <FurnitureTab />
