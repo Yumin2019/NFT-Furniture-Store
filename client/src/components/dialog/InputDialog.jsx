@@ -8,16 +8,26 @@ import {
   AlertDialogCloseButton,
   Button,
   Input,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { useState } from "react";
-import { editText } from "../tabs/item/CommentItem";
 
-export const CommentEditDialog = ({ isOpen, onClose, onClick }) => {
+export const InputDialog = ({
+  isOpen,
+  onClose,
+  onClick,
+  initialText,
+  title,
+  text,
+  yesText,
+  noText,
+  inputPlaceholder,
+}) => {
   const cancelRef = useRef();
-  const [text, setText] = useState("");
+  const [inputText, setInputText] = useState("");
   useEffect(() => {
-    setText(editText);
+    setInputText(initialText);
   }, [isOpen]);
 
   return (
@@ -30,13 +40,14 @@ export const CommentEditDialog = ({ isOpen, onClose, onClick }) => {
     >
       <AlertDialogOverlay colorScheme="teal" />
       <AlertDialogContent>
-        <AlertDialogHeader>Edit comment</AlertDialogHeader>
+        <AlertDialogHeader>{title}</AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>
+          {text && <Text mb={2}>{text}</Text>}
           <Input
-            placeholder="write a comment"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
+            placeholder={inputPlaceholder}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
             size="md"
             color="teal"
             _placeholder={{ color: "inherit" }}
@@ -45,10 +56,10 @@ export const CommentEditDialog = ({ isOpen, onClose, onClick }) => {
         </AlertDialogBody>
         <AlertDialogFooter>
           <Button ref={cancelRef} onClick={onClose} size="sm">
-            Cancel
+            {noText}
           </Button>
           <Button colorScheme="teal" ml={3} onClick={onClick} size="sm">
-            Edit
+            {yesText}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

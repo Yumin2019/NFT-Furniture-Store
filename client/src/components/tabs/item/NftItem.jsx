@@ -1,6 +1,13 @@
 import { Flex, Text, Image, Button, Stack, Spacer } from "@chakra-ui/react";
+import { atom, useAtom } from "jotai";
 import { FaMoneyBill } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+
+export const nftDialogTextAtom = atom({
+  nftDialogText: "",
+  nftDialogTitle: "",
+  nftDialogYesText: "",
+});
 
 export const NftItem = ({
   image,
@@ -11,9 +18,14 @@ export const NftItem = ({
   isMyNft,
   isSelling,
   price,
+  onBasicOpen,
+  onSellOpen,
+  onItemClick,
 }) => {
+  const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
+
   return (
-    <Flex width="100%" alignItems="center">
+    <Flex width="100%" alignItems="center" onClick={onItemClick}>
       <Image boxSize="65px" border="0.5px solid grey" src={image} />
 
       <Flex direction="column" ml={4}>
@@ -44,21 +56,40 @@ export const NftItem = ({
             right={4}
             size="xs"
             rightIcon={!isSelling ? <FaMoneyBill /> : <MdCancel />}
-            onClick={() => {}}
+            onClick={(e) => {
+              setDialogTextAtom({
+                nftDialogTitle: !isSelling ? "NFT Sell" : "Cancel Sales",
+                nftDialogText: !isSelling
+                  ? "Are you sure you want to sell this NFT? (MATIC)"
+                  : "Are you sure you want to cancel this sale?",
+                nftDialogYesText: !isSelling ? "Sell" : "Cancel Sales",
+              });
+              !isSelling ? onSellOpen() : onBasicOpen();
+              e.stopPropagation();
+            }}
           >
             {!isSelling ? "NFT Sell" : "Cancel Sales"}
           </Button>
         )}
 
-        {!isMyNft && (
+        {!isMyNft && isSelling && (
           <Button
             position="absolute"
             colorScheme="teal"
+            width={100}
             mt={2}
             right={4}
             size="xs"
             rightIcon={<FaMoneyBill />}
-            onClick={() => {}}
+            onClick={(e) => {
+              setDialogTextAtom({
+                nftDialogTitle: "Buy NFT",
+                nftDialogText: `Are you sure you want to buy this NFT? (${price} MATIC)`,
+                nftDialogYesText: "Buy",
+              });
+              onBasicOpen();
+              e.stopPropagation();
+            }}
           >
             Buy
           </Button>

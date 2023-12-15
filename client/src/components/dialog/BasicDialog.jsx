@@ -10,7 +10,15 @@ import {
 } from "@chakra-ui/react";
 import { useRef } from "react";
 
-export const BasicDialog = ({ isOpen, onClose, onClick, title, text }) => {
+export const BasicDialog = ({
+  isOpen,
+  onClose,
+  onClick,
+  title,
+  text,
+  yesText,
+  noText,
+}) => {
   const cancelRef = useRef();
   return (
     <AlertDialog
@@ -27,10 +35,10 @@ export const BasicDialog = ({ isOpen, onClose, onClick, title, text }) => {
         <AlertDialogBody>{text}</AlertDialogBody>
         <AlertDialogFooter>
           <Button ref={cancelRef} onClick={onClose} size="sm">
-            Cancel
+            {noText}
           </Button>
           <Button colorScheme="teal" ml={3} onClick={onClick} size="sm">
-            Delete
+            {yesText}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
