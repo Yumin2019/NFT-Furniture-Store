@@ -4,12 +4,12 @@ import { FaHeartBroken } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa";
 import { HeartAnimContext } from "../../../pages/UserInfoPage";
 
-export const FollowerItem = ({ imgSrc, name, onClick, isFollowable }) => {
+export const FollowerItem = ({ image, name, onClick, isFollowable }) => {
   const [isFollower, setIsFollower] = useState(false);
   const heartAnimFunc = useContext(HeartAnimContext);
   return (
     <Flex width="100%" alignItems="center">
-      <Image boxSize="65px" border="0.5px solid grey" src={imgSrc} />
+      <Image boxSize="65px" border="0.5px solid grey" src={image} />
       <Stack direction="column" ml={4}>
         <Text fontWeight="bold" fontSize={16}>
           {name}

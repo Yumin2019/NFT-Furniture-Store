@@ -1,8 +1,8 @@
 import { Box, Flex, Image, Text, Stack, Button } from "@chakra-ui/react";
 
 export let editText = "";
-export const Comment = ({
-  imgSrc,
+export const CommentItem = ({
+  image,
   name,
   date,
   text,
@@ -14,7 +14,7 @@ export const Comment = ({
   return (
     <>
       <Flex width="100%">
-        <Image boxSize="65px" border="0.5px solid grey" src={imgSrc} />
+        <Image boxSize="65px" border="0.5px solid grey" src={image} />
         <Stack direction="column" ml={4}>
           <Box display="flex" textAlign="center">
             <Text fontWeight="bold" fontSize={16} mr={3}>

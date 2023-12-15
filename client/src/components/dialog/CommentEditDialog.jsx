@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { useState } from "react";
-import { editText } from "../tabs/item/Comment";
+import { editText } from "../tabs/item/CommentItem";
 
 export const CommentEditDialog = ({ isOpen, onClose, onClick }) => {
   const cancelRef = useRef();

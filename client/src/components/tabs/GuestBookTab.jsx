@@ -6,7 +6,7 @@ import {
   Box,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Comment } from "./item/Comment";
+import { CommentItem } from "./item/CommentItem";
 import { BasicDialog } from "../dialog/BasicDialog";
 import { CommentEditDialog } from "../dialog/CommentEditDialog";
 
@@ -14,7 +14,7 @@ export const GuestBookTab = () => {
   const comments = [
     {
       id: 1,
-      imgSrc: "image/profile_image.png",
+      image: "image/profile_image.png",
       name: "yumin",
       date: "2023.12.03 09:00:10",
       text: "안녕하세요",
@@ -22,7 +22,7 @@ export const GuestBookTab = () => {
     },
     {
       id: 2,
-      imgSrc: "image/profile_image.png",
+      image: "image/profile_image.png",
       name: "yumin",
       date: "2023.12.03 09:00:10",
       text: "안녕하세요안d안녕하세요안녕하세요요안녕하세요안녕하세요",
@@ -30,7 +30,7 @@ export const GuestBookTab = () => {
     },
     {
       id: 3,
-      imgSrc: "image/profile_image.png",
+      image: "image/profile_image.png",
       name: "yumin",
       date: "2023.12.03 09:00:10",
       text: "안녕하세요",
@@ -76,8 +76,8 @@ export const GuestBookTab = () => {
       {comments.map((v, index) => {
         return (
           <Box key={index}>
-            <Comment
-              imgSrc={v.imgSrc}
+            <CommentItem
+              image={v.image}
               name={v.name}
               date={v.date}
               text={v.text}

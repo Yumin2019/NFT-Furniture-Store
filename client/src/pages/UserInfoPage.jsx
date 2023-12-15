@@ -17,9 +17,9 @@ import { createContext, useRef, useState } from "react";
 import { FaHeart, FaHeartBroken } from "react-icons/fa";
 import Lottie from "lottie-react";
 import heartAnim from "../assets/HeartAnim.json";
-import { ItemTab } from "../components/tabs/ItemTab";
 import { FollowersTab } from "../components/tabs/FollowersTab";
 import { GuestBookTab } from "../components/tabs/GuestBookTab";
+import { FurnitureTab } from "../components/tabs/FurnitureTab";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -104,7 +104,7 @@ export const UserInfoPage = () => {
             <ColItem name="NFT" count={10} onClick={() => {}} />
             <ColItem name="Furniture" count={10} onClick={() => {}} />
             <ColItem name="Followers" count={10} onClick={() => {}} />
-            <ColItem name="Followings" count={10} onClick={() => {}} />
+            <ColItem name="Following" count={10} onClick={() => {}} />
           </Box>
 
           <Box mt={4}>
@@ -148,35 +148,34 @@ export const UserInfoPage = () => {
           </Box>
 
           <RoomItem room={myRoom} right="-91%" />
-
-          <Tabs isFitted variant="enclosed" mt={4} colorScheme="teal">
-            <TabList mb={2}>
-              <Tab>NFT</Tab>
-              <Tab>Furniture</Tab>
-              <Tab>Followers</Tab>
-              <Tab>Followings</Tab>
-              <Tab>Guest Book</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <ItemTab />
-              </TabPanel>
-              <TabPanel>
-                <ItemTab />
-              </TabPanel>
-              <TabPanel>
-                <FollowersTab />
-              </TabPanel>
-              <TabPanel>
-                <HeartAnimContext.Provider value={clickFollowButton}>
+          <HeartAnimContext.Provider value={clickFollowButton}>
+            <Tabs isFitted variant="enclosed" mt={4} colorScheme="teal">
+              <TabList mb={2}>
+                <Tab>NFT</Tab>
+                <Tab>Furniture</Tab>
+                <Tab>Followers</Tab>
+                <Tab>Following</Tab>
+                <Tab>Guest Book</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <FurnitureTab />
+                </TabPanel>
+                <TabPanel>
+                  <FurnitureTab />
+                </TabPanel>
+                <TabPanel>
                   <FollowersTab />
-                </HeartAnimContext.Provider>
-              </TabPanel>
-              <TabPanel>
-                <GuestBookTab />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+                </TabPanel>
+                <TabPanel>
+                  <FollowersTab />
+                </TabPanel>
+                <TabPanel>
+                  <GuestBookTab />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </HeartAnimContext.Provider>
         </Box>
       </Center>
     </>
