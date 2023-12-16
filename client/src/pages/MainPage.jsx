@@ -1,7 +1,15 @@
-import { FurnitureCard } from "../components/FurnitureCard";
+import { NftCard } from "../components/NftCard";
 import { Button, Grid, Center, useDisclosure, Box } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { RoomDialog } from "../components/dialog/RoomDialog";
+import { useAtom } from "jotai";
+import { nftDialogTextAtom } from "../components/tabs/item/NftItem";
+import { BasicDialog } from "../components/dialog/BasicDialog";
+import { InputDialog } from "../components/dialog/InputDialog";
+import { NftDetailDialog } from "../components/dialog/NftDetailDialog";
+import { BiSolidLogIn, BiWorld } from "react-icons/bi";
+import { FaUser, FaPlusSquare } from "react-icons/fa";
+
 const PageNumber = ({ number }) => {
   return (
     <Button
@@ -17,11 +25,130 @@ const PageNumber = ({ number }) => {
 };
 
 export const MainPage = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
+
+  // 블록체인 네트워크상 내 NFT 정보만 가져온 경우 예시
+  let blockInfo = [
+    {
+      nftId: 1, // 0th nft
+      itemId: 0, // item idx
+      price: 5,
+      isSelling: true,
+      author: "kym",
+    },
+    {
+      nftId: 2, // 0th nft
+      itemId: 0, // item idx
+      price: 0,
+      isSelling: false,
+      author: "kym", // current author
+    },
+    {
+      nftId: 3, // 0th nft
+      itemId: 0, // item idx
+      price: 1,
+      isSelling: true,
+      author: "FSSAD", // current author
+    },
+  ];
+
+  // DB에서 Item 테이블을 조회하여 정보가 있는 상황
+  // dbInfo[itemId]
+  let dbInfo = {
+    0: {
+      image: "image/profile_image.png",
+      name: "Furniture Coupon A",
+      text: "this is really good a nft",
+      couponType: "furniture",
+    },
+  };
+
+  // NFT 이전 정보를 DB에서 가져왔다고 가정한다.
+  // transferInfoList[nftId]
+  let transferInfoList = {
+    1: [
+      {
+        from: "A",
+        to: "B",
+        date: "2023-12-15 11:00:00",
+        price: 5,
+      },
+      {
+        from: "B",
+        to: "kym",
+        date: "2023-12-15 12:00:00",
+        price: 1,
+      },
+    ],
+    2: [
+      {
+        from: "A",
+        to: "B",
+        date: "2023-12-15 11:00:00",
+        price: 5,
+      },
+      {
+        from: "B",
+        to: "kym",
+        date: "2023-12-15 12:00:00",
+        price: 1,
+      },
+    ],
+  };
+
+  const {
+    isOpen: isBasicOpen,
+    onOpen: onBasicOpen,
+    onClose: onBasicClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isSellOpen,
+    onOpen: onSellOpen,
+    onClose: onSellClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isDetailOpen,
+    onOpen: onDetailOpen,
+    onClose: onDetailClose,
+  } = useDisclosure();
+
+  const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
 
   return (
     <>
-      <RoomDialog isOpen={isOpen} onClose={onClose} />
+      <RoomDialog isOpen={isRoomOpen} onClose={onRoomClose} />
+
+      <BasicDialog
+        isOpen={isBasicOpen}
+        onClose={onBasicClose}
+        title={dialogTextAtom.nftDialogTitle}
+        text={dialogTextAtom.nftDialogText}
+        yesText={dialogTextAtom.nftDialogYesText}
+        noText="Cancel"
+      />
+
+      <InputDialog
+        isOpen={isSellOpen}
+        onClose={onSellClose}
+        title={dialogTextAtom.nftDialogTitle}
+        text={dialogTextAtom.nftDialogText}
+        yesText={dialogTextAtom.nftDialogYesText}
+        noText="Cancel"
+        initialText={"0.01"}
+      />
+
+      <NftDetailDialog
+        isOpen={isDetailOpen}
+        onClose={onDetailClose}
+        onBasicOpen={onBasicOpen}
+        onSellOpen={onSellOpen}
+        dbInfo={dbInfo[0]}
+        blockInfo={blockInfo[0]}
+        transferInfoList={transferInfoList[1]}
+      />
+
       <Box
         w="100%"
         zIndex={100}
@@ -45,49 +172,78 @@ export const MainPage = () => {
           </h1>
           <div style={{ margin: 10, float: "right" }}>
             <Link to={"/login"}>
-              <Button colorScheme="gray" size="sm" mr={4}>
+              <Button
+                colorScheme="gray"
+                size="sm"
+                mr={4}
+                rightIcon={<BiSolidLogIn />}
+              >
                 Login
               </Button>
             </Link>
             <Link to={"/userInfo"}>
-              <Button colorScheme="gray" size="sm" mr={4}>
+              <Button
+                colorScheme="gray"
+                size="sm"
+                mr={4}
+                rightIcon={<FaUser />}
+              >
                 My Info
               </Button>
             </Link>
             <Link to={"/register"}>
-              <Button colorScheme="gray" size="sm" mr={4}>
+              <Button
+                colorScheme="gray"
+                size="sm"
+                mr={4}
+                rightIcon={<FaPlusSquare />}
+              >
                 Register
               </Button>
             </Link>
-            <Button colorScheme="gray" size="sm" mr={4} onClick={onOpen}>
+            <Button
+              colorScheme="gray"
+              size="sm"
+              mr={4}
+              onClick={onOpen}
+              rightIcon={<BiWorld />}
+            >
               Furniture World
             </Button>
           </div>
         </header>
       </Box>
 
+      {/* Nft List 최대 10개까지 출력하고 페이징을 이용한다. */}
       <Center paddingTop={100}>
-        <Grid templateColumns="repeat(6, 1fr)" gap={6}>
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
+        <Grid templateColumns="repeat(5, 1fr)" gap={6}>
+          {blockInfo.map((v, index) => {
+            let itemInfo = dbInfo[v.itemId];
+            return (
+              <NftCard
+                key={index}
+                image={itemInfo.image}
+                name={itemInfo.name}
+                text={itemInfo.text}
+                author={v.author}
+                type={itemInfo.couponType}
+                isSelling={v.isSelling}
+                isMyNft={v.author === "kym"}
+                price={v.price}
+                onBasicOpen={onBasicOpen}
+                onSellOpen={onSellOpen}
+                onItemClick={(e) => {
+                  console.log("clicked");
+                  onDetailOpen();
+                }}
+              />
+            );
+          })}
         </Grid>
       </Center>
       <div style={{ margin: 16 }} />
-      <Center>
-        <Grid templateColumns="repeat(6, 1fr)" gap={6}>
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-          <FurnitureCard w="100%" />
-        </Grid>
-      </Center>
-      <div style={{ margin: 16 }} />
+
+      {/* Pagination  */}
       <Center>
         <Button
           colorScheme="teal"

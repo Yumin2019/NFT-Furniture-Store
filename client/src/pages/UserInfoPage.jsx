@@ -51,6 +51,7 @@ export const UserInfoPage = () => {
 
   const [isHeartAnim, setIsHeartAnim] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [tabIndex, setTabIndex] = useState(0);
   const lottieRef = useRef();
 
   const clickFollowButton = (flag) => {
@@ -102,10 +103,41 @@ export const UserInfoPage = () => {
               border="0.5px solid grey"
               src="image/profile_image.png"
             />
-            <ColItem name="NFT" count={10} onClick={() => {}} />
-            <ColItem name="Furniture" count={10} onClick={() => {}} />
-            <ColItem name="Followers" count={10} onClick={() => {}} />
-            <ColItem name="Following" count={10} onClick={() => {}} />
+            <ColItem
+              name="NFT"
+              count={10}
+              onClick={() => {
+                setTabIndex(0);
+              }}
+            />
+            <ColItem
+              name="Furniture"
+              count={10}
+              onClick={() => {
+                setTabIndex(1);
+              }}
+            />
+            <ColItem
+              name="Followers"
+              count={10}
+              onClick={() => {
+                setTabIndex(2);
+              }}
+            />
+            <ColItem
+              name="Following"
+              count={10}
+              onClick={() => {
+                setTabIndex(3);
+              }}
+            />
+            <ColItem
+              name="Guest Book"
+              count={10}
+              onClick={() => {
+                setTabIndex(4);
+              }}
+            />
           </Box>
 
           <Box mt={4}>
@@ -150,7 +182,17 @@ export const UserInfoPage = () => {
 
           <RoomItem room={myRoom} right="-91%" />
           <HeartAnimContext.Provider value={clickFollowButton}>
-            <Tabs isFitted variant="enclosed" mt={4} colorScheme="teal">
+            <Tabs
+              isFitted
+              variant="enclosed"
+              mt={4}
+              colorScheme="teal"
+              size="md"
+              onChange={(index) => {
+                setTabIndex(index);
+              }}
+              index={tabIndex}
+            >
               <TabList mb={2}>
                 <Tab>NFT</Tab>
                 <Tab>Furniture</Tab>

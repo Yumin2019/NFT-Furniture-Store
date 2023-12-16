@@ -21,7 +21,7 @@ export const CommentItem = ({
               {name}
             </Text>
             <Text color="grey" fontSize={13} mt="3px">
-              {date}
+              {date}(modified: 2023.12.03 09:00:10)
             </Text>
             <Stack direction="row" position="absolute" right={4}>
               {editable && (

@@ -167,7 +167,9 @@ export const NftDetailDialog = ({
             </Accordion>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={onClose}>Close</Button>
+            <Button colorScheme="teal" onClick={onClose}>
+              Close
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

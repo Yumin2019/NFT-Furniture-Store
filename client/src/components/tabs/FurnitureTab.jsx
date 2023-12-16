@@ -1,5 +1,6 @@
-import { Box, Divider } from "@chakra-ui/react";
+import { Box, Divider, useDisclosure } from "@chakra-ui/react";
 import { FurnitureItem } from "./item/FurnitureItem";
+import { FurnitureDetailDialog } from "../dialog/FurnitureDetailDialog";
 
 export const FurnitureTab = () => {
   const furnitures = [
@@ -26,11 +27,23 @@ export const FurnitureTab = () => {
     },
   ];
 
+  const {
+    isOpen: isDetailOpen,
+    onOpen: onDetailOpen,
+    onClose: onDetailClose,
+  } = useDisclosure();
+
   return (
     <>
+      <FurnitureDetailDialog
+        isOpen={isDetailOpen}
+        onClose={onDetailClose}
+        dbInfo={furnitures[0]}
+      />
+
       {furnitures.map((v, index) => {
         return (
-          <Box key={index}>
+          <Box key={index} onClick={onDetailOpen}>
             <FurnitureItem image={v.image} name={v.name} text={v.text} />
             <Divider mt={2} mb={2} />
           </Box>
