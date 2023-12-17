@@ -1,5 +1,59 @@
-import pathfinding from "pathfinding";
-import { Server } from "socket.io";
+// Basic Module
+const express = require("express");
+const session = require("express-session");
+const MySQLStore = require("express-mysql-session")(session);
+require("dotenv").config();
+
+const passport = require("passport");
+const db = require("./config/mysql.js");
+
+const app = express();
+
+// Module
+const pathfinding = require("pathfinding");
+const { Server } = require("socket.io");
+
+// Router
+const authRouter = require("./routes/auth");
+
+app.use(express.json());
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.COOKIE_SECRET,
+    store: new MySQLStore({
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    }),
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/auth", authRouter);
+
+app.use((req, res, next) => {
+  console.log("user 정보: ", req.user);
+  if (req.user) next();
+  else res.send(401);
+});
+
+app.use("/", (req, res) => {
+  res.send(200);
+});
+
+app.listen(process.env.PORT, () =>
+  console.log(`running express server on port ${process.env.PORT}`)
+);
+
+// other router
+
+// ================== Game Logic ==================
 
 const io = new Server({
   cors: {
@@ -475,7 +529,7 @@ const generatedRandomHexColor = () => {
 };
 
 io.on("connection", (socket) => {
-  console.log("someone connected");
+  // console.log("someone connected");
   characters.push({
     id: socket.id,
     position: generateRandomPosition(),
