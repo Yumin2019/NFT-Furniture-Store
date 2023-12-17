@@ -10,6 +10,7 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { RoomItem } from "../components/RoomItem";
 import { BiWorld } from "react-icons/bi";
@@ -21,6 +22,8 @@ import { FollowersTab } from "../components/tabs/FollowersTab";
 import { GuestBookTab } from "../components/tabs/GuestBookTab";
 import { FurnitureTab } from "../components/tabs/FurnitureTab";
 import { NftTab } from "./../components/tabs/NftTab";
+import { RiPencilFill } from "react-icons/ri";
+import { EditProfileDialog } from "../components/dialog/EditProfileDialog";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -53,6 +56,7 @@ export const UserInfoPage = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
   const lottieRef = useRef();
+  const isMyInfo = true;
 
   const clickFollowButton = (flag) => {
     lottieRef.current.stop();
@@ -81,8 +85,24 @@ export const UserInfoPage = () => {
     people: 1,
   };
 
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+
   return (
     <>
+      <EditProfileDialog
+        isOpen={isEditOpen}
+        onClose={onEditClose}
+        initProfile="image/profile_image.png"
+        initName={user.name}
+        initDesc={user.desc}
+        initWorldName={myRoom.name}
+        initWorldDesc={myRoom.desc}
+      />
+
       <Box position="absolute" top="10%" left="30%" w="40%">
         <Lottie
           lottieRef={lottieRef}
@@ -94,7 +114,6 @@ export const UserInfoPage = () => {
           }}
         />
       </Box>
-
       <Center>
         <Box maxW="60%" padding={5}>
           <Box display="flex" alignItems="center">
@@ -150,19 +169,32 @@ export const UserInfoPage = () => {
             <Text mt={2} fontSize={18} color="grey">
               {user.email}
             </Text>
+
             <Button
               colorScheme="teal"
-              variant="outline"
+              variant={isMyInfo ? null : "outline"}
               mt={2}
               width={100}
               size="sm"
-              rightIcon={isFollowing ? <FaHeartBroken /> : <FaHeart />}
+              rightIcon={
+                isMyInfo ? (
+                  <RiPencilFill />
+                ) : isFollowing ? (
+                  <FaHeartBroken />
+                ) : (
+                  <FaHeart />
+                )
+              }
               onClick={() => {
-                setIsFollowing(!isFollowing);
-                clickFollowButton(!isFollowing);
+                if (isMyInfo) {
+                  onEditOpen();
+                } else {
+                  setIsFollowing(!isFollowing);
+                  clickFollowButton(!isFollowing);
+                }
               }}
             >
-              {isFollowing ? "Unfollow" : "Follow"}
+              {isMyInfo ? "Edit" : isFollowing ? "Unfollow" : "Follow"}
             </Button>
           </Box>
 
