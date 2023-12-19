@@ -89,8 +89,8 @@ INSERT INTO `room` (`name`, `desc`) VALUES ('Furniture room2', 'This is a Furnit
 
 # 가구 데이터와 NFT 정보용 데이터는 미리 생성한다. (게임으로 치면 교환권 같은 개념)
 INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture1', 'furniture1');
-INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture3', 'furniture2');
-INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture2', 'furniture3');
+INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture2', 'furniture2');
+INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture3', 'furniture3');
 
 # NFT 아이템 정보(교환권 데이터)
 INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`, `couponType`) VALUES (1, 'furniture1 coupon', 'furniture1 coupon', 'furniture');

@@ -2,6 +2,128 @@ const { Router } = require("express");
 const router = Router();
 const db = require("../config/mysql.js");
 
+// 특정 유저의 가구 정보를 구한다.
+router.get("/getFurnitures/:userId", async (req, res) => {
+  try {
+    let userId = req.params["userId"];
+    let sql =
+      "SELECT `furniture_count`.*, `furniture`.`name`, `furniture`.`desc`, `furniture`.`image` FROM `furniture_count` JOIN `furniture` ON `furniture_count`.`furnitureId` = `furniture`.`id` WHERE `userId` = ?";
+    let [rows] = await db.query(sql, [userId]);
+    res.send({ furnitures: rows, count: rows.length });
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
+router.get("/getFurnitures", async (req, res) => {
+  try {
+    let [rows] = await db.query("SELECT * FROM `furniture`");
+    res.send({ furnitures: rows, count: rows.length });
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
+router.post("/follow", async (req, res) => {
+  try {
+    const { targetId } = req.body;
+    let userId = req.user.id;
+
+    // 자기 자신을 follow 하는 것은 불가하다.
+    if (userId === targetId) {
+      res.status(400).send({ msg: "user can't follow yourself" });
+      return;
+    }
+
+    // 상대가 존재하는지 확인한다.
+    let [targetRows] = await db.query(
+      "SELECT count(*) FROM `user` WHERE `id` = ?",
+      [targetId]
+    );
+
+    if (targetRows[0]["count(*)"] === 0) {
+      res.status(400).send({ msg: "targetId is invalid" });
+      return;
+    }
+
+    // 이미 follow 하고 있는지 확인한다.
+    let [rows, fields] = await db.query(
+      "SELECT * FROM `follow` WHERE `targetId` = ? AND `userId` = ?",
+      [targetId, userId]
+    );
+
+    if (rows.length > 0) {
+      res.status(400).send({ msg: "user already followed target" });
+      return;
+    }
+
+    let [results] = await db.query(
+      "INSERT INTO `follow` (`targetId`, `userId`) VALUES (?, ?)",
+      [targetId, userId]
+    );
+
+    if (results.affectedRows > 0) {
+      res.send(200);
+    } else {
+      res.send(500);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
+router.post("/unfollow", async (req, res) => {
+  try {
+    const { targetId } = req.body;
+    let userId = req.user.id;
+
+    // 자기 자신을 unfollow 하는 것은 불가하다.
+    if (userId === targetId) {
+      res.status(400).send({ msg: "user can't unfollow yourself" });
+      return;
+    }
+
+    // 상대가 존재하는지 확인한다.
+    let [targetRows] = await db.query(
+      "SELECT count(*) FROM `user` WHERE `id` = ?",
+      [targetId]
+    );
+
+    if (targetRows[0]["count(*)"] === 0) {
+      res.status(400).send({ msg: "targetId is invalid" });
+      return;
+    }
+
+    // unfollow 할 수 있는지 확인한다.
+    let [rows, fields] = await db.query(
+      "SELECT * FROM `follow` WHERE `targetId` = ? AND `userId` = ?",
+      [targetId, userId]
+    );
+
+    if (rows.length == 0) {
+      res.status(400).send({ msg: "user is not following target" });
+      return;
+    }
+
+    let [results] = await db.query(
+      "DELETE FROM `follow` WHERE `targetId` = ? AND `userId` = ?",
+      [targetId, userId]
+    );
+
+    if (results.affectedRows === 1) {
+      res.send(200);
+    } else {
+      res.send(500);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
 // 특정 유저의 방명록 정보를 가져온다.
 router.get("/getGuestBook/:userId", async (req, res) => {
   try {
@@ -84,9 +206,9 @@ router.post("/editProfile", async (req, res) => {
     }
 
     if (userResult && roomResult) {
-      return res.send(200);
+      res.send(200);
     } else {
-      return res.send(500);
+      res.send(500);
     }
   } catch (e) {
     console.log(e);
