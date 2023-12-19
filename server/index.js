@@ -4,8 +4,9 @@ const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
 require("dotenv").config();
 
+require("./strategies/local");
 const passport = require("passport");
-const db = require("./config/mysql.js");
+const db = require("./config/mysql");
 
 const app = express();
 
@@ -15,6 +16,9 @@ const { Server } = require("socket.io");
 
 // Router
 const authRouter = require("./routes/auth");
+const userRouter = require("./routes/user");
+const nftRouter = require("./routes/nft");
+const worldRouter = require("./routes/world");
 
 app.use(express.json());
 app.use(
@@ -43,15 +47,14 @@ app.use((req, res, next) => {
   else res.send(401);
 });
 
-app.use("/", (req, res) => {
-  res.send(200);
-});
-
 app.listen(process.env.PORT, () =>
   console.log(`running express server on port ${process.env.PORT}`)
 );
 
 // other router
+app.use("/user", userRouter);
+app.use("/nft", nftRouter);
+app.use("/world", worldRouter);
 
 // ================== Game Logic ==================
 

@@ -7,10 +7,6 @@ const db_info = {
   database: process.env.DB_NAME,
 };
 
-const conn = mysql.createConnection(db_info);
-conn.connect((err) => {
-  if (err) console.error("mysql connection error : " + err);
-  else console.log("mysql is connected successfully!");
-});
-
-module.exports = conn;
+const pool = mysql.createPool(db_info);
+const promisePool = pool.promise();
+module.exports = promisePool;

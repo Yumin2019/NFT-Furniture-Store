@@ -2,7 +2,7 @@ const { Router } = require("express");
 const passport = require("passport");
 const router = Router();
 
-const db = require("../config/mysql.js");
+const db = require("../config/mysql");
 const { hashPassword, comparePassword } = require("../utils/helpers");
 
 router.post("/login", passport.authenticate("local"), (req, res) => {
@@ -17,27 +17,34 @@ router.post("/register", async (req, res) => {
     return;
   }
 
-  let sql = "SELECT `email` from `user` where `email` = ?";
-  db.query(sql, [email], (error, rows, fields) => {
-    if (error) {
-      console.log(error);
-      res.send(500);
-    } else if (rows.fieldCount > 0) {
+  try {
+    let sql = "SELECT `email` from `user` where `email` = ?";
+    let params = [email];
+    let [rows, fields] = await db.query(sql, params);
+
+    // 중복된 이메일을 확인한다.
+    if (rows.length > 0) {
       res.status(400).send({ msg: "user already exists" });
-    } else {
-      // const password = hashPassword(req.body.password);
-      console.log(password);
-      sql = "INSERT INTO `user` (`name`, `email`, `password`) VALUES (?, ?, ?)";
-      db.query(sql, [name, email, password], (error, rows, fields) => {
-        if (error) {
-          console.log(error);
-          res.send(500);
-        } else {
-          res.send(201);
-        }
-      });
+      return;
     }
-  });
+
+    // 계정 회원가입 처리
+    // 해시함수 부분 추가해야 함.
+    const password = req.body.password; // hashPassword(req.body.password);
+    console.log(password);
+
+    sql = "INSERT INTO `user` (`name`, `email`, `password`) VALUES (?, ?, ?)";
+    params = [name, email, password];
+    let [result] = await db.query(sql, params);
+
+    console.log(result);
+    if (result.affectedRows) {
+      res.send(201);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
 });
 
 module.exports = router;

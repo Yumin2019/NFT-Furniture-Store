@@ -15,13 +15,12 @@ passport.deserializeUser(async (user, done) => {
 
   try {
     let sql = "SELECT `id`, `name`, `email` from `user` where `email` = ?";
-    db.query(sql, [user.email], (error, rows, fields) => {
-      if (error) {
-        throw new Error("User not found");
-      } else {
-        done(null, rows[0]);
-      }
-    });
+    let params = [user.email];
+    let [rows, fields] = await db.query(sql, params);
+
+    if (rows.length > 0) {
+      done(null, rows[0]);
+    }
   } catch (error) {
     console.log(error);
     done(error, null);
@@ -43,24 +42,21 @@ passport.use(
 
         let sql =
           "SELECT `id`, `name`, `email`, `password` from `user` where `email` = ?";
-        db.query(sql, [email], (error, rows, fields) => {
-          if (error) {
-            throw new Error("User not found");
-          } else {
-            const isValid = password === rows[0].password;
-            if (isValid) {
-              console.log("Authenicated Successfully!");
-              done(null, {
-                id: rows[0].id,
-                name: rows[0].name,
-                email: rows[0].email,
-              });
-            } else {
-              console.log("Invalid Authentication");
-              done(null, null);
-            }
-          }
-        });
+        let params = [email];
+        let [rows, fields] = await db.query(sql, params);
+        // 해시 함수 부분 추가해야 함.
+        const isValid = password === rows[0].password;
+        if (isValid) {
+          console.log("Authenicated Successfully!");
+          done(null, {
+            id: rows[0].id,
+            name: rows[0].name,
+            email: rows[0].email,
+          });
+        } else {
+          console.log("Invalid Authentication");
+          done(null, null);
+        }
       } catch (error) {
         console.log(error);
         done(error, null);
