@@ -28,7 +28,7 @@ CREATE TABLE `furniture_nft_store`.`room` (
   #`userId` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `desc` VARCHAR(255) NULL,
-  `oneline` INT NOT NULL DEFAULT 0,
+  `online` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`));
 
 CREATE TABLE `furniture_nft_store`.`nft_item` (
