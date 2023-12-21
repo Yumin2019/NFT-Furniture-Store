@@ -6,13 +6,58 @@ import {
   InputRightElement,
   Text,
   Box,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { api } from "../utils/Axios";
+import { useAtom } from "jotai";
+import { loginAtom } from "./MainPage";
 
 export const LoginPage = () => {
   const [show, setShow] = useState(false);
+  const [emailText, setEmailText] = useState("");
+  const [passwordText, setPasswordText] = useState("");
+  const [isLogin, setIsLogin] = useAtom(loginAtom);
   const handleClick = () => setShow(!show);
+  const toast = useToast();
+  const navigate = useNavigate();
+
+  const onClickLogin = async () => {
+    try {
+      console.log(emailText);
+      console.log(passwordText);
+
+      let res = await api.post("login", {
+        email: emailText,
+        password: passwordText,
+      });
+
+      setIsLogin(res.status === 200);
+      if (res.status === 200) {
+        toast({
+          title: `Login Success`,
+          status: "success",
+          isClosable: true,
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: `Login Failed`,
+          status: "error",
+          isClosable: true,
+        });
+      }
+    } catch (e) {
+      console.log(e);
+      toast({
+        title: `Login Failed`,
+        status: "error",
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <>
       <Center>
@@ -20,9 +65,19 @@ export const LoginPage = () => {
           <Text fontSize={40} mb={4} mt={100}>
             Furniture NFT Store
           </Text>
-          <Input pr="4.5rem" placeholder="Enter email" mb={4} />
+          <Input
+            pr="4.5rem"
+            placeholder="Enter email"
+            mb={4}
+            value={emailText}
+            onChange={(e) => setEmailText(e.target.value)}
+          />
           <InputGroup size="md" mb={8}>
             <Input
+              value={passwordText}
+              onChange={(e) => {
+                setPasswordText(e.target.value);
+              }}
               pr="4.5rem"
               type={show ? "text" : "password"}
               placeholder="Enter password"
@@ -34,7 +89,13 @@ export const LoginPage = () => {
             </InputRightElement>
           </InputGroup>
 
-          <Button colorScheme="teal" size="md" w="100%" mb={4}>
+          <Button
+            colorScheme="teal"
+            size="md"
+            w="100%"
+            mb={4}
+            onClick={onClickLogin}
+          >
             Login
           </Button>
 

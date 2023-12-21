@@ -44,6 +44,7 @@ passport.use(
           "SELECT `id`, `name`, `email`, `password` from `user` where `email` = ?";
         let params = [email];
         let [rows, fields] = await db.query(sql, params);
+
         // 해시 함수 부분 추가해야 함.
         const isValid = password === rows[0].password;
         if (isValid) {

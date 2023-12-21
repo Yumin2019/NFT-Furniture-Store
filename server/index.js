@@ -1,6 +1,7 @@
 // Basic Module
 const express = require("express");
 const session = require("express-session");
+const cors = require("cors");
 const MySQLStore = require("express-mysql-session")(session);
 require("dotenv").config();
 
@@ -15,12 +16,22 @@ const pathfinding = require("pathfinding");
 const { Server } = require("socket.io");
 
 // Router
-const authRouter = require("./routes/auth");
+const frontRouter = require("./routes/front");
 const userRouter = require("./routes/user");
 const nftRouter = require("./routes/nft");
 const worldRouter = require("./routes/world");
 
 app.use(express.json());
+
+// CORS 설정
+app.use(
+  cors({
+    origin: "http://localhost:5173", // 접근 권한을 부여하는 도메인
+    credentials: true, // 응답 헤더에 Access-Control-Allow-Credentials 추가
+    optionsSuccessStatus: 200, // 응답 상태 200으로 설정
+  })
+);
+
 app.use(
   session({
     resave: false,
@@ -39,7 +50,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/auth", authRouter);
+// 권한 없이 접근할 수 있는 api를 처리한다.
+app.use(frontRouter);
 
 app.use((req, res, next) => {
   console.log("user 정보: ", req.user);
@@ -47,14 +59,14 @@ app.use((req, res, next) => {
   else res.send(401);
 });
 
+// other router
+app.use(userRouter);
+app.use(nftRouter);
+app.use(worldRouter);
+
 app.listen(process.env.PORT, () =>
   console.log(`running express server on port ${process.env.PORT}`)
 );
-
-// other router
-app.use("/user", userRouter);
-app.use("/nft", nftRouter);
-app.use("/world", worldRouter);
 
 // ================== Game Logic ==================
 

@@ -2,13 +2,15 @@ import { NftCard } from "../components/NftCard";
 import { Button, Grid, Center, useDisclosure, Box } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { RoomDialog } from "../components/dialog/RoomDialog";
-import { useAtom } from "jotai";
 import { nftDialogTextAtom } from "../components/tabs/item/NftItem";
 import { BasicDialog } from "../components/dialog/BasicDialog";
 import { InputDialog } from "../components/dialog/InputDialog";
 import { NftDetailDialog } from "../components/dialog/NftDetailDialog";
 import { BiSolidLogIn, BiWorld } from "react-icons/bi";
 import { FaUser, FaPlusSquare } from "react-icons/fa";
+import { api } from "../utils/Axios";
+import { useEffect } from "react";
+import { useAtom, atom } from "jotai";
 
 const PageNumber = ({ number }) => {
   return (
@@ -24,8 +26,24 @@ const PageNumber = ({ number }) => {
   );
 };
 
+export const loginAtom = atom(false);
+
 export const MainPage = () => {
   const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
+  const [isLogin, setIsLogin] = useAtom(loginAtom);
+  const checkLogin = async () => {
+    try {
+      let res = await api.get("/loginStatus");
+      console.log(res.data);
+      setIsLogin(res.data.id ? true : false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    checkLogin();
+  }, []);
 
   // 블록체인 네트워크상 내 NFT 정보만 가져온 경우 예시
   let blockInfo = [
@@ -171,45 +189,53 @@ export const MainPage = () => {
             Furniture NFT Store
           </h1>
           <div style={{ margin: 10, float: "right" }}>
-            <Link to={"/login"}>
+            {!isLogin && (
+              <Link to={"/login"}>
+                <Button
+                  colorScheme="gray"
+                  size="sm"
+                  mr={4}
+                  rightIcon={<BiSolidLogIn />}
+                >
+                  Login
+                </Button>
+              </Link>
+            )}
+            {isLogin && (
+              <Link to={"/userInfo"}>
+                <Button
+                  colorScheme="gray"
+                  size="sm"
+                  mr={4}
+                  rightIcon={<FaUser />}
+                >
+                  My Info
+                </Button>
+              </Link>
+            )}
+            {!isLogin && (
+              <Link to={"/register"}>
+                <Button
+                  colorScheme="gray"
+                  size="sm"
+                  mr={4}
+                  rightIcon={<FaPlusSquare />}
+                >
+                  Register
+                </Button>
+              </Link>
+            )}
+            {isLogin && (
               <Button
                 colorScheme="gray"
                 size="sm"
                 mr={4}
-                rightIcon={<BiSolidLogIn />}
+                onClick={onOpen}
+                rightIcon={<BiWorld />}
               >
-                Login
+                Furniture World
               </Button>
-            </Link>
-            <Link to={"/userInfo"}>
-              <Button
-                colorScheme="gray"
-                size="sm"
-                mr={4}
-                rightIcon={<FaUser />}
-              >
-                My Info
-              </Button>
-            </Link>
-            <Link to={"/register"}>
-              <Button
-                colorScheme="gray"
-                size="sm"
-                mr={4}
-                rightIcon={<FaPlusSquare />}
-              >
-                Register
-              </Button>
-            </Link>
-            <Button
-              colorScheme="gray"
-              size="sm"
-              mr={4}
-              onClick={onOpen}
-              rightIcon={<BiWorld />}
-            >
-              Furniture World
-            </Button>
+            )}
           </div>
         </header>
       </Box>
