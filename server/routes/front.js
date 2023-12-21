@@ -1,9 +1,14 @@
 const { Router } = require("express");
 const passport = require("passport");
 const router = Router();
+const mailer = require("../utils/mailer");
 
 const db = require("../utils/mysql");
-const { hashPassword, comparePassword } = require("../utils/helpers");
+const {
+  hashPassword,
+  comparePassword,
+  randomGenerator,
+} = require("../utils/helpers");
 
 // ======================== GET API ========================
 router.get("/loginStatus", async (req, res) => {
@@ -170,6 +175,22 @@ router.post("/login", passport.authenticate("local"), (req, res) => {
   res.send(200);
 });
 
+router.post("/logout", (req, res) => {
+  if (!req.user) {
+    res.status(400).send({ msg: "you're logged in" });
+    return;
+  }
+
+  req.logOut((err) => {
+    if (err) {
+      res.status(400).send({ msg: "logout failled" });
+    } else {
+      console.log("로그아웃됨.");
+      res.send(200);
+    }
+  });
+});
+
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
@@ -199,7 +220,7 @@ router.post("/register", async (req, res) => {
 
     console.log(result);
     if (result.affectedRows) {
-      res.send(201);
+      res.send(200);
     }
   } catch (e) {
     console.log(e);

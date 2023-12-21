@@ -13,6 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../utils/Axios";
 import { useAtom } from "jotai";
 import { loginAtom } from "./MainPage";
+import { errorToast, successToast } from "../utils/Helper";
 
 export const LoginPage = () => {
   const [show, setShow] = useState(false);
@@ -25,8 +26,8 @@ export const LoginPage = () => {
 
   const onClickLogin = async () => {
     try {
-      console.log(emailText);
-      console.log(passwordText);
+      console.log(`email ${emailText}`);
+      console.log(`password ${passwordText}`);
 
       let res = await api.post("login", {
         email: emailText,
@@ -35,26 +36,14 @@ export const LoginPage = () => {
 
       setIsLogin(res.status === 200);
       if (res.status === 200) {
-        toast({
-          title: `Login Success`,
-          status: "success",
-          isClosable: true,
-        });
+        successToast(toast, `Login Success`);
         navigate("/");
       } else {
-        toast({
-          title: `Login Failed`,
-          status: "error",
-          isClosable: true,
-        });
+        errorToast(toast, `Login Failed`);
       }
     } catch (e) {
       console.log(e);
-      toast({
-        title: `Login Failed`,
-        status: "error",
-        isClosable: true,
-      });
+      errorToast(toast, e.response.data.msg);
     }
   };
 

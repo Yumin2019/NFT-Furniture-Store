@@ -1,5 +1,13 @@
 import { NftCard } from "../components/NftCard";
-import { Button, Grid, Center, useDisclosure, Box } from "@chakra-ui/react";
+import {
+  Button,
+  Grid,
+  Center,
+  useDisclosure,
+  Box,
+  Toast,
+  useToast,
+} from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { RoomDialog } from "../components/dialog/RoomDialog";
 import { nftDialogTextAtom } from "../components/tabs/item/NftItem";
@@ -11,6 +19,7 @@ import { FaUser, FaPlusSquare } from "react-icons/fa";
 import { api } from "../utils/Axios";
 import { useEffect } from "react";
 import { useAtom, atom } from "jotai";
+import { errorToast, successToast } from "../utils/Helper";
 
 const PageNumber = ({ number }) => {
   return (
@@ -31,6 +40,7 @@ export const loginAtom = atom(false);
 export const MainPage = () => {
   const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
   const [isLogin, setIsLogin] = useAtom(loginAtom);
+  const toast = useToast();
   const checkLogin = async () => {
     try {
       let res = await api.get("/loginStatus");
@@ -38,6 +48,22 @@ export const MainPage = () => {
       setIsLogin(res.data.id ? true : false);
     } catch (e) {
       console.log(e);
+    }
+  };
+
+  const clickLogout = async () => {
+    if (!isLogin) return;
+    try {
+      let res = await api.post("/logout");
+      if (res.status === 200) {
+        setIsLogin(false);
+        successToast(toast, `Logout Success`);
+      } else {
+        errorToast(toast, `Logout Failed`);
+      }
+    } catch (e) {
+      console.log(e);
+      errorToast(toast, `Logout Failed`);
     }
   };
 
@@ -201,6 +227,18 @@ export const MainPage = () => {
                 </Button>
               </Link>
             )}
+            {isLogin && (
+              <Button
+                colorScheme="gray"
+                size="sm"
+                mr={4}
+                rightIcon={<BiSolidLogIn />}
+                onClick={clickLogout}
+              >
+                Logout
+              </Button>
+            )}
+
             {isLogin && (
               <Link to={"/userInfo"}>
                 <Button
