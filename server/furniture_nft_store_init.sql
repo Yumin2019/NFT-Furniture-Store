@@ -81,7 +81,7 @@ CREATE TABLE `furniture_nft_store`.`follow` (
 SELECT * FROM furniture_nft_store.user;
 
 # user와 room은 같이 생성된다. 동일한 id를 사용한다. 
-INSERT INTO `user` (`name`, `email`, `password`) VALUES ('name1', 'email1', 'password');
+INSERT INTO `user` (`name`, `email`, `password`) VALUES ('유미니', 'richyumin@naver.com', 'password');
 INSERT INTO `room` (`name`, `desc`) VALUES ('Furniture room1', 'This is a Furniture World1');
 
 INSERT INTO `user` (`name`, `email`, `password`) VALUES ('name2', 'email2', 'password');

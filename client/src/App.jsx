@@ -19,7 +19,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/findPassword" element={<FindPasswordPage />} />
-        <Route path="/resetPassword" element={<ResetPasswordPage />} />
+        <Route path="/resetPassword/:token" element={<ResetPasswordPage />} />
         <Route path="/userInfo" element={<UserInfoPage />} />
       </Routes>
       {/* <SocketManager />

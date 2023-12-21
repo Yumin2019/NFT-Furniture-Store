@@ -1,6 +1,89 @@
 const { Router } = require("express");
 const router = Router();
-const db = require("../config/mysql.js");
+const db = require("../utils/mysql.js");
+const mailer = require("../utils/mailer");
+const { hash, randomGenerator } = require("../utils/helpers.js");
+
+router.post("/resetPassword", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    let [rows] = await db.query("SELECT * FROM `user` WHERE `resetToken` = ?", [
+      token,
+    ]);
+
+    if (rows.length == 0) {
+      res.status(400).send({ msg: "token is invalid" });
+      return;
+    }
+
+    let now = new Date();
+    let date = rows[0]["resetMailDate"];
+    let diff = (now - date) / (1000 * 60);
+
+    // 3분이 넘은 경우, 처리할 수 없도록 한다.
+    if (diff > 3) {
+      res
+        .status(400)
+        .send({ msg: "token is expired, request reset mail again" });
+      return;
+    }
+
+    // 3분 이내 요청한 경우라면, 업데이트 처리해준다.
+    let [results] = await db.query(
+      "UPDATE `user` SET `password` = ? WHERE `resetToken` = ?",
+      [password, token]
+    );
+    if (results.affectedRows > 0) {
+      res.send(200);
+    } else {
+      res.send(500);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
+router.post("/requestResetMail", async (req, res) => {
+  try {
+    const { email } = req.body;
+    // 이메일 정보를 가진 유저가 있는지 확인한다.
+    let [rows] = await db.query("SELECT * FROM `user` WHERE `email` = ?", [
+      email,
+    ]);
+    if (rows.length == 0) {
+      res.status(400).send({ msg: "email is invalid" });
+      return;
+    }
+
+    // 해당 유저가 사용할 token 정보를 만들고 유저 정보에 업데이트 한다.
+    let token = randomGenerator(20);
+    let [result] = await db.query(
+      "UPDATE `user` SET `resetToken` = ?, `resetMailDate` = NOW() WHERE `email` = ?",
+      [token, email]
+    );
+
+    if (result.affectedRows == 0) {
+      res.send(500);
+      return;
+    }
+
+    let emailParam = {
+      toEmail: email,
+      subject: "[Furniture NFT Store] Reset password",
+      html: `<p><span style="font-size:22px"><strong>This is a Mail to reset your password of Furniture NFT Store.</strong></span></p>
+      <p>Reset Link:&nbsp;<a href="http://localhost:5173/resetPassword/${token}">http://localhost:5173/resetPassword/${token}</a></p>
+      <p>&nbsp;</p>
+      <p>if you didn&#39;t request reset mail. ignore this.</p>`,
+    };
+
+    mailer.sendGmail(emailParam);
+    res.send(200);
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
 
 // 유저 페이지에서 필요한 정보를 한번에 넘겨준다. NFT(블록체인과 통신) 가구수, 팔로잉, 팔로워수, 댓글 수, 유저 정보, world 정보
 router.get("/getUserInfo/:userId", async (req, res) => {

@@ -6,7 +6,7 @@ require("dotenv").config();
 
 require("./strategies/local");
 const passport = require("passport");
-const db = require("./config/mysql");
+const db = require("./utils/mysql");
 
 const app = express();
 

@@ -1,7 +1,7 @@
 const passport = require("passport");
 const { Strategy } = require("passport-local");
 const { comparePassword } = require("../utils/helpers");
-const db = require("../config/mysql");
+const db = require("../utils/mysql");
 
 passport.serializeUser((user, done) => {
   console.log("Serializing User...");

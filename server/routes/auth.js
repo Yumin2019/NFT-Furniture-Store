@@ -2,7 +2,7 @@ const { Router } = require("express");
 const passport = require("passport");
 const router = Router();
 
-const db = require("../config/mysql");
+const db = require("../utils/mysql");
 const { hashPassword, comparePassword } = require("../utils/helpers");
 
 router.post("/login", passport.authenticate("local"), (req, res) => {

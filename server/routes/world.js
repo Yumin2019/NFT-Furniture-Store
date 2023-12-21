@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const router = Router();
-const db = require("../config/mysql");
+const db = require("../utils/mysql");
 
 // 자신의 방 정보와 팔로우하고 있는 유저의 방 정보를 넘긴다.
 router.get("/getWorldList", async (req, res) => {
