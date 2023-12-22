@@ -71,6 +71,7 @@ export const UserInfoPage = () => {
   const [followers, setFollowers] = useState([]);
   const [followings, setFollowings] = useState([]);
   const [followingsViewer, setFollowingsViewer] = useState([]);
+  const [comments, setComments] = useState([]);
   const toast = useToast();
 
   const {
@@ -169,6 +170,17 @@ export const UserInfoPage = () => {
     }
   };
 
+  const getComments = async () => {
+    try {
+      const userId = getQueryParam();
+      let res = await api.get(`/getComments/${userId}`);
+      setComments(res.data.comments);
+      console.log(res.data.comments);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const checkLogin = async () => {
     try {
       let res = await api.get("/loginStatus");
@@ -182,6 +194,7 @@ export const UserInfoPage = () => {
   const init = async () => {
     await checkLogin();
     getUserInfo();
+    getComments();
     getFollowingsViewer();
   };
 
@@ -202,6 +215,8 @@ export const UserInfoPage = () => {
       getFollowers();
     } else if (tabIndex === 3) {
       getFollowings();
+    } else if (tabIndex === 4) {
+      getComments();
     }
   }, [tabIndex]);
 
@@ -375,7 +390,7 @@ export const UserInfoPage = () => {
                   />
                 </TabPanel>
                 <TabPanel>
-                  <GuestBookTab />
+                  <GuestBookTab comments={comments} onRefresh={getComments} />
                 </TabPanel>
               </TabPanels>
             </Tabs>

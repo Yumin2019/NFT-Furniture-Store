@@ -1,11 +1,9 @@
 import { Box, Flex, Image, Text, Stack, Button } from "@chakra-ui/react";
-
+import { dateToString } from "../../../utils/Helper";
 export let editText = "";
+export let clickComment = -1;
 export const CommentItem = ({
-  image,
-  name,
-  date,
-  text,
+  data,
   deletable,
   editable,
   onDelOpen,
@@ -14,14 +12,22 @@ export const CommentItem = ({
   return (
     <>
       <Flex width="100%">
-        <Image boxSize="65px" border="0.5px solid grey" src={image} />
+        <Image
+          boxSize="65px"
+          border="0.5px solid grey"
+          src={data?.image || "/image/account_icon.svg"}
+        />
         <Stack direction="column" ml={4}>
           <Box display="flex" textAlign="center">
             <Text fontWeight="bold" fontSize={16} mr={3}>
-              {name}
+              {data?.name}
             </Text>
             <Text color="grey" fontSize={13} mt="3px">
-              {date}(modified: 2023.12.03 09:00:10)
+              {dateToString(data?.createdAt)}
+              {data?.createdAt === data?.modifiedAt
+                ? ""
+                : `(modified:
+              ${dateToString(data?.modifiedAt)})`}
             </Text>
             <Stack direction="row" position="absolute" right={4}>
               {editable && (
@@ -29,7 +35,8 @@ export const CommentItem = ({
                   colorScheme="teal"
                   size="xs"
                   onClick={() => {
-                    editText = text;
+                    editText = data?.text || "";
+                    clickComment = data.id;
                     onEditOpen();
                   }}
                 >
@@ -37,13 +44,20 @@ export const CommentItem = ({
                 </Button>
               )}
               {deletable && (
-                <Button colorScheme="teal" size="xs" onClick={onDelOpen}>
+                <Button
+                  colorScheme="teal"
+                  size="xs"
+                  onClick={() => {
+                    clickComment = data.id;
+                    onDelOpen();
+                  }}
+                >
                   Delete
                 </Button>
               )}
             </Stack>
           </Box>
-          <Text>{text}</Text>
+          <Text>{data?.text}</Text>
         </Stack>
       </Flex>
     </>

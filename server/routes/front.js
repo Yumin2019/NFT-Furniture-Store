@@ -148,7 +148,7 @@ router.get("/getComments/:targetId", async (req, res) => {
   try {
     let targetId = req.params["targetId"];
     let sql =
-      "SELECT `guest_book_comment`.*, `user`.`name`, `user`.`email` FROM `guest_book_comment` JOIN `user` ON `guest_book_comment`.`userId` = `user`.`id` WHERE `guest_book_comment`.`originUserId` = ?";
+      "SELECT `guest_book_comment`.*, `user`.`name`, `user`.`email`, `user`.`image` FROM `guest_book_comment` JOIN `user` ON `guest_book_comment`.`userId` = `user`.`id` WHERE `guest_book_comment`.`originUserId` = ? ORDER BY `createdAt` DESC";
     let [rows, fields] = await db.query(sql, [targetId]);
     res.send({ comments: rows, count: rows.length });
   } catch (e) {

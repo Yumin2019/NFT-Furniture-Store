@@ -63,8 +63,8 @@ router.post("/deleteComment", async (req, res) => {
 
     // commentId에 해당하는 댓글이 유저가 쓴 것이 맞는지 확인한다.
     let sql =
-      "SELECT * FROM `guest_book_comment` WHERE `id` = ? AND `userId` = ?";
-    let [rows] = await db.query(sql, [commentId, userId]);
+      "SELECT * FROM `guest_book_comment` WHERE `id` = ? AND (`userId` = ? OR `originUserId` = ?)";
+    let [rows] = await db.query(sql, [commentId, userId, userId]);
     if (rows.length === 0) {
       res.status(400).send({
         msg: "this comment is already deleted or you're not an author.",
@@ -73,8 +73,9 @@ router.post("/deleteComment", async (req, res) => {
     }
 
     // 해당하는 댓글을 삭제한다.
-    sql = "DELETE FROM `guest_book_comment` WHERE `id` = ? AND `userId` = ?";
-    let [results] = await db.query(sql, [commentId, userId]);
+    sql =
+      "DELETE FROM `guest_book_comment` WHERE `id` = ? AND (`userId` = ? OR `originUserId` = ?)";
+    let [results] = await db.query(sql, [commentId, userId, userId]);
     if (results.affectedRows > 0) {
       res.send(200);
     } else {
@@ -91,6 +92,9 @@ router.post("/editComment", async (req, res) => {
   try {
     let userId = req.user.id;
     const { commentId, text } = req.body;
+
+    console.log(commentId);
+    console.log(text);
 
     // 해당 댓글이 있는지부터 확인한다.
     let sql =

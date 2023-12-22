@@ -32,4 +32,15 @@ const getQueryParam = () => {
   return window.location.pathname.split("/")[2];
 };
 
-export { validateEmail, getQueryParam, infoToast, errorToast, successToast };
+const dateToString = (str) => {
+  return new Date(str).toLocaleString();
+};
+
+export {
+  validateEmail,
+  getQueryParam,
+  dateToString,
+  infoToast,
+  errorToast,
+  successToast,
+};

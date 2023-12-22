@@ -40,7 +40,7 @@ export const LoginPage = () => {
       }
     } catch (e) {
       console.log(e);
-      errorToast(toast, e.response.data.msg);
+      errorToast(toast, `Login Failed`);
     }
   };
 

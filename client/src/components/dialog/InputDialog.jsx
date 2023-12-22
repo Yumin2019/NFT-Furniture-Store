@@ -58,7 +58,14 @@ export const InputDialog = ({
           <Button ref={cancelRef} onClick={onClose} size="sm">
             {noText}
           </Button>
-          <Button colorScheme="teal" ml={3} onClick={onClick} size="sm">
+          <Button
+            colorScheme="teal"
+            ml={3}
+            onClick={() => {
+              if (onClick) onClick(inputText);
+            }}
+            size="sm"
+          >
             {yesText}
           </Button>
         </AlertDialogFooter>
