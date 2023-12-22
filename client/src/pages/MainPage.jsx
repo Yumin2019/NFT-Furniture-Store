@@ -8,7 +8,7 @@ import {
   Toast,
   useToast,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RoomDialog } from "../components/dialog/RoomDialog";
 import { nftDialogTextAtom } from "../components/tabs/item/NftItem";
 import { BasicDialog } from "../components/dialog/BasicDialog";
@@ -40,8 +40,9 @@ export const loginAtom = atom({});
 export const MainPage = () => {
   const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
-
   const toast = useToast();
+  const navigate = useNavigate();
+
   const checkLogin = async () => {
     try {
       let res = await api.get("/loginStatus");
@@ -58,6 +59,7 @@ export const MainPage = () => {
       let res = await api.post("/logout");
       if (res.status === 200) {
         setLoginInfo({});
+        navigate("/");
         successToast(toast, `Logout Success`);
       } else {
         errorToast(toast, `Logout Failed`);

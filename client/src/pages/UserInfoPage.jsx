@@ -55,15 +55,16 @@ const ColItem = ({ name, count, onClick }) => {
 
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
-  const [loginInfo] = useAtom(loginAtom);
+  const [loginInfo, setLoginInfo] = useAtom(loginAtom);
   console.log(`loginInfo: `, loginInfo);
 
-  const [isHeartAnim, setIsHeartAnim] = useState(false);
+  // 현재 유저 Following 여부
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isHeartAnim, setIsHeartAnim] = useState(false);
 
   const [tabIndex, setTabIndex] = useState(0);
+  const [isMyInfo, setIsMyInfo] = useState(false);
   const lottieRef = useRef();
-  const isMyInfo = `${loginInfo.id}` === getQueryParam();
 
   const [userInfo, setUserInfo] = useState({});
   const [furnitures, setFurnitures] = useState([]);
@@ -71,6 +72,12 @@ export const UserInfoPage = () => {
   const [followings, setFollowings] = useState([]);
   const [followingsViewer, setFollowingsViewer] = useState([]);
   const toast = useToast();
+
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
 
   const clickFollowButton = async (isFollow, id) => {
     try {
@@ -151,16 +158,41 @@ export const UserInfoPage = () => {
       let idList = [];
       res.data.followings.map((v) => idList.push(v.id));
       setFollowingsViewer(idList);
+
+      /// 내가 팔로잉 하고 있는지
+      let isFollowingViewer = idList.includes(parseInt(getQueryParam()));
+      setIsFollowing(isFollowingViewer);
+      console.log("isFollowingViewer ", isFollowingViewer);
       console.log(`idList `, idList);
     } catch (e) {
       console.log(e);
     }
   };
 
-  useEffect(() => {
+  const checkLogin = async () => {
+    try {
+      let res = await api.get("/loginStatus");
+      console.log(res.data);
+      setLoginInfo(res.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const init = async () => {
+    await checkLogin();
     getUserInfo();
     getFollowingsViewer();
+  };
+
+  useEffect(() => {
+    init();
   }, []);
+
+  useEffect(() => {
+    setIsMyInfo(`${loginInfo?.id}` === getQueryParam());
+    getFollowingsViewer();
+  }, [loginInfo]);
 
   useEffect(() => {
     console.log("tab changed");
@@ -173,22 +205,16 @@ export const UserInfoPage = () => {
     }
   }, [tabIndex]);
 
-  const {
-    isOpen: isEditOpen,
-    onOpen: onEditOpen,
-    onClose: onEditClose,
-  } = useDisclosure();
-
   return (
     <>
       <EditProfileDialog
         isOpen={isEditOpen}
         onClose={onEditClose}
         initProfile={userInfo?.info?.image || "/image/account_icon.svg"}
-        initName={userInfo?.info?.name}
-        initDesc={userInfo?.info?.desc}
-        initWorldName={userInfo?.info?.worldName}
-        initWorldDesc={userInfo?.info?.worldDesc}
+        initName={userInfo?.info?.name || ""}
+        initDesc={userInfo?.info?.desc || ""}
+        initWorldName={userInfo?.info?.worldName || ""}
+        initWorldDesc={userInfo?.info?.worldDesc || ""}
       />
 
       <Box position="absolute" top="10%" left="30%" w="40%">
@@ -257,32 +283,34 @@ export const UserInfoPage = () => {
             <Text mt={2} fontSize={18} color="grey">
               {userInfo?.info?.email}
             </Text>
-            <Button
-              colorScheme="teal"
-              variant={isMyInfo ? null : "outline"}
-              mt={2}
-              width={100}
-              size="sm"
-              rightIcon={
-                isMyInfo ? (
-                  <RiPencilFill />
-                ) : isFollowing ? (
-                  <FaHeartBroken />
-                ) : (
-                  <FaHeart />
-                )
-              }
-              onClick={() => {
-                if (isMyInfo) {
-                  onEditOpen();
-                } else {
-                  setIsFollowing(!isFollowing);
-                  clickFollowButton(!isFollowing);
+
+            {loginInfo?.id && (
+              <Button
+                colorScheme="teal"
+                variant={isMyInfo ? null : "outline"}
+                mt={2}
+                width={100}
+                size="sm"
+                rightIcon={
+                  isMyInfo ? (
+                    <RiPencilFill />
+                  ) : isFollowing ? (
+                    <FaHeartBroken />
+                  ) : (
+                    <FaHeart />
+                  )
                 }
-              }}
-            >
-              {isMyInfo ? "Edit" : isFollowing ? "Unfollow" : "Follow"}
-            </Button>
+                onClick={() => {
+                  if (isMyInfo) {
+                    onEditOpen();
+                  } else {
+                    clickFollowButton(!isFollowing, getQueryParam());
+                  }
+                }}
+              >
+                {isMyInfo ? "Edit" : isFollowing ? "Unfollow" : "Follow"}
+              </Button>
+            )}
           </Box>
 
           <Divider mt={4} mb={4} />

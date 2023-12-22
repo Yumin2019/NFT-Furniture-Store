@@ -25,14 +25,14 @@ export const EditProfileDialog = ({
   isOpen,
   onClose,
 }) => {
-  const [preview, setPreview] = useState();
-  const [nameText, setNameText] = useState();
-  const [descText, setDescText] = useState();
-  const [worldNameText, setWorldNameText] = useState();
-  const [worldDescText, setWorldDescText] = useState();
+  const [preview, setPreview] = useState("");
+  const [nameText, setNameText] = useState("");
+  const [descText, setDescText] = useState("");
+  const [worldNameText, setWorldNameText] = useState("");
+  const [worldDescText, setWorldDescText] = useState("");
 
   useEffect(() => {
-    setPreview(undefined);
+    setPreview(initProfile);
     setNameText(initName);
     setDescText(initDesc);
     setWorldNameText(initWorldName);
@@ -64,7 +64,7 @@ export const EditProfileDialog = ({
                   <Image
                     boxSize="200"
                     border="0.5px solid grey"
-                    src={preview || initProfile}
+                    src={preview}
                   />
 
                   <Box

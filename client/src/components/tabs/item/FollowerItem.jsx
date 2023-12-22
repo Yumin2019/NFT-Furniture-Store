@@ -38,7 +38,7 @@ export const FollowerItem = ({
         </Text>
       </Flex>
 
-      {loginInfo.id && (
+      {loginInfo.id && loginInfo.id !== id && (
         <Button
           position="absolute"
           colorScheme="teal"
