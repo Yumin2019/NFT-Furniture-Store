@@ -20,7 +20,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/findPassword" element={<FindPasswordPage />} />
         <Route path="/resetPassword/:token" element={<ResetPasswordPage />} />
-        <Route path="/userInfo" element={<UserInfoPage />} />
+        <Route path="/userInfo/:userId" element={<UserInfoPage />} />
       </Routes>
       {/* <SocketManager />
       <Canvas shadows camera={{ position: [8, 8, 8], fov: 30 }}>

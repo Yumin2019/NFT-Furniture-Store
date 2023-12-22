@@ -11,10 +11,11 @@ import {
   TabPanels,
   TabPanel,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { RoomItem } from "../components/RoomItem";
 import { BiWorld } from "react-icons/bi";
-import { createContext, useRef, useState } from "react";
+import { createContext, useRef, useState, useEffect } from "react";
 import { FaHeart, FaHeartBroken } from "react-icons/fa";
 import Lottie from "lottie-react";
 import heartAnim from "../assets/HeartAnim.json";
@@ -24,6 +25,10 @@ import { FurnitureTab } from "../components/tabs/FurnitureTab";
 import { NftTab } from "./../components/tabs/NftTab";
 import { RiPencilFill } from "react-icons/ri";
 import { EditProfileDialog } from "../components/dialog/EditProfileDialog";
+import { useAtom } from "jotai";
+import { loginAtom } from "./MainPage";
+import { api } from "../utils/Axios";
+import { errorToast, getQueryParam } from "../utils/Helper";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -50,40 +55,123 @@ const ColItem = ({ name, count, onClick }) => {
 
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
-  console.log("UserInfoPage");
+  const [loginInfo] = useAtom(loginAtom);
+  console.log(`loginInfo: `, loginInfo);
 
   const [isHeartAnim, setIsHeartAnim] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+
   const [tabIndex, setTabIndex] = useState(0);
   const lottieRef = useRef();
-  const isMyInfo = true;
+  const isMyInfo = `${loginInfo.id}` === getQueryParam();
 
-  const clickFollowButton = (flag) => {
-    lottieRef.current.stop();
-    if (flag) {
-      lottieRef.current.play();
-      lottieRef.current.setSpeed(2);
+  const [userInfo, setUserInfo] = useState({});
+  const [furnitures, setFurnitures] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [followings, setFollowings] = useState([]);
+  const [followingsViewer, setFollowingsViewer] = useState([]);
+  const toast = useToast();
+
+  const clickFollowButton = async (isFollow, id) => {
+    try {
+      console.log(`isFollow = ${isFollow}`);
+      if (!loginInfo.id) return;
+
+      let res = await api.post(isFollow ? `/follow` : `/unfollow`, {
+        targetId: id,
+      });
+
+      if (res.status === 200) {
+        lottieRef.current.stop();
+        if (isFollow) {
+          lottieRef.current.play();
+          lottieRef.current.setSpeed(2);
+        }
+        setIsHeartAnim(isFollow);
+        getFollowingsViewer();
+      } else {
+        errorToast(toast, `${isFollow ? `Follow` : `Unfollow`} Failed`);
+      }
+    } catch (e) {
+      console.log(e);
+      errorToast(toast, `${isFollow ? `Follow` : `Unfollow`} Failed`);
     }
-    setIsHeartAnim(flag);
   };
 
-  const user = {
-    id: 1,
-    name: "yumin",
-    desc: "yumin is a really good programmer who can make many things. ",
-    email: "richyumin@naver.com",
-    nftCount: 10,
-    furnitureCount: 5,
-    followers: 2,
-    followings: 1,
+  const getUserInfo = async () => {
+    try {
+      const userId = getQueryParam();
+      let res = await api.get(`/getUserInfo/${userId}`);
+      setUserInfo(res.data || {});
+      console.log(res.data);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
-  const myRoom = {
-    id: 3,
-    name: "Meta World",
-    desc: "Welcome to learning React!",
-    people: 1,
+  const getFurnitures = async () => {
+    try {
+      const userId = getQueryParam();
+      let res = await api.get(`/getFurnitures/${userId}`);
+      console.log(res.data.furnitures);
+      setFurnitures(res.data.furnitures);
+    } catch (e) {
+      console.log(e);
+    }
   };
+
+  const getFollowers = async () => {
+    try {
+      const userId = getQueryParam();
+      let res = await api.get(`/getFollowers/${userId}`);
+      console.log(res.data.followers);
+      setFollowers(res.data.followers);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getFollowings = async () => {
+    try {
+      const userId = getQueryParam();
+      let res = await api.get(`/getFollowings/${userId}`);
+      console.log(res.data.followings);
+      setFollowings(res.data.followings);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getFollowingsViewer = async () => {
+    try {
+      if (!loginInfo.id) return;
+      let res = await api.get(`/getFollowings/${loginInfo.id}`);
+
+      // viewer의 followings id list
+      let idList = [];
+      res.data.followings.map((v) => idList.push(v.id));
+      setFollowingsViewer(idList);
+      console.log(`idList `, idList);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getUserInfo();
+    getFollowingsViewer();
+  }, []);
+
+  useEffect(() => {
+    console.log("tab changed");
+    if (tabIndex === 1) {
+      getFurnitures();
+    } else if (tabIndex === 2) {
+      getFollowers();
+    } else if (tabIndex === 3) {
+      getFollowings();
+    }
+  }, [tabIndex]);
 
   const {
     isOpen: isEditOpen,
@@ -96,11 +184,11 @@ export const UserInfoPage = () => {
       <EditProfileDialog
         isOpen={isEditOpen}
         onClose={onEditClose}
-        initProfile="image/profile_image.png"
-        initName={user.name}
-        initDesc={user.desc}
-        initWorldName={myRoom.name}
-        initWorldDesc={myRoom.desc}
+        initProfile={userInfo?.info?.image || "/image/account_icon.svg"}
+        initName={userInfo?.info?.name}
+        initDesc={userInfo?.info?.desc}
+        initWorldName={userInfo?.info?.worldName}
+        initWorldDesc={userInfo?.info?.worldDesc}
       />
 
       <Box position="absolute" top="10%" left="30%" w="40%">
@@ -120,39 +208,39 @@ export const UserInfoPage = () => {
             <Image
               boxSize="150px"
               border="0.5px solid grey"
-              src="image/profile_image.png"
+              src={userInfo?.info?.image || "/image/account_icon.svg"}
             />
             <ColItem
               name="NFT"
-              count={10}
+              count={100}
               onClick={() => {
                 setTabIndex(0);
               }}
             />
             <ColItem
               name="Furniture"
-              count={10}
+              count={userInfo?.furnitureCount || 0}
               onClick={() => {
                 setTabIndex(1);
               }}
             />
             <ColItem
               name="Followers"
-              count={10}
+              count={userInfo?.followerCount || 0}
               onClick={() => {
                 setTabIndex(2);
               }}
             />
             <ColItem
               name="Following"
-              count={10}
+              count={userInfo?.followingCount || 0}
               onClick={() => {
                 setTabIndex(3);
               }}
             />
             <ColItem
               name="Guest Book"
-              count={10}
+              count={userInfo?.commentCount || 0}
               onClick={() => {
                 setTabIndex(4);
               }}
@@ -161,15 +249,14 @@ export const UserInfoPage = () => {
 
           <Box mt={4}>
             <Text fontSize={24} fontWeight="bold">
-              {user.name}
+              {userInfo?.info?.name}
             </Text>
             <Text fontSize={18} color="grey">
-              {user.desc}
+              {userInfo?.info?.desc}
             </Text>
             <Text mt={2} fontSize={18} color="grey">
-              {user.email}
+              {userInfo?.info?.email}
             </Text>
-
             <Button
               colorScheme="teal"
               variant={isMyInfo ? null : "outline"}
@@ -209,10 +296,18 @@ export const UserInfoPage = () => {
             mb={1}
           >
             <BiWorld fontSize={20} style={{ marginRight: 4 }} />
-            {user.name}'s World
+            {userInfo?.info?.name}'s World
           </Box>
 
-          <RoomItem room={myRoom} right="-91%" />
+          <RoomItem
+            room={{
+              name: userInfo?.info?.worldName,
+              desc: userInfo?.info?.worldDesc,
+              online: userInfo?.info?.online,
+            }}
+            desc={userInfo}
+            right="-91%"
+          />
           <HeartAnimContext.Provider value={clickFollowButton}>
             <Tabs
               isFitted
@@ -237,13 +332,19 @@ export const UserInfoPage = () => {
                   <NftTab />
                 </TabPanel>
                 <TabPanel>
-                  <FurnitureTab />
+                  <FurnitureTab furnitures={furnitures} />
                 </TabPanel>
                 <TabPanel>
-                  <FollowersTab />
+                  <FollowersTab
+                    users={followers}
+                    viewerFollowers={followingsViewer}
+                  />
                 </TabPanel>
                 <TabPanel>
-                  <FollowersTab />
+                  <FollowersTab
+                    users={followings}
+                    viewerFollowers={followingsViewer}
+                  />
                 </TabPanel>
                 <TabPanel>
                   <GuestBookTab />

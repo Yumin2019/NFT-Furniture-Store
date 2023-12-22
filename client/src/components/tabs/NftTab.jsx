@@ -35,7 +35,7 @@ export const NftTab = () => {
   // dbInfo[itemId]
   let dbInfo = {
     0: {
-      image: "image/profile_image.png",
+      image: "/image/profile_image.png",
       name: "Furniture Coupon A",
       text: "this is really good a nft",
       couponType: "furniture",

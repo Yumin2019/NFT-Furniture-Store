@@ -1,6 +1,6 @@
 import { Flex, Text, Image } from "@chakra-ui/react";
 
-export const FurnitureItem = ({ image, name, text }) => {
+export const FurnitureItem = ({ image, name, text, count }) => {
   return (
     <Flex width="100%" alignItems="center">
       <Image boxSize="65px" border="0.5px solid grey" src={image} />
@@ -13,7 +13,7 @@ export const FurnitureItem = ({ image, name, text }) => {
           {text}
         </Text>
         <Text fontSize={14} mt={2}>
-          count: 3
+          count: {count || 0}
         </Text>
       </Flex>
     </Flex>

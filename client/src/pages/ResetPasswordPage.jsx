@@ -11,7 +11,12 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../utils/Axios";
-import { errorToast, infoToast, successToast } from "../utils/Helper";
+import {
+  errorToast,
+  getQueryParam,
+  infoToast,
+  successToast,
+} from "../utils/Helper";
 
 export const ResetPasswordPage = () => {
   const [show, setShow] = useState(false);
@@ -35,7 +40,7 @@ export const ResetPasswordPage = () => {
         return;
       }
 
-      const token = window.location.pathname.split("/")[2];
+      const token = getQueryParam();
       let res = await api.post("/resetPassword", {
         token: token,
         password: passwordText,

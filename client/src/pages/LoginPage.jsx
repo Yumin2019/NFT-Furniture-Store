@@ -11,15 +11,13 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../utils/Axios";
-import { useAtom } from "jotai";
-import { loginAtom } from "./MainPage";
 import { errorToast, successToast } from "../utils/Helper";
 
 export const LoginPage = () => {
   const [show, setShow] = useState(false);
   const [emailText, setEmailText] = useState("");
   const [passwordText, setPasswordText] = useState("");
-  const [isLogin, setIsLogin] = useAtom(loginAtom);
+
   const handleClick = () => setShow(!show);
   const toast = useToast();
   const navigate = useNavigate();
@@ -34,7 +32,6 @@ export const LoginPage = () => {
         password: passwordText,
       });
 
-      setIsLogin(res.status === 200);
       if (res.status === 200) {
         successToast(toast, `Login Success`);
         navigate("/");

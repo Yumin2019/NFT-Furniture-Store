@@ -14,7 +14,7 @@ export const GuestBookTab = () => {
   const comments = [
     {
       id: 1,
-      image: "image/profile_image.png",
+      image: "/image/profile_image.png",
       name: "yumin",
       date: "2023.12.03 09:00:10",
       text: "안녕하세요",
@@ -22,7 +22,7 @@ export const GuestBookTab = () => {
     },
     {
       id: 2,
-      image: "image/profile_image.png",
+      image: "/image/profile_image.png",
       name: "yumin",
       date: "2023.12.03 09:00:10",
       text: "안녕하세요안d안녕하세요안녕하세요요안녕하세요안녕하세요",
@@ -30,7 +30,7 @@ export const GuestBookTab = () => {
     },
     {
       id: 3,
-      image: "image/profile_image.png",
+      image: "/image/profile_image.png",
       name: "yumin",
       date: "2023.12.03 09:00:10",
       text: "안녕하세요",

@@ -12,10 +12,10 @@ export const RoomItem = ({ room, right, width }) => {
         position="relative"
       >
         <Text fontWeight="bold" mb={2}>
-          {room.name} (online: {room.people})
+          {room?.name} (online: {room?.online})
         </Text>
         <Text fontSize="sm" mb={2}>
-          {room.desc}
+          {room?.desc}
         </Text>
         <Flex>
           <Spacer />

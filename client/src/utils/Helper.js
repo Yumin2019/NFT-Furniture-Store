@@ -28,4 +28,8 @@ const successToast = (toast, text) => {
   });
 };
 
-export { validateEmail, infoToast, errorToast, successToast };
+const getQueryParam = () => {
+  return window.location.pathname.split("/")[2];
+};
+
+export { validateEmail, getQueryParam, infoToast, errorToast, successToast };

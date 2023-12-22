@@ -35,28 +35,29 @@ const PageNumber = ({ number }) => {
   );
 };
 
-export const loginAtom = atom(false);
+export const loginAtom = atom({});
 
 export const MainPage = () => {
   const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
-  const [isLogin, setIsLogin] = useAtom(loginAtom);
+  const [loginInfo, setLoginInfo] = useAtom(loginAtom);
+
   const toast = useToast();
   const checkLogin = async () => {
     try {
       let res = await api.get("/loginStatus");
       console.log(res.data);
-      setIsLogin(res.data.id ? true : false);
+      setLoginInfo(res.data);
     } catch (e) {
       console.log(e);
     }
   };
 
   const clickLogout = async () => {
-    if (!isLogin) return;
+    if (!loginInfo.id) return;
     try {
       let res = await api.post("/logout");
       if (res.status === 200) {
-        setIsLogin(false);
+        setLoginInfo({});
         successToast(toast, `Logout Success`);
       } else {
         errorToast(toast, `Logout Failed`);
@@ -100,7 +101,7 @@ export const MainPage = () => {
   // dbInfo[itemId]
   let dbInfo = {
     0: {
-      image: "image/profile_image.png",
+      image: "/image/profile_image.png",
       name: "Furniture Coupon A",
       text: "this is really good a nft",
       couponType: "furniture",
@@ -215,7 +216,7 @@ export const MainPage = () => {
             Furniture NFT Store
           </h1>
           <div style={{ margin: 10, float: "right" }}>
-            {!isLogin && (
+            {!loginInfo.id && (
               <Link to={"/login"}>
                 <Button
                   colorScheme="gray"
@@ -227,7 +228,7 @@ export const MainPage = () => {
                 </Button>
               </Link>
             )}
-            {isLogin && (
+            {loginInfo.id && (
               <Button
                 colorScheme="gray"
                 size="sm"
@@ -239,8 +240,8 @@ export const MainPage = () => {
               </Button>
             )}
 
-            {isLogin && (
-              <Link to={"/userInfo"}>
+            {loginInfo.id && (
+              <Link to={`/userInfo/${loginInfo.id}`}>
                 <Button
                   colorScheme="gray"
                   size="sm"
@@ -251,7 +252,7 @@ export const MainPage = () => {
                 </Button>
               </Link>
             )}
-            {!isLogin && (
+            {!loginInfo.id && (
               <Link to={"/register"}>
                 <Button
                   colorScheme="gray"
@@ -263,7 +264,7 @@ export const MainPage = () => {
                 </Button>
               </Link>
             )}
-            {isLogin && (
+            {loginInfo.id && (
               <Button
                 colorScheme="gray"
                 size="sm"

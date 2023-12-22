@@ -12,27 +12,27 @@ import {
   Image,
 } from "@chakra-ui/react";
 
-export const FurnitureDetailDialog = ({ dbInfo, isOpen, onClose }) => {
+export const FurnitureDetailDialog = ({ furniture, isOpen, onClose }) => {
   return (
     <>
       <Modal onClose={onClose} size="lg" isOpen={isOpen}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{dbInfo.name}</ModalHeader>
+          <ModalHeader>{furniture?.name}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Box pl={4} pr={4} pb={4}>
               <Image
                 boxSize="100%"
                 border="0.5px solid grey"
-                src={dbInfo.image}
+                src={furniture?.image || "/image/furniture_icon.svg"}
               />
             </Box>
             <Text color="grey" fontSize={18}>
-              {dbInfo.text}
+              {furniture?.text}
             </Text>
             <Text fontSize={18} mt={2} color="teal.400">
-              count: {dbInfo.count}
+              count: {furniture?.count}
             </Text>
             <Text fontSize={18} color="teal.400">
               type: item
