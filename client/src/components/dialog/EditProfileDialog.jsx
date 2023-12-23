@@ -12,9 +12,12 @@ import {
   Image,
   Input,
   Center,
+  useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { RiPencilFill } from "react-icons/ri";
+import { errorToast, successToast } from "../../utils/Helper";
+import axios from "axios";
 
 export const EditProfileDialog = ({
   initProfile,
@@ -24,14 +27,18 @@ export const EditProfileDialog = ({
   initWorldDesc,
   isOpen,
   onClose,
+  onResfresh,
 }) => {
   const [preview, setPreview] = useState("");
   const [nameText, setNameText] = useState("");
   const [descText, setDescText] = useState("");
   const [worldNameText, setWorldNameText] = useState("");
   const [worldDescText, setWorldDescText] = useState("");
+  const [imageFile, setImageFile] = useState();
+  const toast = useToast();
 
   useEffect(() => {
+    setImageFile(undefined);
     setPreview(initProfile);
     setNameText(initName);
     setDescText(initDesc);
@@ -41,6 +48,7 @@ export const EditProfileDialog = ({
 
   const onChange = (e) => {
     const img = e.target.files[0];
+    setImageFile(img);
     console.log(img);
 
     var reader = new FileReader();
@@ -48,6 +56,34 @@ export const EditProfileDialog = ({
     reader.onload = (e) => {
       setPreview(e.target.result);
     };
+  };
+
+  const clickEdit = async () => {
+    try {
+      let formData = new FormData();
+      formData.append("image", imageFile);
+      formData.append("name", nameText);
+      formData.append("desc", descText);
+      formData.append("worldName", worldNameText);
+      formData.append("worldDesc", worldDescText);
+
+      let res = await axios.post(`/editProfile`, formData, {
+        baseURL: "http://localhost:3000",
+        withCredentials: true,
+        "Content-Type": "multipart/form-data",
+      });
+
+      if (res.status === 200) {
+        successToast(toast, `Profile edited`);
+        onResfresh();
+        onClose();
+      } else {
+        errorToast(toast, `Failed to edit profile`);
+      }
+    } catch (e) {
+      console.log(e);
+      errorToast(toast, `Failed to edit profile`);
+    }
   };
 
   return (
@@ -146,7 +182,9 @@ export const EditProfileDialog = ({
             <Button mr={4} onClick={onClose}>
               Close
             </Button>
-            <Button colorScheme="teal">Edit</Button>
+            <Button colorScheme="teal" onClick={clickEdit}>
+              Edit
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

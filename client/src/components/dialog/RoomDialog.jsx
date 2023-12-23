@@ -10,44 +10,32 @@ import {
 } from "@chakra-ui/react";
 import { FaHeart } from "react-icons/fa";
 import { BiWorld } from "react-icons/bi";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RoomItem } from "../RoomItem";
+import { api } from "../../utils/Axios";
+import { useAtom } from "jotai";
+import { loginAtom } from "../../pages/MainPage";
 
 export const RoomDialog = ({ isOpen, onClose }) => {
   const cancelRef = useRef();
-  const myRoom = {
-    id: 3,
-    name: "Meta World",
-    desc: "Welcome to learning React!",
-    people: 1,
+  const [loginInfo] = useAtom(loginAtom);
+  const [rooms, setRooms] = useState([]);
+  const [myRoom, setMyRoom] = useState({});
+
+  const getWorldList = async () => {
+    try {
+      let res = await api.get("/getWorldList");
+      console.log(res.data.rooms);
+      setMyRoom(res.data.rooms.filter((v) => v.id === loginInfo.id)[0]);
+      setRooms(res.data.rooms.filter((v) => v.id !== loginInfo.id));
+    } catch (e) {
+      console.log(e);
+    }
   };
 
-  const roomsOfFollwing = [
-    {
-      id: 1,
-      name: "Hello World",
-      desc: "Welcome to learning React!",
-      people: 1,
-    },
-    {
-      id: 2,
-      name: "Installation",
-      desc: "You can install React from npm.",
-      people: 0,
-    },
-    {
-      id: 1,
-      name: "Hello World",
-      desc: "Welcome to learning React!",
-      people: 1,
-    },
-    {
-      id: 2,
-      name: "Installation",
-      desc: "You can install React from npm.",
-      people: 0,
-    },
-  ];
+  useEffect(() => {
+    getWorldList();
+  }, [isOpen]);
 
   return (
     <>
@@ -90,9 +78,8 @@ export const RoomDialog = ({ isOpen, onClose }) => {
               <FaHeart style={{ marginRight: 6 }} /> Followings
             </Box>
             <div style={{ marginBottom: 4 }}></div>
-            {roomsOfFollwing.map((room, index) => (
-              <RoomItem room={room} key={index} />
-            ))}
+            {rooms &&
+              rooms.map((room, index) => <RoomItem room={room} key={index} />)}
           </AlertDialogBody>
         </AlertDialogContent>
       </AlertDialog>

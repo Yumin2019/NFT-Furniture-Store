@@ -3,6 +3,7 @@ const router = Router();
 const db = require("../utils/mysql.js");
 const mailer = require("../utils/mailer");
 const { hash, randomGenerator } = require("../utils/helpers.js");
+const { uploadS3, s3 } = require("../utils/upload");
 
 // 자신의 방 정보와 팔로우하고 있는 유저의 방 정보를 넘긴다. (userId 기준)
 router.get("/getWorldList", async (req, res) => {
@@ -220,43 +221,61 @@ router.post("/unfollow", async (req, res) => {
 });
 
 // 프로필 이미지 부분은 일단 제외한다.
-router.post("/editProfile", async (req, res) => {
-  const { name, desc, worldName, worldDesc } = req.body;
-  if (!name && !desc && !worldName && !worldDesc) {
-    res.status(400).send({ msg: "input values are invalid" });
+router.post("/editProfile", uploadS3.single("image"), async (req, res) => {
+  let { name, desc, worldName, worldDesc } = req.body;
+  if (!name || name === "") {
+    res.status(400).send({ msg: "name is necessary" });
+    return;
+  } else if (!worldName || worldName === "") {
+    res.status(400).send({ msg: "worldName is necessary" });
     return;
   }
 
+  if (!desc) desc = "";
+  if (!worldDesc) worldDesc = "";
+
   try {
     let id = req.user.id;
-    let roomResult = true;
-    let userResult = true;
+    let sql = "UPDATE `user` SET ? WHERE `id` = ?";
+    let setJson = { name, desc };
+    console.log(req.file);
 
-    // 유저 정보를 업데이트 하는 경우
-    if (name || desc) {
-      let userUpdate = {};
-      if (name) userUpdate.name = name;
-      if (desc) userUpdate.desc = desc;
+    // 이미지를 변경하는 경우, 이전 이미지를 삭제한다.
+    if (req.file) {
+      let [userRows] = await db.query(
+        "SELECT `image` from `user` WHERE `id` = ?",
+        [id]
+      );
+      let imagePath = userRows[0].image;
+      console.log("imagePath: ", imagePath);
 
-      let sql = "UPDATE `user` SET ? WHERE ?";
-      let params = [userUpdate, { id: id }];
-      let [results] = await db.query(sql, params);
-      userResult = results.affectedRows === 1;
+      if (imagePath && imagePath !== "") {
+        imagePath = imagePath.substring(imagePath.length - 33);
+        s3.deleteObject(
+          {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: imagePath, // 삭제하고 싶은 이미지의 key
+          },
+          (err, data) => {
+            console.log("================");
+            if (err) console.log(err); // 실패 시 에러 메시지
+            else console.log(data); // 성공 시 데이터 출력
+            console.log("================");
+          }
+        );
+      }
+
+      setJson.image = req.file.location;
     }
 
-    // room 정보를 업데이트 하는 경우
-    if (worldName || worldDesc) {
-      let roomUpdate = {};
-      if (worldName) roomUpdate.name = worldName;
-      if (worldDesc) roomUpdate.desc = worldDesc;
+    let params = [setJson, id];
+    let [userResults] = await db.query(sql, params);
 
-      let sql = "UPDATE `room` SET ? WHERE ?";
-      let params = [roomUpdate, { id: id }];
-      let [results] = await db.query(sql, params);
-      roomResult = results.affectedRows === 1;
-    }
+    sql = "UPDATE `room` SET ? WHERE `id` = ?";
+    params = [{ name: worldName, desc: worldDesc }, id];
+    let [roomResults] = await db.query(sql, params);
 
-    if (userResult && roomResult) {
+    if (userResults.affectedRows === 1 && roomResults.affectedRows === 1) {
       res.send(200);
     } else {
       res.send(500);

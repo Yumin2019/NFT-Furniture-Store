@@ -39,6 +39,7 @@ export const GuestBookTab = ({ comments, onRefresh }) => {
       if (res.status === 200) {
         successToast(toast, "Comment deleted");
         onRefresh();
+        onDelClose();
       } else {
         errorToast(toast, "Failed to delete comment");
       }
@@ -46,7 +47,6 @@ export const GuestBookTab = ({ comments, onRefresh }) => {
       errorToast(toast, "Failed to delete comment");
       console.log(e);
     }
-    onDelClose();
   };
 
   const clickEdit = async (text) => {
@@ -58,6 +58,7 @@ export const GuestBookTab = ({ comments, onRefresh }) => {
       if (res.status === 200) {
         successToast(toast, "Comment edited");
         onRefresh();
+        onEditClose();
       } else {
         errorToast(toast, "Failed to edit comment");
       }
@@ -65,7 +66,6 @@ export const GuestBookTab = ({ comments, onRefresh }) => {
       errorToast(toast, "Failed to edit comment");
       console.log(e);
     }
-    onEditClose();
   };
 
   const clickWrite = async () => {

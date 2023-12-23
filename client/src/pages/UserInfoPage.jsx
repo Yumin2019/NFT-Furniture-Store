@@ -209,7 +209,8 @@ export const UserInfoPage = () => {
 
   useEffect(() => {
     console.log("tab changed");
-    if (tabIndex === 1) {
+    if (tabIndex === 0) {
+    } else if (tabIndex === 1) {
       getFurnitures();
     } else if (tabIndex === 2) {
       getFollowers();
@@ -230,6 +231,12 @@ export const UserInfoPage = () => {
         initDesc={userInfo?.info?.desc || ""}
         initWorldName={userInfo?.info?.worldName || ""}
         initWorldDesc={userInfo?.info?.worldDesc || ""}
+        onResfresh={() => {
+          getUserInfo();
+          if (tabIndex === 4) {
+            getComments();
+          }
+        }}
       />
 
       <Box position="absolute" top="10%" left="30%" w="40%">
