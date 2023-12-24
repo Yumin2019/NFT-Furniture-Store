@@ -37,8 +37,8 @@ CREATE TABLE `furniture_nft_store`.`nft_item` (
   `name` VARCHAR(45) NOT NULL,
   `desc` VARCHAR(255) NULL,
   `image` VARCHAR(255) NULL,
-  `couponType` ENUM('furniture', 'character') NOT NULL,
   PRIMARY KEY (`id`));
+#`couponType` ENUM('furniture', 'character') NOT NULL,
 
 CREATE TABLE `furniture_nft_store`.`furniture` (
   `id` INT NOT NULL AUTO_INCREMENT,
@@ -81,10 +81,10 @@ CREATE TABLE `furniture_nft_store`.`follow` (
 SELECT * FROM furniture_nft_store.user;
 
 # user와 room은 같이 생성된다. 동일한 id를 사용한다. 
-INSERT INTO `user` (`name`, `email`, `password`) VALUES ('유미니', 'richyumin@naver.com', 'password');
+INSERT INTO `user` (`name`, `email`, `password`) VALUES ('test1', 'richyumin@naver.com', '1234');
 INSERT INTO `room` (`name`, `desc`) VALUES ('Furniture room1', 'This is a Furniture World1');
 
-INSERT INTO `user` (`name`, `email`, `password`) VALUES ('name2', 'email2', 'password');
+INSERT INTO `user` (`name`, `email`, `password`) VALUES ('test2', 'test2@naver.com', '1234');
 INSERT INTO `room` (`name`, `desc`) VALUES ('Furniture room2', 'This is a Furniture World2');
 
 # 가구 데이터와 NFT 정보용 데이터는 미리 생성한다. (게임으로 치면 교환권 같은 개념)
@@ -93,9 +93,9 @@ INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture2', 'furniture2');
 INSERT INTO `furniture` (`name`, `desc`) VALUES ('furiture3', 'furniture3');
 
 # NFT 아이템 정보(교환권 데이터)
-INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`, `couponType`) VALUES (1, 'furniture1 coupon', 'furniture1 coupon', 'furniture');
-INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`, `couponType`) VALUES (2, 'furniture2 coupon', 'furniture2 coupon', 'furniture');
-INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`, `couponType`) VALUES (3, 'furniture3 coupon', 'furniture3 coupon', 'furniture');
+INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`) VALUES (1, 'furniture1 coupon', 'furniture1 coupon');
+INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`) VALUES (2, 'furniture2 coupon', 'furniture2 coupon');
+INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`) VALUES (3, 'furniture3 coupon', 'furniture3 coupon');
 
 # user는 3개의 가구를 1개씩 가진다. 
 INSERT INTO `furniture_count` (`userId`, `furnitureId`, `count`) VALUES (1, 1, 1);

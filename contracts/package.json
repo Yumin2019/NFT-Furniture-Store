@@ -1,0 +1,11 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "description": "contracts of NFT Furniture store",
+  "main": "index.js",
+  "author": "kym",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1"
+  }
+}

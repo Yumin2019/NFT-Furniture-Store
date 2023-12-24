@@ -257,10 +257,8 @@ router.post("/editProfile", uploadS3.single("image"), async (req, res) => {
             Key: imagePath, // 삭제하고 싶은 이미지의 key
           },
           (err, data) => {
-            console.log("================");
-            if (err) console.log(err); // 실패 시 에러 메시지
-            else console.log(data); // 성공 시 데이터 출력
-            console.log("================");
+            if (err) console.log(err);
+            else console.log(data);
           }
         );
       }
