@@ -10,8 +10,33 @@ import { FindPasswordPage } from "./pages/FindPasswordPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { UserInfoPage } from "./pages/UserInfoPage";
+import { useEffect, useState } from "react";
+import { atom, useAtom } from "jotai";
+
+export const accountAtom = atom("");
 
 function App() {
+  const [account, setAccount] = useAtom(accountAtom);
+
+  // 메타마스크 연동 테스트 코드
+  const getAccount = async () => {
+    try {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setAccount(accounts[0]);
+        console.log(accounts[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getAccount();
+  }, [account]);
+
   return (
     <>
       <Routes>

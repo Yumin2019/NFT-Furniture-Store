@@ -29,6 +29,7 @@ import { useAtom } from "jotai";
 import { loginAtom } from "./MainPage";
 import { api } from "../utils/Axios";
 import { errorToast, getQueryParam } from "../utils/Helper";
+import { tokenContract } from "../contracts/contract";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -56,7 +57,6 @@ const ColItem = ({ name, count, onClick }) => {
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
-  console.log(`loginInfo: `, loginInfo);
 
   // 현재 유저 Following 여부
   const [isFollowing, setIsFollowing] = useState(false);
@@ -72,6 +72,8 @@ export const UserInfoPage = () => {
   const [followings, setFollowings] = useState([]);
   const [followingsViewer, setFollowingsViewer] = useState([]);
   const [comments, setComments] = useState([]);
+  const [nftList, setNftList] = useState([]);
+  const [nftInfoList, setNftInfoList] = useState({});
   const toast = useToast();
 
   const {
@@ -181,6 +183,26 @@ export const UserInfoPage = () => {
     }
   };
 
+  const getUserNFT = async () => {
+    try {
+      let res = await tokenContract.methods.getTokens(getQueryParam()).call();
+      console.log(res);
+      setNftList(res);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getNftInfoList = async () => {
+    try {
+      let res = await api.get("/getAllNftItems");
+      console.log(res.data);
+      setNftInfoList(res.data.items);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const checkLogin = async () => {
     try {
       let res = await api.get("/loginStatus");
@@ -194,8 +216,8 @@ export const UserInfoPage = () => {
   const init = async () => {
     await checkLogin();
     getUserInfo();
-    getComments();
-    getFollowingsViewer();
+    getNftInfoList();
+    getUserNFT();
   };
 
   useEffect(() => {
@@ -210,6 +232,7 @@ export const UserInfoPage = () => {
   useEffect(() => {
     console.log("tab changed");
     if (tabIndex === 0) {
+      getUserNFT();
     } else if (tabIndex === 1) {
       getFurnitures();
     } else if (tabIndex === 2) {
@@ -379,7 +402,11 @@ export const UserInfoPage = () => {
               </TabList>
               <TabPanels>
                 <TabPanel>
-                  <NftTab />
+                  <NftTab
+                    nftList={nftList}
+                    nftInfoList={nftInfoList}
+                    userInfo={userInfo?.info || {}}
+                  />
                 </TabPanel>
                 <TabPanel>
                   <FurnitureTab furnitures={furnitures} />

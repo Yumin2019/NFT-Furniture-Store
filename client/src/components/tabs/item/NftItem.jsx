@@ -2,6 +2,7 @@ import { Flex, Text, Image, Button, Stack, Spacer } from "@chakra-ui/react";
 import { atom, useAtom } from "jotai";
 import { FaMoneyBill } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
+import { loginAtom } from "../../../pages/MainPage";
 
 export const nftDialogTextAtom = atom({
   nftDialogText: "",
@@ -10,36 +11,38 @@ export const nftDialogTextAtom = atom({
 });
 
 export const NftItem = ({
-  image,
-  name,
-  text,
+  info,
+  token,
   author,
-  type,
-  isMyNft,
-  isSelling,
-  price,
   onBasicOpen,
   onSellOpen,
   onItemClick,
 }) => {
   const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
+  const [loginInfo] = useAtom(loginAtom);
+  let isSelling = token?.isSelling || false;
+  let isMyNft = loginInfo?.id === Number(token.userId);
 
   return (
     <Flex width="100%" alignItems="center" onClick={onItemClick}>
-      <Image boxSize="65px" border="0.5px solid grey" src={image} />
+      <Image
+        boxSize="65px"
+        border="0.5px solid grey"
+        src={info?.image || "/image/furniture_icon.svg"}
+      />
 
       <Flex direction="column" ml={4}>
         <Text fontWeight="bold" fontSize={16}>
-          {name}
+          {info?.name}
         </Text>
         <Text color="grey" fontSize={14}>
-          {text}
+          {info?.desc}
         </Text>
         <Text fontSize={14} mt={2} color="teal.400">
           author: {author}
         </Text>
         <Text fontSize={14} color="teal.400">
-          type: {type}
+          type: furniture
         </Text>
       </Flex>
 
@@ -72,7 +75,7 @@ export const NftItem = ({
           </Button>
         )}
 
-        {!isMyNft && isSelling && (
+        {!isMyNft && token?.isSelling && (
           <Button
             position="absolute"
             colorScheme="teal"
@@ -84,7 +87,7 @@ export const NftItem = ({
             onClick={(e) => {
               setDialogTextAtom({
                 nftDialogTitle: "Buy NFT",
-                nftDialogText: `Are you sure you want to buy this NFT? (${price} MATIC)`,
+                nftDialogText: `Are you sure you want to buy this NFT? (${token?.price} MATIC)`,
                 nftDialogYesText: "Buy",
               });
               onBasicOpen();
@@ -103,7 +106,7 @@ export const NftItem = ({
             marginTop={9}
             fontSize={20}
           >
-            {price.toFixed(1)} MATIC
+            {Number(token?.price || 0).toFixed(1)} MATIC
           </Text>
         )}
       </Stack>

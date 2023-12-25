@@ -162,7 +162,13 @@ router.get("/getComments/:targetId", async (req, res) => {
 router.get("/getAllNftItems", async (req, res) => {
   try {
     let [rows, fields] = await db.query("SELECT * FROM `nft_item`");
-    res.send({ nftItems: rows, count: rows.length });
+
+    let result = { count: rows.length, items: {} };
+    result.count = rows.length;
+    rows.map((v) => {
+      result.items[v.id] = v;
+    });
+    res.send(result);
   } catch (e) {
     console.log(e);
     res.send(500);

@@ -29,25 +29,30 @@ import {
 import { useAtom } from "jotai";
 import { MdCancel } from "react-icons/md";
 import { nftDialogTextAtom } from "../tabs/item/NftItem";
+import { loginAtom } from "../../pages/MainPage";
+import { FaMoneyBill } from "react-icons/fa";
 
 export const NftDetailDialog = ({
+  token,
+  info,
+  author,
   transferInfoList,
-  blockInfo,
-  dbInfo,
   isOpen,
   onClose,
   onBasicOpen,
   onSellOpen,
 }) => {
   const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
-  let isMyNft = "kym" === blockInfo.author;
-  let isSelling = blockInfo.isSelling;
+  const [loginInfo] = useAtom(loginAtom);
+  let isSelling = token?.isSelling || false;
+  let isMyNft = loginInfo?.id === Number(token?.userId);
+
   return (
     <>
       <Modal onClose={onClose} size="lg" isOpen={isOpen}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{dbInfo.name}</ModalHeader>
+          <ModalHeader>{info?.name}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {/* NFT 이미지 */}
@@ -55,18 +60,18 @@ export const NftDetailDialog = ({
               <Image
                 boxSize="100%"
                 border="0.5px solid grey"
-                src={dbInfo.image}
+                src={info?.image || "/image/furniture_icon.svg"}
               />
             </Box>
 
             <Text color="grey" fontSize={18}>
-              {dbInfo.text}
+              {info?.desc}
             </Text>
             <Text fontSize={18} mt={2} color="teal.400">
-              author: {blockInfo.author}
+              author: {author}
             </Text>
             <Text fontSize={18} color="teal.400">
-              type: {dbInfo.couponType}
+              type: furniture
             </Text>
 
             <Divider mt={2} mb={2} />
@@ -75,7 +80,7 @@ export const NftDetailDialog = ({
             <Stack direction="row" alignItems="center">
               {isSelling && (
                 <Text textColor="teal.400" fontSize={24}>
-                  {blockInfo.price.toFixed(1)} MATIC
+                  {token?.price.toFixed(1)} MATIC
                 </Text>
               )}
 
@@ -86,9 +91,7 @@ export const NftDetailDialog = ({
                   variant="outline"
                   mt={2}
                   size="sm"
-                  rightIcon={
-                    !blockInfo.isSelling ? <FaMoneyBill /> : <MdCancel />
-                  }
+                  rightIcon={!isSelling ? <FaMoneyBill /> : <MdCancel />}
                   onClick={(e) => {
                     setDialogTextAtom({
                       nftDialogTitle: !isSelling ? "NFT Sell" : "Cancel Sales",
@@ -114,7 +117,7 @@ export const NftDetailDialog = ({
                   onClick={(e) => {
                     setDialogTextAtom({
                       nftDialogTitle: "Buy NFT",
-                      nftDialogText: `Are you sure you want to buy this NFT? (${price} MATIC)`,
+                      nftDialogText: `Are you sure you want to buy this NFT? (${token?.price} MATIC)`,
                       nftDialogYesText: "Buy",
                     });
                     onBasicOpen();

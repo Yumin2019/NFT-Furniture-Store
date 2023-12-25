@@ -20,6 +20,7 @@ import { api } from "../utils/Axios";
 import { useEffect } from "react";
 import { useAtom, atom } from "jotai";
 import { errorToast, successToast } from "../utils/Helper";
+import { FaRegQuestionCircle } from "react-icons/fa";
 
 const PageNumber = ({ number }) => {
   return (
@@ -218,6 +219,15 @@ export const MainPage = () => {
             Furniture NFT Store
           </h1>
           <div style={{ margin: 10, float: "right" }}>
+            <Button
+              colorScheme="gray"
+              size="sm"
+              mr={4}
+              rightIcon={<FaRegQuestionCircle />}
+            >
+              Mint NFT
+            </Button>
+
             {!loginInfo.id && (
               <Link to={"/login"}>
                 <Button
@@ -311,7 +321,7 @@ export const MainPage = () => {
       <div style={{ margin: 16 }} />
 
       {/* Pagination  */}
-      <Center>
+      {/* <Center>
         <Button
           colorScheme="teal"
           size="sm"
@@ -335,7 +345,7 @@ export const MainPage = () => {
         >
           »
         </Button>
-      </Center>
+      </Center> */}
     </>
   );
 };
