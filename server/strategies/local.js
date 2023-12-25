@@ -14,7 +14,8 @@ passport.deserializeUser(async (user, done) => {
   console.log(user);
 
   try {
-    let sql = "SELECT `id`, `name`, `email` from `user` where `email` = ?";
+    let sql =
+      "SELECT `id`, `name`, `email`, `walletAddress` from `user` where `email` = ?";
     let params = [user.email];
     let [rows, fields] = await db.query(sql, params);
 
@@ -41,7 +42,7 @@ passport.use(
         if (!email || !password) throw new Error("Missing Credentials");
 
         let sql =
-          "SELECT `id`, `name`, `email`, `password` from `user` where `email` = ?";
+          "SELECT `id`, `name`, `email`, `password`, `walletAddress` from `user` where `email` = ?";
         let params = [email];
         let [rows, fields] = await db.query(sql, params);
 
@@ -53,6 +54,7 @@ passport.use(
             id: rows[0].id,
             name: rows[0].name,
             email: rows[0].email,
+            walletAddress: rows[0].walletAddress,
           });
         } else {
           console.log("Invalid Authentication");

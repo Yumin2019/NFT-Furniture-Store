@@ -794,7 +794,7 @@ const furnitureTokenAbi = [
 ];
 
 export const furnitureTokenAddress =
-  "0x2f99ad0A7D627117d7D984d134FdD84990Fd5467";
+  "0x3955A3896F99669fba8747127fE516A2AD93BB44";
 
 export const tokenContract = new web3.eth.Contract(
   furnitureTokenAbi,

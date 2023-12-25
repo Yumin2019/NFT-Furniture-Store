@@ -14,7 +14,7 @@ export const nftDialogTextAtom = atom({
 export const NftItem = ({
   info,
   token,
-  author,
+  owner,
   onBasicOpen,
   onSellOpen,
   onItemClick,
@@ -34,23 +34,46 @@ export const NftItem = ({
 
       <Flex direction="column" ml={4}>
         <Text fontWeight="bold" fontSize={16}>
-          {info?.name}
+          {info?.name} #{Number(token?.tokenId)}
         </Text>
         <Text color="grey" fontSize={14}>
           {info?.desc}
         </Text>
         <Text fontSize={14} mt={2} color="teal.400">
-          author: {author}
+          owner: {owner}
         </Text>
         <Text fontSize={14} color="teal.400">
           type: furniture
         </Text>
+        {loginInfo?.id && isMyNft && !isSelling && (
+          <Button
+            mt={6}
+            width={100}
+            colorScheme="teal"
+            size="xs"
+            bottom={4}
+            onClick={(e) => {
+              setDialogTextAtom({
+                nftDialogTitle: "Consume NFT",
+                nftDialogText:
+                  "Are you sure you want to consume this NFT? You'll get a furniture item by consuming NFT.",
+                nftDialogYesText: "Consume",
+                info: info,
+                token: token,
+              });
+              onBasicOpen();
+              e.stopPropagation();
+            }}
+          >
+            Consume
+          </Button>
+        )}
       </Flex>
 
       <Spacer />
 
       <Stack direction="column" alignItems="center" height={100}>
-        {isMyNft && (
+        {loginInfo?.id && isMyNft && (
           <Button
             position="absolute"
             colorScheme="teal"
@@ -78,7 +101,7 @@ export const NftItem = ({
           </Button>
         )}
 
-        {!isMyNft && token?.isSelling && (
+        {loginInfo?.id && !isMyNft && token?.isSelling && (
           <Button
             position="absolute"
             colorScheme="teal"

@@ -36,7 +36,7 @@ import { web3 } from "../../contracts/contract";
 export const NftDetailDialog = ({
   token,
   info,
-  author,
+  owner,
   transferInfoList,
   isOpen,
   onClose,
@@ -53,7 +53,9 @@ export const NftDetailDialog = ({
       <Modal onClose={onClose} size="lg" isOpen={isOpen}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{info?.name}</ModalHeader>
+          <ModalHeader>
+            {info?.name} #{Number(token?.tokenId)}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {/* NFT 이미지 */}
@@ -69,7 +71,7 @@ export const NftDetailDialog = ({
               {info?.desc}
             </Text>
             <Text fontSize={18} mt={2} color="teal.400">
-              author: {author}
+              owner: {owner}
             </Text>
             <Text fontSize={18} color="teal.400">
               type: furniture
@@ -86,7 +88,7 @@ export const NftDetailDialog = ({
               )}
 
               <Spacer />
-              {isMyNft && (
+              {loginInfo?.id && isMyNft && (
                 <Button
                   colorScheme="teal"
                   variant="outline"
@@ -109,7 +111,7 @@ export const NftDetailDialog = ({
                 </Button>
               )}
 
-              {!isMyNft && isSelling && (
+              {loginInfo?.id && !isMyNft && isSelling && (
                 <Button
                   colorScheme="teal"
                   mt={2}

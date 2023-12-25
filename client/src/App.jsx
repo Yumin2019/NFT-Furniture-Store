@@ -35,7 +35,7 @@ function App() {
 
   useEffect(() => {
     getAccount();
-  }, [account]);
+  }, []);
 
   return (
     <>

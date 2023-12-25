@@ -69,7 +69,7 @@ const NFT_ITEM_LENGTH = 3;
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
-  const [account] = useAtom(accountAtom);
+  const [account, setAccount] = useAtom(accountAtom);
 
   // 현재 유저 Following 여부
   const [isFollowing, setIsFollowing] = useState(false);
@@ -203,6 +203,7 @@ export const UserInfoPage = () => {
       setNftList(res);
     } catch (e) {
       console.log(e);
+      setNftList([]);
     }
   };
 
@@ -267,6 +268,7 @@ export const UserInfoPage = () => {
       let res = await api.get("/loginStatus");
       console.log(res.data);
       setLoginInfo(res.data);
+      setAccount(res.data.walletAddress);
     } catch (e) {
       console.log(e);
     }

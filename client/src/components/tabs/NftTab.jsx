@@ -8,6 +8,7 @@ import { useState } from "react";
 import { tokenContract, web3 } from "../../contracts/contract";
 import { accountAtom } from "../../App";
 import { errorToast, successToast } from "../../utils/Helper";
+import { api } from "../../utils/Axios";
 
 export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
   const [account] = useAtom(accountAtom);
@@ -65,9 +66,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
     }
   };
 
-  const clickCancelSales = async () => {
-    onBasicClose();
-
+  const cancelSales = async () => {
     try {
       let token = dialogTextAtom.token;
       let res = await tokenContract.methods
@@ -84,6 +83,68 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
     } catch (e) {
       errorToast(toast, "Failed to transact");
       console.log(e);
+    }
+  };
+
+  const buyToken = async () => {
+    try {
+      let token = dialogTextAtom.token;
+      let res = await tokenContract.methods
+        .buyToken(token.tokenId)
+        .send({ from: account, value: token.price });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        successToast(toast, "You bought NFT");
+        onLoad();
+      } else {
+        errorToast(toast, "Failed to buy NFT");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to buy NFT");
+      console.log(e);
+    }
+  };
+
+  const consumeToken = async () => {
+    try {
+      let token = dialogTextAtom.token;
+      let info = dialogTextAtom.info;
+      let res = await tokenContract.methods
+        .deleteToken(token.tokenId)
+        .send({ from: account });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        res = await api.post("/consumeToken", {
+          furnitureId: info.furnitureId,
+        });
+
+        if (res.status === 200) {
+          successToast(toast, "You consumed NFT");
+          onLoad();
+        } else {
+          errorToast(toast, "Failed to consume NFT");
+        }
+      } else {
+        errorToast(toast, "Failed to consume NFT");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to consume NFT");
+      console.log(e);
+    }
+  };
+
+  const clickBasicDialogOk = () => {
+    onBasicClose();
+
+    let text = dialogTextAtom.nftDialogYesText;
+    if (text === "Buy") {
+      buyToken();
+    } else if (text === "Consume") {
+      consumeToken();
+    } else {
+      cancelSales();
     }
   };
 
@@ -117,7 +178,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
         text={dialogTextAtom.nftDialogText}
         yesText={dialogTextAtom.nftDialogYesText}
         noText="Cancel"
-        onClick={clickCancelSales}
+        onClick={clickBasicDialogOk}
       />
 
       <InputDialog
@@ -139,7 +200,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
         transferInfoList={transferInfoList[1]}
         token={selectedInfo?.token}
         info={selectedInfo?.info}
-        author={userInfo?.name || ""}
+        owner={userInfo?.name || ""}
       />
 
       {nftInfoList &&
@@ -150,7 +211,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
               <NftItem
                 token={v}
                 info={nftInfoList[v.nftItemId]}
-                author={userInfo?.name || ""}
+                owner={userInfo?.name || ""}
                 onBasicOpen={onBasicOpen}
                 onSellOpen={onSellOpen}
                 onItemClick={(e) => {

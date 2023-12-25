@@ -20,6 +20,7 @@ import { api } from "../utils/Axios";
 import { useEffect } from "react";
 import { useAtom, atom } from "jotai";
 import { errorToast, successToast } from "../utils/Helper";
+import { accountAtom } from "../App";
 
 const PageNumber = ({ number }) => {
   return (
@@ -40,6 +41,7 @@ export const loginAtom = atom({});
 export const MainPage = () => {
   const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
+  const [account, setAccount] = useAtom(accountAtom);
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -48,6 +50,7 @@ export const MainPage = () => {
       let res = await api.get("/loginStatus");
       console.log(res.data);
       setLoginInfo(res.data);
+      setAccount(res.data.walletAddress);
     } catch (e) {
       console.log(e);
     }

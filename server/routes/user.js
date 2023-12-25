@@ -220,6 +220,38 @@ router.post("/unfollow", async (req, res) => {
   }
 });
 
+// 토큰 삭제 이후에 호출하는 API
+// 보안적으로 취약한 부분이다. 상용 블록체인 플랫폼에서는 백엔드에서 모든 처리를 끝낸 이후에 아이템의 개수를 증가시키는 형태일 것.
+// 우리 앱에서는 프론트가 처리를 한 이후에 개수 요청에 대한 처리를 백엔드에 던지고 있음. 그리고 백엔드는 블록체인 상태를 따로 확인하지 않음.
+router.post("/consumeToken", async (req, res) => {
+  try {
+    let userId = req.user.id;
+    let { furnitureId } = req.body;
+
+    // 매칭 되는 정보가 있다면, 수를 증가하고 없으면 삽입한다.
+    let [rows] = await db.query(
+      "SELECT * from `furniture_count` WHERE `userId` = ? AND `furnitureId` = ?",
+      [userId, furnitureId]
+    );
+
+    let [results] = await db.query(
+      rows.length === 1
+        ? "UPDATE `furniture_count` SET `count` = `count` + 1 WHERE `userId` = ? AND `furnitureId` = ?"
+        : "INSERT INTO `furniture_count` (`userId`, `furnitureId`, `count`) VALUES (?, ?, 1)",
+      [userId, furnitureId]
+    );
+
+    if (results.affectedRows === 1) {
+      res.send(200);
+    } else {
+      res.send(500);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
 // account 정보를 등록한다.
 router.post("/registerAccount", async (req, res) => {
   try {
