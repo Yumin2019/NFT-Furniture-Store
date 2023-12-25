@@ -31,6 +31,7 @@ import { MdCancel } from "react-icons/md";
 import { nftDialogTextAtom } from "../tabs/item/NftItem";
 import { loginAtom } from "../../pages/MainPage";
 import { FaMoneyBill } from "react-icons/fa";
+import { web3 } from "../../contracts/contract";
 
 export const NftDetailDialog = ({
   token,
@@ -79,8 +80,8 @@ export const NftDetailDialog = ({
             {/* 가격 정보 및 버튼  */}
             <Stack direction="row" alignItems="center">
               {isSelling && (
-                <Text textColor="teal.400" fontSize={24}>
-                  {token?.price.toFixed(1)} MATIC
+                <Text textColor="teal.400" fontSize={20}>
+                  {web3.utils.fromWei(token?.price, "ether")} MATIC
                 </Text>
               )}
 

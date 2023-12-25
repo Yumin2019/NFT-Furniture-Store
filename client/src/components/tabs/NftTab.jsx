@@ -1,13 +1,17 @@
-import { Box, Divider, useDisclosure } from "@chakra-ui/react";
+import { Box, Divider, useDisclosure, useToast } from "@chakra-ui/react";
 import { BasicDialog } from "./../dialog/BasicDialog";
 import { InputDialog } from "../dialog/InputDialog";
 import { NftDetailDialog } from "./../dialog/NftDetailDialog";
 import { useAtom } from "jotai";
 import { NftItem, nftDialogTextAtom } from "./item/NftItem";
-import { useMemo, useState } from "react";
-import { api } from "../../utils/Axios";
+import { useState } from "react";
+import { tokenContract, web3 } from "../../contracts/contract";
+import { accountAtom } from "../../App";
+import { errorToast, successToast } from "../../utils/Helper";
 
-export const NftTab = ({ nftList, nftInfoList, userInfo }) => {
+export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
+  const [account] = useAtom(accountAtom);
+  const toast = useToast();
   let transferInfoList = {
     1: [
       {
@@ -37,6 +41,50 @@ export const NftTab = ({ nftList, nftInfoList, userInfo }) => {
         price: 1,
       },
     ],
+  };
+
+  const clickSell = async (text) => {
+    onSellClose();
+
+    try {
+      let token = dialogTextAtom.token;
+      let res = await tokenContract.methods
+        .sellToken(token.tokenId, web3.utils.toWei(Number(text), "ether"))
+        .send({ from: account });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        successToast(toast, "Your nft is on sale.");
+        onLoad();
+      } else {
+        errorToast(toast, "Failed to transact");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to transact");
+      console.log(e);
+    }
+  };
+
+  const clickCancelSales = async () => {
+    onBasicClose();
+
+    try {
+      let token = dialogTextAtom.token;
+      let res = await tokenContract.methods
+        .cancelTokenSales(token.tokenId)
+        .send({ from: account });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        successToast(toast, "Your nft is not on sale.");
+        onLoad();
+      } else {
+        errorToast(toast, "Failed to transact");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to transact");
+      console.log(e);
+    }
   };
 
   const {
@@ -69,6 +117,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo }) => {
         text={dialogTextAtom.nftDialogText}
         yesText={dialogTextAtom.nftDialogYesText}
         noText="Cancel"
+        onClick={clickCancelSales}
       />
 
       <InputDialog
@@ -78,7 +127,8 @@ export const NftTab = ({ nftList, nftInfoList, userInfo }) => {
         text={dialogTextAtom.nftDialogText}
         yesText={dialogTextAtom.nftDialogYesText}
         noText="Cancel"
-        initialText={"0.01"}
+        initialText={"0.001"}
+        onClick={clickSell}
       />
 
       <NftDetailDialog

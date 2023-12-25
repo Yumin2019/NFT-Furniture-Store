@@ -220,6 +220,27 @@ router.post("/unfollow", async (req, res) => {
   }
 });
 
+// account 정보를 등록한다.
+router.post("/registerAccount", async (req, res) => {
+  try {
+    let userId = req.user.id;
+    let { address } = req.body;
+    let [results] = await db.query(
+      "UPDATE `user` SET `walletAddress` = ? WHERE `id` = ?",
+      [address, userId]
+    );
+
+    if (results.affectedRows === 1) {
+      res.send(200);
+    } else {
+      res.send(500);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
 // 프로필 이미지 부분은 일단 제외한다.
 router.post("/editProfile", uploadS3.single("image"), async (req, res) => {
   let { name, desc, worldName, worldDesc } = req.body;

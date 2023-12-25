@@ -16,7 +16,12 @@ import {
 import { RoomItem } from "../components/RoomItem";
 import { BiWorld } from "react-icons/bi";
 import { createContext, useRef, useState, useEffect } from "react";
-import { FaHeart, FaHeartBroken } from "react-icons/fa";
+import {
+  FaHeart,
+  FaHeartBroken,
+  FaRegQuestionCircle,
+  FaWallet,
+} from "react-icons/fa";
 import Lottie from "lottie-react";
 import heartAnim from "../assets/HeartAnim.json";
 import { FollowersTab } from "../components/tabs/FollowersTab";
@@ -28,8 +33,14 @@ import { EditProfileDialog } from "../components/dialog/EditProfileDialog";
 import { useAtom } from "jotai";
 import { loginAtom } from "./MainPage";
 import { api } from "../utils/Axios";
-import { errorToast, getQueryParam } from "../utils/Helper";
+import {
+  errorToast,
+  getQueryParam,
+  getRandomInt,
+  successToast,
+} from "../utils/Helper";
 import { tokenContract } from "../contracts/contract";
+import { accountAtom } from "../App";
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -54,9 +65,11 @@ const ColItem = ({ name, count, onClick }) => {
   );
 };
 
+const NFT_ITEM_LENGTH = 3;
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
+  const [account] = useAtom(accountAtom);
 
   // 현재 유저 Following 여부
   const [isFollowing, setIsFollowing] = useState(false);
@@ -203,6 +216,52 @@ export const UserInfoPage = () => {
     }
   };
 
+  const clickMint = async () => {
+    try {
+      let itemIdx = getRandomInt(1, NFT_ITEM_LENGTH + 1);
+      let res = await tokenContract.methods
+        .mintToken(itemIdx)
+        .send({ from: account });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        successToast(toast, "NFT Mint Success");
+        getUserNFT();
+        // 다이얼로그로 ~가 나왔습니다. 혹은 Gif 처리를 하면 좋을 듯
+      } else {
+        errorToast(toast, "Failed to mint NFT");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to mint NFT");
+      console.log(e);
+    }
+  };
+
+  const clickConnect = async () => {
+    try {
+      let userId = loginInfo.id;
+      let res = await tokenContract.methods
+        .registerAccount(Number(userId))
+        .send({ from: account });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        // User 정보에 account를 등록한다.
+        res = await api.post("/registerAccount", { address: account });
+        if (res.status === 200) {
+          successToast(toast, "Account is registered");
+        } else {
+          errorToast(toast, "Failed to register");
+        }
+      } else {
+        errorToast(toast, "Failed to register");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to register");
+      console.log(e);
+    }
+  };
+
   const checkLogin = async () => {
     try {
       let res = await api.get("/loginStatus");
@@ -243,6 +302,8 @@ export const UserInfoPage = () => {
       getComments();
     }
   }, [tabIndex]);
+
+  let isMyInfoOnLogin = loginInfo?.id && isMyInfo;
 
   return (
     <>
@@ -334,7 +395,7 @@ export const UserInfoPage = () => {
                 colorScheme="teal"
                 variant={isMyInfo ? null : "outline"}
                 mt={2}
-                width={100}
+                minW={100}
                 size="sm"
                 rightIcon={
                   isMyInfo ? (
@@ -354,6 +415,32 @@ export const UserInfoPage = () => {
                 }}
               >
                 {isMyInfo ? "Edit" : isFollowing ? "Unfollow" : "Follow"}
+              </Button>
+            )}
+
+            {isMyInfoOnLogin && (
+              <Button
+                colorScheme="blue"
+                size="sm"
+                mt={2}
+                ml={2}
+                rightIcon={<FaRegQuestionCircle />}
+                onClick={clickMint}
+              >
+                Mint NFT
+              </Button>
+            )}
+
+            {isMyInfoOnLogin && (
+              <Button
+                colorScheme="pink"
+                size="sm"
+                mt={2}
+                ml={2}
+                rightIcon={<FaWallet />}
+                onClick={clickConnect}
+              >
+                Connect Wallet
               </Button>
             )}
           </Box>
@@ -406,6 +493,9 @@ export const UserInfoPage = () => {
                     nftList={nftList}
                     nftInfoList={nftInfoList}
                     userInfo={userInfo?.info || {}}
+                    onLoad={() => {
+                      getUserNFT();
+                    }}
                   />
                 </TabPanel>
                 <TabPanel>

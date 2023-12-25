@@ -3,6 +3,7 @@ import { atom, useAtom } from "jotai";
 import { FaMoneyBill } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { loginAtom } from "../../../pages/MainPage";
+import { web3 } from "../../../contracts/contract";
 
 export const nftDialogTextAtom = atom({
   nftDialogText: "",
@@ -66,6 +67,8 @@ export const NftItem = ({
                   ? "Are you sure you want to sell this NFT? (MATIC)"
                   : "Are you sure you want to cancel this sale?",
                 nftDialogYesText: !isSelling ? "Sell" : "Cancel Sales",
+                info: info,
+                token: token,
               });
               !isSelling ? onSellOpen() : onBasicOpen();
               e.stopPropagation();
@@ -87,8 +90,13 @@ export const NftItem = ({
             onClick={(e) => {
               setDialogTextAtom({
                 nftDialogTitle: "Buy NFT",
-                nftDialogText: `Are you sure you want to buy this NFT? (${token?.price} MATIC)`,
+                nftDialogText: `Are you sure you want to buy this NFT? (${web3.utils.fromWei(
+                  token?.price,
+                  "ether"
+                )} MATIC)`,
                 nftDialogYesText: "Buy",
+                info: info,
+                token: token,
               });
               onBasicOpen();
               e.stopPropagation();
@@ -104,9 +112,9 @@ export const NftItem = ({
             textAlign="center"
             textColor="teal.400"
             marginTop={9}
-            fontSize={20}
+            fontSize={16}
           >
-            {Number(token?.price || 0).toFixed(1)} MATIC
+            {web3.utils.fromWei(token?.price, "ether")} MATIC
           </Text>
         )}
       </Stack>
