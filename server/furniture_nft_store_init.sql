@@ -20,6 +20,7 @@ CREATE TABLE `furniture_nft_store`.`user` (
   `resetToken` VARCHAR(255) NULL,
   `image` VARCHAR(255) NULL,
   `desc` VARCHAR(255) NULL,
+  `walletAddress` VARCHAR(255) NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE);
 
