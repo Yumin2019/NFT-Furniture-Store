@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "version": "1.0.0",
+  "short_name": "React App",
+  "name": "TITLE",
+  "description": "Add the reading time to Chrome Extension documentation articles",
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "icons": {
+    "16": "images/icon-16.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "action": {
+    "default_title": "tooltip",
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "js": ["content.js"],
+      "matches": ["*://*/*"]
+    }
+  ]
+}
