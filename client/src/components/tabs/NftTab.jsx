@@ -57,6 +57,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
       if (Number(res.status) === 1) {
         successToast(toast, "Your nft is on sale.");
         onLoad();
+        if (isDetailOpen) onDetailClose();
       } else {
         errorToast(toast, "Failed to transact");
       }
@@ -77,6 +78,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
       if (Number(res.status) === 1) {
         successToast(toast, "Your nft is not on sale.");
         onLoad();
+        if (isDetailOpen) onDetailClose();
       } else {
         errorToast(toast, "Failed to transact");
       }
@@ -97,6 +99,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
       if (Number(res.status) === 1) {
         successToast(toast, "You bought NFT");
         onLoad();
+        if (isDetailOpen) onDetailClose();
       } else {
         errorToast(toast, "Failed to buy NFT");
       }
@@ -123,6 +126,7 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
         if (res.status === 200) {
           successToast(toast, "You consumed NFT");
           onLoad();
+          if (isDetailOpen) onDetailClose();
         } else {
           errorToast(toast, "Failed to consume NFT");
         }

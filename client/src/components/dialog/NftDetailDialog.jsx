@@ -88,11 +88,32 @@ export const NftDetailDialog = ({
               )}
 
               <Spacer />
+              {loginInfo?.id && isMyNft && !isSelling && (
+                <Button
+                  mt={2}
+                  colorScheme="teal"
+                  size="sm"
+                  onClick={(e) => {
+                    setDialogTextAtom({
+                      nftDialogTitle: "Consume NFT",
+                      nftDialogText:
+                        "Are you sure you want to consume this NFT? You'll get a furniture item by consuming NFT.",
+                      nftDialogYesText: "Consume",
+                      info: info,
+                      token: token,
+                    });
+                    onBasicOpen();
+                    e.stopPropagation();
+                  }}
+                >
+                  Consume
+                </Button>
+              )}
               {loginInfo?.id && isMyNft && (
                 <Button
                   colorScheme="teal"
-                  variant="outline"
                   mt={2}
+                  variant="outline"
                   size="sm"
                   rightIcon={!isSelling ? <FaMoneyBill /> : <MdCancel />}
                   onClick={(e) => {
@@ -102,6 +123,8 @@ export const NftDetailDialog = ({
                         ? "Are you sure you want to sell this NFT? (MATIC)"
                         : "Are you sure you want to cancel this sale?",
                       nftDialogYesText: !isSelling ? "Sell" : "Cancel Sales",
+                      token: token,
+                      info: info,
                     });
                     !isSelling ? onSellOpen() : onBasicOpen();
                     e.stopPropagation();
@@ -120,8 +143,13 @@ export const NftDetailDialog = ({
                   onClick={(e) => {
                     setDialogTextAtom({
                       nftDialogTitle: "Buy NFT",
-                      nftDialogText: `Are you sure you want to buy this NFT? (${token?.price} MATIC)`,
+                      nftDialogText: `Are you sure you want to buy this NFT? (${web3.utils.fromWei(
+                        token?.price,
+                        "ether"
+                      )} MATIC)`,
                       nftDialogYesText: "Buy",
+                      token: token,
+                      info: info,
                     });
                     onBasicOpen();
                     e.stopPropagation();

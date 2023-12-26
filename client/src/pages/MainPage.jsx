@@ -10,40 +10,29 @@ import {
 } from "@chakra-ui/react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RoomDialog } from "../components/dialog/RoomDialog";
-import { nftDialogTextAtom } from "../components/tabs/item/NftItem";
+import { NftItem, nftDialogTextAtom } from "../components/tabs/item/NftItem";
 import { BasicDialog } from "../components/dialog/BasicDialog";
 import { InputDialog } from "../components/dialog/InputDialog";
 import { NftDetailDialog } from "../components/dialog/NftDetailDialog";
 import { BiSolidLogIn, BiWorld } from "react-icons/bi";
 import { FaUser, FaPlusSquare } from "react-icons/fa";
 import { api } from "../utils/Axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAtom, atom } from "jotai";
 import { errorToast, successToast } from "../utils/Helper";
 import { accountAtom } from "../App";
-
-const PageNumber = ({ number }) => {
-  return (
-    <Button
-      colorScheme="teal"
-      size="sm"
-      fontSize={18}
-      variant="ghost"
-      fontWeight="bold"
-    >
-      {number}
-    </Button>
-  );
-};
+import { tokenContract } from "../contracts/contract";
 
 export const loginAtom = atom({});
 
 export const MainPage = () => {
+  const toast = useToast();
+  const navigate = useNavigate();
   const { isOpen: isRoomOpen, onOpen, onClose: onRoomClose } = useDisclosure();
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
   const [account, setAccount] = useAtom(accountAtom);
-  const toast = useToast();
-  const navigate = useNavigate();
+  const [nftList, setNftList] = useState([]);
+  const [nftInfoList, setNftInfoList] = useState({});
 
   const checkLogin = async () => {
     try {
@@ -73,45 +62,43 @@ export const MainPage = () => {
     }
   };
 
+  const getNftInfoList = async () => {
+    try {
+      let res = await api.get("/getAllNftItems");
+      console.log(res.data);
+      setNftInfoList(res.data.items);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const getSalesToken = async () => {
+    try {
+      let res = await tokenContract.methods.getSaleTokens().call();
+      console.log(res);
+      setNftList(res);
+    } catch (e) {
+      setNftList([]);
+      console.log(e);
+    }
+  };
+
+  const getUserList = async () => {
+    try {
+      let res = await api.get("/getUserList");
+      console.log(res.data);
+      setUserList(res.data.users);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
     checkLogin();
+    getSalesToken();
+    getNftInfoList();
+    getUserList();
   }, []);
-
-  // 블록체인 네트워크상 내 NFT 정보만 가져온 경우 예시
-  let blockInfo = [
-    {
-      nftId: 1, // 0th nft
-      itemId: 0, // item idx
-      price: 5,
-      isSelling: true,
-      author: "kym",
-    },
-    {
-      nftId: 2, // 0th nft
-      itemId: 0, // item idx
-      price: 0,
-      isSelling: false,
-      author: "kym", // current author
-    },
-    {
-      nftId: 3, // 0th nft
-      itemId: 0, // item idx
-      price: 1,
-      isSelling: true,
-      author: "FSSAD", // current author
-    },
-  ];
-
-  // DB에서 Item 테이블을 조회하여 정보가 있는 상황
-  // dbInfo[itemId]
-  let dbInfo = {
-    0: {
-      image: "/image/profile_image.png",
-      name: "Furniture Coupon A",
-      text: "this is really good a nft",
-      couponType: "furniture",
-    },
-  };
 
   // NFT 이전 정보를 DB에서 가져왔다고 가정한다.
   // transferInfoList[nftId]
@@ -146,6 +133,59 @@ export const MainPage = () => {
     ],
   };
 
+  const cancelSales = async () => {
+    try {
+      let token = dialogTextAtom.token;
+      let res = await tokenContract.methods
+        .cancelTokenSales(token.tokenId)
+        .send({ from: account });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        successToast(toast, "Your nft is not on sale.");
+        getSalesToken();
+        if (isDetailOpen) onDetailClose();
+      } else {
+        errorToast(toast, "Failed to transact");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to transact");
+      console.log(e);
+    }
+  };
+
+  const buyToken = async () => {
+    try {
+      let token = dialogTextAtom.token;
+      let res = await tokenContract.methods
+        .buyToken(token.tokenId)
+        .send({ from: account, value: token.price });
+      console.log(res);
+
+      if (Number(res.status) === 1) {
+        successToast(toast, "You bought NFT");
+        getSalesToken();
+        if (isDetailOpen) onDetailClose();
+      } else {
+        errorToast(toast, "Failed to buy NFT");
+      }
+    } catch (e) {
+      errorToast(toast, "Failed to buy NFT");
+      console.log(e);
+    }
+  };
+
+  const clickBasicDialogOk = () => {
+    onBasicClose();
+
+    let text = dialogTextAtom.nftDialogYesText;
+    if (text === "Buy") {
+      buyToken();
+    } else {
+      cancelSales();
+    }
+  };
+
   const {
     isOpen: isBasicOpen,
     onOpen: onBasicOpen,
@@ -164,7 +204,9 @@ export const MainPage = () => {
     onClose: onDetailClose,
   } = useDisclosure();
 
+  const [selectedInfo, setSelectedInfo] = useState({});
   const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
+  const [userList, setUserList] = useState([]);
 
   return (
     <>
@@ -177,16 +219,7 @@ export const MainPage = () => {
         text={dialogTextAtom.nftDialogText}
         yesText={dialogTextAtom.nftDialogYesText}
         noText="Cancel"
-      />
-
-      <InputDialog
-        isOpen={isSellOpen}
-        onClose={onSellClose}
-        title={dialogTextAtom.nftDialogTitle}
-        text={dialogTextAtom.nftDialogText}
-        yesText={dialogTextAtom.nftDialogYesText}
-        noText="Cancel"
-        initialText={"0.01"}
+        onClick={clickBasicDialogOk}
       />
 
       <NftDetailDialog
@@ -194,9 +227,10 @@ export const MainPage = () => {
         onClose={onDetailClose}
         onBasicOpen={onBasicOpen}
         onSellOpen={onSellOpen}
-        dbInfo={dbInfo[0]}
-        blockInfo={blockInfo[0]}
         transferInfoList={transferInfoList[1]}
+        token={selectedInfo?.token}
+        info={selectedInfo?.info}
+        owner={(userList && userList[selectedInfo?.token?.userId]?.name) || ""}
       />
 
       <Box
@@ -283,62 +317,33 @@ export const MainPage = () => {
           </div>
         </header>
       </Box>
-
-      {/* Nft List 최대 10개까지 출력하고 페이징을 이용한다. */}
       <Center paddingTop={100}>
         <Grid templateColumns="repeat(5, 1fr)" gap={6}>
-          {blockInfo.map((v, index) => {
-            let itemInfo = dbInfo[v.itemId];
-            return (
-              <NftCard
-                key={index}
-                image={itemInfo.image}
-                name={itemInfo.name}
-                text={itemInfo.text}
-                author={v.author}
-                type={itemInfo.couponType}
-                isSelling={v.isSelling}
-                isMyNft={v.author === "kym"}
-                price={v.price}
-                onBasicOpen={onBasicOpen}
-                onSellOpen={onSellOpen}
-                onItemClick={(e) => {
-                  console.log("clicked");
-                  onDetailOpen();
-                }}
-              />
-            );
-          })}
+          {nftInfoList &&
+            userList &&
+            nftList &&
+            nftList.map((v, index) => {
+              return (
+                <NftCard
+                  key={index}
+                  token={v}
+                  info={nftInfoList[v.nftItemId]}
+                  owner={userList[v.userId].name}
+                  onBasicOpen={onBasicOpen}
+                  onSellOpen={onSellOpen}
+                  onItemClick={(e) => {
+                    console.log("clicked");
+                    setSelectedInfo({
+                      token: v,
+                      info: nftInfoList[v.nftItemId],
+                    });
+                    onDetailOpen();
+                  }}
+                />
+              );
+            })}
         </Grid>
       </Center>
-      <div style={{ margin: 16 }} />
-
-      {/* Pagination  */}
-      {/* <Center>
-        <Button
-          colorScheme="teal"
-          size="sm"
-          variant="ghost"
-          fontSize={30}
-          mr={1}
-          pb={1}
-        >
-          «
-        </Button>
-        <PageNumber number={1} />
-        <PageNumber number={2} />
-        <PageNumber number={3} />
-        <Button
-          colorScheme="teal"
-          size="sm"
-          variant="ghost"
-          fontSize={30}
-          ml={1}
-          pb={1}
-        >
-          »
-        </Button>
-      </Center> */}
     </>
   );
 };

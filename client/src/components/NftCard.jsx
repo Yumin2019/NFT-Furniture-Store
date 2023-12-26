@@ -9,80 +9,82 @@ import {
   Text,
   Flex,
   Spacer,
+  Center,
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { FaMoneyBill } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { nftDialogTextAtom } from "./tabs/item/NftItem";
+import { loginAtom } from "../pages/MainPage";
+import { web3 } from "../contracts/contract";
 
 export const NftCard = ({
-  name,
-  text,
-  author,
-  type,
-  isMyNft,
-  isSelling,
-  price,
+  info,
+  token,
+  owner,
   onBasicOpen,
   onSellOpen,
   onItemClick,
 }) => {
   const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
+  const [loginInfo] = useAtom(loginAtom);
+  let isMyNft = loginInfo?.id === Number(token.userId);
   return (
     <>
       <Card width={250} maxW="sm" border="1px solid grey" onClick={onItemClick}>
         <CardBody>
-          <Image
-            src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-            alt="Green double couch with wooden legs"
-            borderRadius="lg"
-          />
+          <Center>
+            <Image
+              src={info?.image || "/image/furniture_icon.svg"}
+              width={150}
+              borderRadius="lg"
+            />
+          </Center>
+
           <Stack mt="6">
-            <Heading size="md">{name}</Heading>
+            <Heading fontSize={18}>
+              {info?.name} #{Number(token?.tokenId)}
+            </Heading>
             <Text fontSize={16} color="grey">
-              {text}
+              {info?.desc}
             </Text>
             <Text fontSize={14} color="teal.400">
-              author: {author}
+              owner: {owner}
             </Text>
             <Text fontSize={14} color="teal.400">
-              type: {type}
+              type: furniture
             </Text>
 
-            <Text
-              visibility={!isSelling ? "hidden" : "visible"}
-              textColor="teal.400"
-              fontSize={20}
-            >
-              {price.toFixed(1)} MATIC
+            <Text textColor="teal.400" fontSize={20}>
+              {web3.utils.fromWei(token?.price, "ether")} MATIC
             </Text>
           </Stack>
           <Divider marginTop={2} marginBottom={2} />
           <Flex>
             <Spacer />
-            {isMyNft && (
+            {loginInfo?.id && isMyNft && (
               <Button
                 colorScheme="teal"
                 mt={2}
                 size="sm"
-                rightIcon={!isSelling ? <FaMoneyBill /> : <MdCancel />}
+                rightIcon={<MdCancel />}
                 onClick={(e) => {
                   setDialogTextAtom({
-                    nftDialogTitle: !isSelling ? "NFT Sell" : "Cancel Sales",
-                    nftDialogText: !isSelling
-                      ? "Are you sure you want to sell this NFT? (MATIC)"
-                      : "Are you sure you want to cancel this sale?",
-                    nftDialogYesText: !isSelling ? "Sell" : "Cancel Sales",
+                    nftDialogTitle: "Cancel Sales",
+                    nftDialogText: "Are you sure you want to cancel this sale?",
+                    nftDialogYesText: "Cancel Sales",
+                    info: info,
+                    token: token,
                   });
-                  !isSelling ? onSellOpen() : onBasicOpen();
+                  onBasicOpen();
                   e.stopPropagation();
                 }}
               >
-                {!isSelling ? "NFT Sell" : "Cancel Sales"}
+                Cancel Sales
               </Button>
             )}
 
-            {!isMyNft && isSelling && (
+            {loginInfo?.id && !isMyNft && (
               <Button
                 mt={2}
                 colorScheme="teal"
@@ -91,8 +93,13 @@ export const NftCard = ({
                 onClick={(e) => {
                   setDialogTextAtom({
                     nftDialogTitle: "Buy NFT",
-                    nftDialogText: `Are you sure you want to buy this NFT? (${price} MATIC)`,
+                    nftDialogText: `Are you sure you want to buy this NFT? (${web3.utils.fromWei(
+                      token?.price,
+                      "ether"
+                    )} MATIC)`,
                     nftDialogYesText: "Buy",
+                    info: info,
+                    token: token,
                   });
                   onBasicOpen();
                   e.stopPropagation();

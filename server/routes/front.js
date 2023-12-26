@@ -91,6 +91,20 @@ router.get("/getFurnitures", async (req, res) => {
   }
 });
 
+router.get("/getUserList", async (req, res) => {
+  try {
+    let [rows] = await db.query("SELECT `id`, `name`, `email` FROM `user`");
+    let json = {};
+    rows.map((v) => {
+      json[v.id] = v;
+    });
+    res.send({ users: json, count: rows.length });
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
 // 유저 페이지에서 필요한 정보를 한번에 넘겨준다. NFT(블록체인과 통신) 가구수, 팔로잉, 팔로워수, 댓글 수, 유저 정보, world 정보
 router.get("/getUserInfo/:userId", async (req, res) => {
   try {
