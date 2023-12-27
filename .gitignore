@@ -2,3 +2,5 @@
 /server/node_modules
 /server/.env
 /contracts/node_modules
+/wallet-server/node_modules
+/wallet-server/.env
