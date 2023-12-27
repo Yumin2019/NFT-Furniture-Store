@@ -1,11 +1,26 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
+import { ChakraProvider } from "@chakra-ui/react";
+import { MainPage } from "./pages/MainPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RouterProvider, createMemoryRouter } from "react-router-dom";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+const router = createMemoryRouter([
+  {
+    path: "/",
+    element: <MainPage />,
+  },
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+]);
+
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <ChakraProvider>
+      <RouterProvider router={router} />
+    </ChakraProvider>
   </React.StrictMode>
 );

@@ -4,10 +4,6 @@
   "short_name": "React App",
   "name": "TITLE",
   "description": "Add the reading time to Chrome Extension documentation articles",
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
   "icons": {
     "16": "images/icon-16.png",
     "32": "images/icon-32.png",
