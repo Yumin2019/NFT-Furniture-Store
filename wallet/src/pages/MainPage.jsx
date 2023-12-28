@@ -11,9 +11,9 @@ import {
   Tab,
   Tabs,
   Tooltip,
-  Image,
   Spacer,
   Flex,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { FaClipboard, FaBookmark } from "react-icons/fa";
@@ -28,26 +28,49 @@ import { useState } from "react";
 import { ActivityTab } from "../components/tabs/ActivityTab";
 import { TokensTab } from "../components/tabs/TokensTab";
 import { FaUserCircle } from "react-icons/fa";
+import { NetworkDialog } from "../components/dialog/NetworkDialog";
+
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
+  const clickNetwork = () => {
+    console.log("tab");
+    onNetOpen();
+  };
+
+  const {
+    isOpen: isNetOpen,
+    onOpen: onNetOpen,
+    onClose: onNetClose,
+  } = useDisclosure();
+
   return (
     <Box textAlign="center">
+      <NetworkDialog
+        isOpen={isNetOpen}
+        onOpen={onNetOpen}
+        onClose={onNetClose}
+      />
+
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
-        <Stack
-          direction="row"
-          alignItems="center"
-          backgroundColor="#f2f4f7"
-          borderRadius={24}
-          w="55px"
-          ml={2}
-          pl={3}
-          pr={3}
-          pt={1.5}
-          pb={1.5}
-        >
-          <Text fontSize={12}>M</Text>
-          <IoIosArrowDown size={14} />
-        </Stack>
+        <Tooltip label="Mumbai Testnet" placement="right" fontSize={12}>
+          <Stack
+            onClick={clickNetwork}
+            cursor="pointer"
+            direction="row"
+            alignItems="center"
+            backgroundColor="#f2f4f6"
+            borderRadius={24}
+            w="55px"
+            ml={2}
+            pl={3}
+            pr={3}
+            pt={1.5}
+            pb={1.5}
+          >
+            <Text fontSize={12}>M</Text>
+            <IoIosArrowDown size={14} />
+          </Stack>
+        </Tooltip>
 
         <Box flex={1}>
           <Center>

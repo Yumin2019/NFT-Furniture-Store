@@ -15,9 +15,9 @@ export const TokensTab = () => {
       <Text textAlign="left" mb={4} fontSize={16}>
         Dec 26, 2023
       </Text>
-      {activities.map((v) => {
+      {activities.map((v, index) => {
         return (
-          <Box>
+          <Box key={index}>
             <Box
               alignItems="center"
               backgroundColor="#f2f4f6"
@@ -32,7 +32,7 @@ export const TokensTab = () => {
             </Box>
             <Stack direction="row" alignItems="center">
               <Box
-                backgroundColor="#eaf1fa"
+                backgroundColor="#f2f4f6"
                 pt={1.5}
                 pb={1.5}
                 pl={3}

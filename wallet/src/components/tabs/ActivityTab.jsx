@@ -1,5 +1,14 @@
-import { Box, Stack, Text, Spacer } from "@chakra-ui/react";
+import {
+  Box,
+  Stack,
+  Text,
+  Spacer,
+  useDisclosure,
+  Button,
+} from "@chakra-ui/react";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
+import { ActivityDialog } from "../dialog/ActivityDialog";
+import { NetworkDialog } from "../dialog/NetworkDialog";
 
 export const ActivityTab = () => {
   const activities = [
@@ -17,14 +26,31 @@ export const ActivityTab = () => {
     },
   ];
 
+  const clickActivity = () => {
+    console.log("tab");
+    onActivityOpen();
+  };
+
+  const {
+    isOpen: isActivityOpen,
+    onOpen: onActivityOpen,
+    onClose: onActivityClose,
+  } = useDisclosure();
+
   return (
     <Box width="100%" pr={2}>
+      <ActivityDialog
+        isOpen={isActivityOpen}
+        onOpen={onActivityOpen}
+        onClose={onActivityClose}
+      />
+
       <Text textAlign="left" mb={4} fontSize={16}>
         Dec 26, 2023
       </Text>
-      {activities.map((v) => {
+      {activities.map((v, index) => {
         return (
-          <Box>
+          <Box key={index} onClick={clickActivity} cursor="pointer">
             <Box
               alignItems="center"
               backgroundColor="#f2f4f6"
