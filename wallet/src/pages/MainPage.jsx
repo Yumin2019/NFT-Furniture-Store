@@ -14,6 +14,7 @@ import {
   Spacer,
   Flex,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { FaClipboard, FaBookmark } from "react-icons/fa";
@@ -29,26 +30,57 @@ import { ActivityTab } from "../components/tabs/ActivityTab";
 import { TokensTab } from "../components/tabs/TokensTab";
 import { FaUserCircle } from "react-icons/fa";
 import { NetworkDialog } from "../components/dialog/NetworkDialog";
+import { AccountDialog } from "../components/dialog/AccountDialog";
+import { errorToast, infoToast } from "../utils/Helper";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
+  const [isAccountHover, setIsAccountHover] = useState(false);
+  const [isMenuHover, setIsMenuHover] = useState(false);
+  const toast = useToast();
+
+  const handleCopyClipBoard = async (text) => {
+    try {
+      await navigator.clipboard.writeText("test");
+      infoToast(toast, "Copied");
+    } catch (e) {
+      errorToast(toast, "Failed to copy");
+    }
+  };
+
   const clickNetwork = () => {
     console.log("tab");
-    onNetOpen();
+    onNetworkOpen();
+  };
+
+  const clickAccount = () => {
+    onAccountOpen();
   };
 
   const {
-    isOpen: isNetOpen,
-    onOpen: onNetOpen,
-    onClose: onNetClose,
+    isOpen: isNetworkOpen,
+    onOpen: onNetworkOpen,
+    onClose: onNetworkClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isAccountOpen,
+    onOpen: onAccountOpen,
+    onClose: onAccountClose,
   } = useDisclosure();
 
   return (
     <Box textAlign="center">
+      <AccountDialog
+        isOpen={isAccountOpen}
+        onOpen={onAccountOpen}
+        onClose={onAccountClose}
+      />
+
       <NetworkDialog
-        isOpen={isNetOpen}
-        onOpen={onNetOpen}
-        onClose={onNetClose}
+        isOpen={isNetworkOpen}
+        onOpen={onNetworkOpen}
+        onClose={onNetworkClose}
       />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
@@ -74,7 +106,20 @@ export const MainPage = () => {
 
         <Box flex={1}>
           <Center>
-            <Stack direction="row" alignItems="center">
+            <Stack
+              direction="row"
+              alignItems="center"
+              cursor="pointer"
+              onMouseOut={() => setIsAccountHover(false)}
+              onMouseOver={() => setIsAccountHover(true)}
+              backgroundColor={isAccountHover ? "#f9faf9" : null}
+              borderRadius={10}
+              onClick={clickAccount}
+              pt={2}
+              pb={2}
+              pl={4}
+              pr={4}
+            >
               <FaUserCircle size={24} color="#3082ce" />
               <Text textAlign="center" fontWeight="700" fontSize={14} mb={1}>
                 Account 1
@@ -86,7 +131,15 @@ export const MainPage = () => {
 
         <Stack direction="row" mr={2} w="55px">
           <Spacer />
-          <IoIosMenu size={24} />
+
+          <Box
+            cursor="pointer"
+            onMouseOut={() => setIsMenuHover(false)}
+            onMouseOver={() => setIsMenuHover(true)}
+            backgroundColor={isMenuHover ? "#f9faf9" : null}
+          >
+            <IoIosMenu size={24} />
+          </Box>
         </Stack>
       </Flex>
 
@@ -98,6 +151,7 @@ export const MainPage = () => {
           size="sm"
           borderRadius={25}
           rightIcon={<FaClipboard />}
+          onClick={handleCopyClipBoard}
         >
           0x8aDd5..16bda
         </Button>
