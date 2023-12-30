@@ -15,6 +15,10 @@ import {
   Flex,
   useDisclosure,
   useToast,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { FaClipboard, FaBookmark } from "react-icons/fa";
@@ -32,6 +36,8 @@ import { FaUserCircle } from "react-icons/fa";
 import { NetworkDialog } from "../components/dialog/NetworkDialog";
 import { AccountDialog } from "../components/dialog/AccountDialog";
 import { errorToast, infoToast } from "../utils/Helper";
+import { RiShareBoxFill } from "react-icons/ri";
+import { TbReportSearch } from "react-icons/tb";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -132,14 +138,33 @@ export const MainPage = () => {
         <Stack direction="row" mr={2} w="55px">
           <Spacer />
 
-          <Box
-            cursor="pointer"
-            onMouseOut={() => setIsMenuHover(false)}
-            onMouseOver={() => setIsMenuHover(true)}
-            backgroundColor={isMenuHover ? "#f9faf9" : null}
-          >
-            <IoIosMenu size={24} />
-          </Box>
+          <Menu>
+            <MenuButton px={4} py={2}>
+              <Box
+                cursor="pointer"
+                onMouseOut={() => setIsMenuHover(false)}
+                onMouseOver={() => setIsMenuHover(true)}
+                backgroundColor={isMenuHover ? "#f9faf9" : null}
+              >
+                <IoIosMenu size={24} />
+              </Box>
+            </MenuButton>
+            <MenuList padding={0}>
+              <MenuItem padding={3}>
+                <RiShareBoxFill size={18} />
+                <Text ml={2} fontSize={14}>
+                  View on explorer
+                </Text>
+              </MenuItem>
+              <MenuItem padding={3}>
+                <TbReportSearch size={20} />
+                <Box ml={2}>
+                  <Text fontSize={14}>Privacy policy</Text>
+                  <Text fontSize={12}>mumbai.polygonscan.com</Text>
+                </Box>
+              </MenuItem>
+            </MenuList>
+          </Menu>
         </Stack>
       </Flex>
 
