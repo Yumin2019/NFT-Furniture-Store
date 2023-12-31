@@ -28,7 +28,7 @@ export const BasicDialog = ({
       isOpen={isOpen}
       isCentered
     >
-      <AlertDialogOverlay colorScheme="blue" />
+      <AlertDialogOverlay />
       <AlertDialogContent m={4}>
         <AlertDialogHeader>{title}</AlertDialogHeader>
         <AlertDialogCloseButton />

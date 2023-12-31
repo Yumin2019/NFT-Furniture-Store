@@ -40,6 +40,7 @@ import { errorToast, infoToast } from "../utils/Helper";
 import { RiShareBoxFill } from "react-icons/ri";
 import { TbReportSearch } from "react-icons/tb";
 import { ContactDialog } from "../components/dialog/ContactDialog";
+import { BookmarkDialog } from "../components/dialog/BookmarkDialog";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -89,25 +90,21 @@ export const MainPage = () => {
     onClose: onSendClose,
   } = useDisclosure();
 
+  const {
+    isOpen: isBookmarkOpen,
+    onOpen: onBookmarkOpen,
+    onClose: onBookmarkClose,
+  } = useDisclosure();
+
   return (
     <Box textAlign="center">
-      <AccountDialog
-        isOpen={isAccountOpen}
-        onOpen={onAccountOpen}
-        onClose={onAccountClose}
-      />
+      <AccountDialog isOpen={isAccountOpen} onClose={onAccountClose} />
 
-      <NetworkDialog
-        isOpen={isNetworkOpen}
-        onOpen={onNetworkOpen}
-        onClose={onNetworkClose}
-      />
+      <NetworkDialog isOpen={isNetworkOpen} onClose={onNetworkClose} />
 
-      <ContactDialog
-        isOpen={isContactOpen}
-        onOpen={onContactOpen}
-        onClose={onContactClose}
-      />
+      <ContactDialog isOpen={isContactOpen} onClose={onContactClose} />
+
+      <BookmarkDialog isOpen={isBookmarkOpen} onClose={onBookmarkClose} />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
         <Tooltip label="Mumbai Testnet" placement="right" fontSize={12}>
@@ -233,7 +230,7 @@ export const MainPage = () => {
             </Text>
           </Box>
 
-          <Box width="70px">
+          <Box width="70px" onClick={onBookmarkOpen}>
             <IconButton
               isRound={true}
               colorScheme="blue"

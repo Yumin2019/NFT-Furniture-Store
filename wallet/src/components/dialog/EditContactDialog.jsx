@@ -22,6 +22,10 @@ export const EditContactDialog = ({
   title,
   yesText,
   noText,
+  rowText1,
+  rowText2,
+  placeHolder1,
+  placeHolder2,
 }) => {
   const cancelRef = useRef();
   const [nameText, setNameText] = useState("");
@@ -39,14 +43,14 @@ export const EditContactDialog = ({
       isOpen={isOpen}
       isCentered
     >
-      <AlertDialogOverlay colorScheme="teal" />
+      <AlertDialogOverlay />
       <AlertDialogContent m={4}>
         <AlertDialogHeader>{title}</AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>
-          <Text mb={2}>Name</Text>
+          <Text mb={2}>{rowText1 || "Name"}</Text>
           <Input
-            placeholder="Name to display"
+            placeholder={placeHolder1 || "Name to display"}
             value={nameText}
             onChange={(e) => setNameText(e.target.value)}
             size="md"
@@ -55,10 +59,10 @@ export const EditContactDialog = ({
           />
 
           <Text mt={4} mb={2}>
-            Address
+            {rowText2 || "Address"}
           </Text>
           <Input
-            placeholder="Account address"
+            placeholder={placeHolder2 || "Account address"}
             value={addressText}
             onChange={(e) => setAddressText(e.target.value)}
             size="md"
