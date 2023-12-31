@@ -10,7 +10,7 @@ import {
 import { useEffect } from "react";
 import { useState } from "react";
 
-export const CreatePasswordPage = () => {
+export const CreatePasswordPage = ({ onNext, buttonText }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [pwText, setPwText] = useState("");
   const [confirmPwText, setConfirmPwText] = useState("");
@@ -19,9 +19,8 @@ export const CreatePasswordPage = () => {
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
-  const clickLogin = () => {
-    console.log(isChecked);
-    // navigate("/login");
+  const clickCreate = () => {
+    onNext();
   };
 
   useEffect(() => {
@@ -114,9 +113,9 @@ export const CreatePasswordPage = () => {
           fontSize={13}
           borderRadius={32}
           mb={4}
-          onClick={isValid ? clickLogin : null}
+          onClick={isValid ? clickCreate : null}
         >
-          Create a new wallet
+          {buttonText}
         </Button>
       </Box>
     </Box>

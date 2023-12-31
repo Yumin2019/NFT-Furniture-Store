@@ -5,24 +5,30 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { LoginPage } from "./pages/LoginPage";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
 import { IntroPage } from "./pages/IntroPage";
+import { MainPage } from "./pages/MainPage";
 import { CreateWalletPage } from "./pages/createWallet/CreateWalletPage";
+import { ImportWalletPage } from "./pages/importWallet/ImportWalletPage";
 
 const router = createMemoryRouter([
   {
     path: "/",
-    element: <IntroPage />, // MainPage
+    element: <IntroPage />,
   },
   {
     path: "/login",
     element: <LoginPage />,
   },
   {
-    path: "/intro",
-    element: <IntroPage />,
+    path: "/main",
+    element: <MainPage />,
   },
   {
     path: "/createWallet",
     element: <CreateWalletPage />,
+  },
+  {
+    path: "/importWallet",
+    element: <ImportWalletPage />,
   },
 ]);
 

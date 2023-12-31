@@ -19,7 +19,7 @@ export const IntroPage = () => {
   };
 
   const clickImport = () => {
-    // navigate("/importWallet");
+    navigate("/importWallet");
   };
 
   return (

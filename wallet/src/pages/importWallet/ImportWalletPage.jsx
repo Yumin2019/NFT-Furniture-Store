@@ -1,21 +1,13 @@
-import {
-  Box,
-  Center,
-  Text,
-  Flex,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
-  TabPanels,
-} from "@chakra-ui/react";
+import { Box, Center, Text, Flex, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreatePasswordPage } from "./CreatePasswordPage";
-import { PhasePage } from "./PhrasePage";
+import { CreatePasswordPage } from "../createWallet/CreatePasswordPage";
+import { WalletRecoveryPage } from "./WalletRecoveryPage";
+import { infoToast } from "../../utils/Helper";
 
-export const CreateWalletPage = () => {
+export const ImportWalletPage = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [curStep, setCurStep] = useState(1);
   const [steps, setSteps] = useState([]);
 
@@ -26,21 +18,13 @@ export const CreateWalletPage = () => {
   useEffect(() => {
     if (curStep === 1) {
       setSteps([
-        createStep("Create password", false, true),
-        createStep("Secure wallet", false, false),
-        createStep("Confirm secret recovery phrase", false, false),
+        createStep("Confirm secret recovery phrase", false, true),
+        createStep("Create password", false, false),
       ]);
     } else if (curStep === 2) {
       setSteps([
-        createStep("Create password", true, false),
-        createStep("Secure wallet", false, true),
-        createStep("Confirm secret recovery phrase", false, false),
-      ]);
-    } else {
-      setSteps([
-        createStep("Create password", true, false),
-        createStep("Secure wallet", true, false),
-        createStep("Confirm secret recovery phrase", false, true),
+        createStep("Confirm secret recovery phrase", true, false),
+        createStep("Create password", false, true),
       ]);
     }
   }, [curStep]);
@@ -64,12 +48,7 @@ export const CreateWalletPage = () => {
               } else if (index === 1) {
                 leftColor = enable;
                 rightColor = disable;
-              } else if (index === 2) {
-                leftColor = disable;
               }
-            } else if (curStep === 3) {
-              leftColor = enable;
-              rightColor = enable;
             }
 
             return (
@@ -112,7 +91,7 @@ export const CreateWalletPage = () => {
                     backgroundColor={rightColor}
                     h="2px"
                     flex={1}
-                    visibility={index === 2 ? "hidden" : "visible"}
+                    visibility={index === 1 ? "hidden" : "visible"}
                   />
                 </Center>
 
@@ -129,20 +108,19 @@ export const CreateWalletPage = () => {
             );
           })}
         </Flex>
-
         {curStep === 1 && (
-          <CreatePasswordPage
-            buttonText="Create a wallet"
+          <WalletRecoveryPage
             onNext={() => {
               setCurStep(curStep + 1);
             }}
           />
         )}
-
-        {curStep > 1 && (
-          <PhasePage
+        {curStep === 2 && (
+          <CreatePasswordPage
+            buttonText="import my wallet"
             onNext={() => {
-              setCurStep(curStep + 1);
+              navigate("/main");
+              infoToast(toast, "Imported your wallet.");
             }}
           />
         )}
