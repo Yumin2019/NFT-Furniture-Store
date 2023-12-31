@@ -35,9 +35,11 @@ import { TokensTab } from "../components/tabs/TokensTab";
 import { FaUserCircle } from "react-icons/fa";
 import { NetworkDialog } from "../components/dialog/NetworkDialog";
 import { AccountDialog } from "../components/dialog/AccountDialog";
+
 import { errorToast, infoToast } from "../utils/Helper";
 import { RiShareBoxFill } from "react-icons/ri";
 import { TbReportSearch } from "react-icons/tb";
+import { ContactDialog } from "../components/dialog/ContactDialog";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -75,6 +77,18 @@ export const MainPage = () => {
     onClose: onAccountClose,
   } = useDisclosure();
 
+  const {
+    isOpen: isContactOpen,
+    onOpen: onContactOpen,
+    onClose: onContactClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isSendOpen,
+    onOpen: onSendOpen,
+    onClose: onSendClose,
+  } = useDisclosure();
+
   return (
     <Box textAlign="center">
       <AccountDialog
@@ -87,6 +101,12 @@ export const MainPage = () => {
         isOpen={isNetworkOpen}
         onOpen={onNetworkOpen}
         onClose={onNetworkClose}
+      />
+
+      <ContactDialog
+        isOpen={isContactOpen}
+        onOpen={onContactOpen}
+        onClose={onContactClose}
       />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
@@ -187,7 +207,7 @@ export const MainPage = () => {
       <Text fontSize={16}>$0.19 USD</Text>
       <Center mt={6}>
         <Stack direction="row">
-          <Box width="70px">
+          <Box width="50px" ml="10px" mr="10px" onClick={onSendOpen}>
             <IconButton
               isRound={true}
               colorScheme="blue"
@@ -200,7 +220,7 @@ export const MainPage = () => {
             </Text>
           </Box>
 
-          <Box width="70px">
+          <Box width="60px" ml="5px" mr="5px" onClick={onContactOpen}>
             <IconButton
               isRound={true}
               colorScheme="blue"
@@ -227,7 +247,7 @@ export const MainPage = () => {
           </Box>
 
           <Link to={"/login"}>
-            <Box width="70px">
+            <Box width="50px" ml="10px" mr="10px">
               <IconButton
                 isRound={true}
                 colorScheme="blue"

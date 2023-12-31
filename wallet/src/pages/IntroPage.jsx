@@ -32,7 +32,12 @@ export const IntroPage = () => {
           Use your Furniture Wallet to login to decentralized apps - no signup
           needed.
         </Text>
-        <Center margin={8}>
+        <Center
+          margin={8}
+          onClick={() => {
+            navigate("/main"); // 개발용
+          }}
+        >
           <Image width={128} src="/image/icon-128.png" />
         </Center>
 

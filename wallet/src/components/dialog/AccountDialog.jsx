@@ -118,7 +118,7 @@ export const AccountDialog = ({ onClose, isOpen }) => {
           mb={4}
           leftIcon={<FaPlus />}
         >
-          Add account for hardware wallet
+          Add new account
         </Button>
       </ModalContent>
     </Modal>

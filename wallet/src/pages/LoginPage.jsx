@@ -24,7 +24,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
 
   const clickLogin = async () => {
-    navigate("/");
+    navigate("/main");
 
     return;
     try {
