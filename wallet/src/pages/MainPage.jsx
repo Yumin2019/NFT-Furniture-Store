@@ -41,6 +41,7 @@ import { RiShareBoxFill } from "react-icons/ri";
 import { TbReportSearch } from "react-icons/tb";
 import { ContactDialog } from "../components/dialog/ContactDialog";
 import { BookmarkDialog } from "../components/dialog/BookmarkDialog";
+import { SendToDialog } from "../components/dialog/SendToDialog";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -105,6 +106,8 @@ export const MainPage = () => {
       <ContactDialog isOpen={isContactOpen} onClose={onContactClose} />
 
       <BookmarkDialog isOpen={isBookmarkOpen} onClose={onBookmarkClose} />
+
+      <SendToDialog isOpen={isSendOpen} onClose={onSendClose} />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
         <Tooltip label="Mumbai Testnet" placement="right" fontSize={12}>
