@@ -7,8 +7,11 @@ import {
   Checkbox,
   Flex,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import * as bip39 from "bip39";
+import HDWalletProvider from "@truffle/hdwallet-provider";
+import { Web3 } from "web3";
 
 export const IntroPage = () => {
   const navigate = useNavigate();
@@ -21,6 +24,30 @@ export const IntroPage = () => {
   const clickImport = () => {
     navigate("/importWallet");
   };
+
+  useEffect(() => {
+    // const mnemonic = bip39.generateMnemonic();
+    // console.log("isValid: ", bip39.validateMnemonic(mnemonic));
+    // console.log(mnemonic);
+    // let provider = new HDWalletProvider({
+    //   mnemonic: {
+    //     phrase: mnemonic,
+    //     // password: 'test',
+    //   },
+    //   providerOrUrl:
+    //     "https://polygon-mainnet.g.alchemy.com/v2/5uXiwGkwZjWmK4tLeBiLBsSvC4c5663w",
+    //   // providerOrUrl: "http://localhost:8545",
+    //   numberOfAddresses: 1,
+    //   derivationPath: "m/44'/60'/0'/0/", // bip44, ethereum, account, change, index
+    // });
+    // // Or, if web3 is alreay initialized, you can call the 'setProvider' on web3, web3.eth, web3.shh and/or web3.bzz
+    // // web3.setProvider(provider)
+    // const web3 = new Web3(provider);
+    // const wallets = provider.getAddresses();
+    // console.log(wallets);
+    // // web3.eth.accounts.privateKeyToAccount([0])
+    // web3.eth.getAccounts().then(console.log);
+  }, []);
 
   return (
     <Center>
