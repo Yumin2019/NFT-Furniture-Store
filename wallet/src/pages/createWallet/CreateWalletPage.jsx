@@ -130,22 +130,24 @@ export const CreateWalletPage = () => {
           })}
         </Flex>
 
-        {curStep === 1 && (
-          <CreatePasswordPage
-            buttonText="Create a wallet"
-            onNext={() => {
-              setCurStep(curStep + 1);
-            }}
-          />
-        )}
+        <Box pl={4} pr={4}>
+          {curStep === 1 && (
+            <CreatePasswordPage
+              buttonText="Create a wallet"
+              onNext={() => {
+                setCurStep(curStep + 1);
+              }}
+            />
+          )}
 
-        {curStep > 1 && (
-          <PhasePage
-            onNext={() => {
-              setCurStep(curStep + 1);
-            }}
-          />
-        )}
+          {curStep > 1 && (
+            <PhasePage
+              onNext={() => {
+                setCurStep(curStep + 1);
+              }}
+            />
+          )}
+        </Box>
       </Box>
     </Center>
   );

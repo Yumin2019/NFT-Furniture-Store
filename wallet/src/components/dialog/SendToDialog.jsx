@@ -26,6 +26,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { AccountRow } from "../AccountRow";
 import { FaUserCircle } from "react-icons/fa";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
+import { dialogMaxWidth } from "../../utils/Helper";
 
 export const SendToDialog = ({ onClose, isOpen }) => {
   const btnRef = useRef(null);
@@ -78,7 +79,7 @@ export const SendToDialog = ({ onClose, isOpen }) => {
       size="full"
     >
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxW={dialogMaxWidth}>
         {curStep !== 3 && (
           <ModalHeader fontSize={16} mt={4} fontWeight="bold" align="center">
             {curStep === 1 ? "Send to" : "Send"}

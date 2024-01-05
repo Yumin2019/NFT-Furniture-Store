@@ -9,6 +9,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { useRef } from "react";
+import { dialogMaxWidth } from "../../utils/Helper";
 
 export const BasicDialog = ({
   isOpen,
@@ -29,7 +30,7 @@ export const BasicDialog = ({
       isCentered
     >
       <AlertDialogOverlay />
-      <AlertDialogContent m={4}>
+      <AlertDialogContent m={4} maxW={dialogMaxWidth}>
         <AlertDialogHeader>{title}</AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>{text}</AlertDialogBody>

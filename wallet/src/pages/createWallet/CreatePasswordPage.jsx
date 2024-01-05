@@ -1,3 +1,4 @@
+/*global chrome*/
 import {
   Box,
   Text,
@@ -9,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { sendWorkerEvent } from "../../utils/Helper";
 
 export const CreatePasswordPage = ({ onNext, buttonText }) => {
   const [isChecked, setIsChecked] = useState(false);

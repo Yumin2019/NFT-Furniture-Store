@@ -107,7 +107,7 @@ export const PhasePage = ({ onNext }) => {
           <Text fontSize={16} textAlign="left" fontWeight="bold" mt={4}>
             Tips:
           </Text>
-          <UnorderedList textAlign="left">
+          <UnorderedList textAlign="left" fontSize={16}>
             <ListItem>Save in a password manager</ListItem>
             <ListItem>Store in a safe deposit box</ListItem>
             <ListItem>Integer molestie lorem at massa</ListItem>

@@ -1,3 +1,4 @@
+/*global chrome*/
 const validateEmail = (email) => {
   return email.match(
     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -42,6 +43,24 @@ const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min; //최댓값은 제외, 최솟값은 포함
 };
 
+const sendWorkerEvent = (type, data, callback) => {
+  try {
+    chrome.runtime.sendMessage({ type: type, data: data }, callback);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const showTab = (hash) => {
+  try {
+    chrome.tabs.create({ url: `index.html#${hash}` });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const dialogMaxWidth = "500px";
+
 export {
   validateEmail,
   getQueryParam,
@@ -50,4 +69,7 @@ export {
   infoToast,
   errorToast,
   successToast,
+  dialogMaxWidth,
+  sendWorkerEvent,
+  showTab,
 };

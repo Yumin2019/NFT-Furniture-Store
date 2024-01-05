@@ -15,6 +15,8 @@ import { FaPlus } from "react-icons/fa6";
 import { useRef } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
+import { dialogMaxWidth } from "../../utils/Helper";
+
 export const ActivityDialog = ({ onClose, isOpen }) => {
   const btnRef = useRef(null);
 
@@ -26,7 +28,14 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
       scrollBehavior="inside"
     >
       <ModalOverlay />
-      <ModalContent maxW="100%" height="100%" ml={4} mr={4} mt={6} mb={6}>
+      <ModalContent
+        maxW={dialogMaxWidth}
+        height="100%"
+        ml={4}
+        mr={4}
+        mt={6}
+        mb={6}
+      >
         <ModalHeader fontSize={16} mt={4} fontWeight="bold">
           Buy Token
         </ModalHeader>

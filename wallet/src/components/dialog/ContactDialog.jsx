@@ -22,6 +22,7 @@ import { IoIosMenu } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { EditContactDialog } from "./EditContactDialog";
 import { BasicDialog } from "./BasicDialog";
+import { dialogMaxWidth } from "../../utils/Helper";
 
 export const ContactDialog = ({ onClose, isOpen }) => {
   const btnRef = useRef(null);
@@ -88,7 +89,7 @@ export const ContactDialog = ({ onClose, isOpen }) => {
       />
 
       <ModalOverlay />
-      <ModalContent maxW="100%" ml={4} mr={4} mt={6} mb={6}>
+      <ModalContent maxW={dialogMaxWidth} ml={4} mr={4} mt={6} mb={6}>
         <ModalHeader fontSize={16} mt={4} fontWeight="bold" align="center">
           Contact
         </ModalHeader>

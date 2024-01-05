@@ -14,6 +14,7 @@ import { useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { FaUserCircle } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
+import { dialogMaxWidth } from "../../utils/Helper";
 
 export const AccountDialog = ({ onClose, isOpen }) => {
   const btnRef = useRef(null);
@@ -51,7 +52,7 @@ export const AccountDialog = ({ onClose, isOpen }) => {
       scrollBehavior="inside"
     >
       <ModalOverlay />
-      <ModalContent maxW="100%" ml={4} mr={4} mt={6} mb={6}>
+      <ModalContent maxW={dialogMaxWidth} ml={4} mr={4} mt={6} mb={6}>
         <ModalHeader fontSize={16} mt={4} fontWeight="bold" align="center">
           Select an account
         </ModalHeader>

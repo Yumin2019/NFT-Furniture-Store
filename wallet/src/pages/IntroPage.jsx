@@ -13,21 +13,31 @@ import * as bip39 from "bip39";
 import HDWalletProvider from "@truffle/hdwallet-provider";
 import { Web3 } from "web3";
 import { hdkey } from "ethereumjs-wallet";
+import { sendWorkerEvent, showTab } from "../utils/Helper";
+import { useAtom } from "jotai";
+import { tabAtom } from "..";
 
 const mnemonic = bip39.generateMnemonic();
 console.log("isValid: ", bip39.validateMnemonic(mnemonic));
 console.log(mnemonic);
 
 export const IntroPage = () => {
+  const [isTabAtom, setIsTabAtom] = useAtom(tabAtom);
   const navigate = useNavigate();
   const [isChecked, setIsChecked] = useState(false);
 
   const clickCreate = () => {
+    // showTab("createWallet");
+
     navigate("/createWallet");
+    setIsTabAtom(true);
   };
 
   const clickImport = () => {
+    // showTab("importWallet");
+
     navigate("/importWallet");
+    setIsTabAtom(true);
   };
 
   const createAccount = async () => {
@@ -50,27 +60,37 @@ export const IntroPage = () => {
   };
 
   useEffect(() => {
-    createAccount();
-    let provider = new HDWalletProvider({
-      mnemonic: {
-        phrase:
-          "large taxi system hamster undo off field bamboo ramp excuse enrich panda",
-        // password: 'test',
-      },
-      providerOrUrl:
-        "https://polygon-mumbai.g.alchemy.com/v2/K1bKo7VgILODfuOm3BD6D0GcZO42i7os",
-      // "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
-      // providerOrUrl: "http://localhost:8545",
-      numberOfAddresses: 1,
-      derivationPath: "m/44'/60'/0'/0/", // bip44, ethereum, account, change, index
-    });
-    // // Or, if web3 is alreay initialized, you can call the 'setProvider' on web3, web3.eth, web3.shh and/or web3.bzz
+    if (window.location.hash === "#createWallet") {
+      sendWorkerEvent("logger", "createWallet event on react");
+      setIsTabAtom(true);
+      navigate("/createWallet");
+    } else if (window.location.hash === "#importWallet") {
+      sendWorkerEvent("logger", "importWallet event on react");
+      setIsTabAtom(true);
+      navigate("/importWallet");
+    }
 
-    const web3 = new Web3(provider);
-    const wallets = provider.getAddresses();
-    console.log(wallets);
-    // web3.eth.accounts.privateKeyToAccount([0])
-    web3.eth.getAccounts().then(console.log);
+    // createAccount();
+    // let provider = new HDWalletProvider({
+    //   mnemonic: {
+    //     phrase:
+    //       "large taxi system hamster undo off field bamboo ramp excuse enrich panda",
+    //     // password: 'test',
+    //   },
+    //   providerOrUrl:
+    //     "https://polygon-mumbai.g.alchemy.com/v2/K1bKo7VgILODfuOm3BD6D0GcZO42i7os",
+    //   // "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
+    //   // providerOrUrl: "http://localhost:8545",
+    //   numberOfAddresses: 1,
+    //   derivationPath: "m/44'/60'/0'/0/", // bip44, ethereum, account, change, index
+    // });
+    // // // Or, if web3 is alreay initialized, you can call the 'setProvider' on web3, web3.eth, web3.shh and/or web3.bzz
+
+    // const web3 = new Web3(provider);
+    // const wallets = provider.getAddresses();
+    // console.log(wallets);
+    // // web3.eth.accounts.privateKeyToAccount([0])
+    // web3.eth.getAccounts().then(console.log);
   }, []);
 
   return (

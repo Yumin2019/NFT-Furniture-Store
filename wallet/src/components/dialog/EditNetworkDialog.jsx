@@ -11,6 +11,7 @@ import {
   Spacer,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
+import { dialogMaxWidth } from "../../utils/Helper";
 
 export const EditNetworkDialog = ({
   onClose,
@@ -44,7 +45,15 @@ export const EditNetworkDialog = ({
       scrollBehavior="inside"
     >
       <ModalOverlay />
-      <ModalContent maxW="100%" ml={4} mr={4} mt={6} mb={6} pl={4} pr={4}>
+      <ModalContent
+        maxW={dialogMaxWidth}
+        ml={4}
+        mr={4}
+        mt={6}
+        mb={6}
+        pl={4}
+        pr={4}
+      >
         <ModalHeader fontSize={16} mt={4} fontWeight="bold" align="center">
           {!isEditMode
             ? "Network Information"

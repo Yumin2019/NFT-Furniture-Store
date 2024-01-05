@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { useState } from "react";
+import { dialogMaxWidth } from "../../utils/Helper";
 
 export const EditContactDialog = ({
   isOpen,
@@ -44,7 +45,7 @@ export const EditContactDialog = ({
       isCentered
     >
       <AlertDialogOverlay />
-      <AlertDialogContent m={4}>
+      <AlertDialogContent m={4} maxW={dialogMaxWidth}>
         <AlertDialogHeader>{title}</AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>
