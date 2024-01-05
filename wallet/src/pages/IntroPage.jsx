@@ -13,7 +13,13 @@ import * as bip39 from "bip39";
 import HDWalletProvider from "@truffle/hdwallet-provider";
 import { Web3 } from "web3";
 import { hdkey } from "ethereumjs-wallet";
-import { sendWorkerEvent, showTab } from "../utils/Helper";
+import {
+  isExtension,
+  printLog,
+  removeData,
+  sendWorkerEvent,
+  showTab as showTabOr,
+} from "../utils/Helper";
 import { useAtom } from "jotai";
 import { tabAtom } from "..";
 
@@ -27,17 +33,17 @@ export const IntroPage = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const clickCreate = () => {
-    // showTab("createWallet");
-
-    navigate("/createWallet");
-    setIsTabAtom(true);
+    showTabOr("createWallet", () => {
+      navigate("/createWallet");
+      setIsTabAtom(true);
+    });
   };
 
   const clickImport = () => {
-    // showTab("importWallet");
-
-    navigate("/importWallet");
-    setIsTabAtom(true);
+    showTabOr("importWallet", () => {
+      navigate("/importWallet");
+      setIsTabAtom(true);
+    });
   };
 
   const createAccount = async () => {
@@ -60,14 +66,15 @@ export const IntroPage = () => {
   };
 
   useEffect(() => {
-    if (window.location.hash === "#createWallet") {
-      sendWorkerEvent("logger", "createWallet event on react");
-      setIsTabAtom(true);
-      navigate("/createWallet");
-    } else if (window.location.hash === "#importWallet") {
-      sendWorkerEvent("logger", "importWallet event on react");
-      setIsTabAtom(true);
-      navigate("/importWallet");
+    if (isExtension()) {
+      printLog(`${window.location.hash} hash on react`);
+      if (window.location.hash === "#createWallet") {
+        setIsTabAtom(true);
+        navigate("/createWallet");
+      } else if (window.location.hash === "#importWallet") {
+        setIsTabAtom(true);
+        navigate("/importWallet");
+      }
     }
 
     // createAccount();

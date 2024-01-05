@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { sendWorkerEvent } from "../../utils/Helper";
+import { saveData, sendWorkerEvent } from "../../utils/Helper";
 
 export const CreatePasswordPage = ({ onNext, buttonText }) => {
   const [isChecked, setIsChecked] = useState(false);
@@ -22,6 +22,7 @@ export const CreatePasswordPage = ({ onNext, buttonText }) => {
   const [isValid, setIsValid] = useState(false);
 
   const clickCreate = () => {
+    saveData("password", pwText);
     onNext();
   };
 

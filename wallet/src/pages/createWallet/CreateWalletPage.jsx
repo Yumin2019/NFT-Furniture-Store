@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CreatePasswordPage } from "./CreatePasswordPage";
 import { PhasePage } from "./PhrasePage";
+import { loadData, printLog, sendWorkerEvent } from "../../utils/Helper";
 
 export const CreateWalletPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,15 @@ export const CreateWalletPage = () => {
   const createStep = (text, isCompleted, isCurrent) => {
     return { text, isCompleted, isCurrent };
   };
+
+  const loadPassword = async () => {
+    let password = await loadData("password");
+    printLog(`password: ${password}`);
+  };
+
+  useEffect(() => {
+    loadPassword();
+  }, []);
 
   useEffect(() => {
     if (curStep === 1) {
