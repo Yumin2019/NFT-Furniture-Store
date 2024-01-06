@@ -44,6 +44,7 @@ import {
   loadData,
   openInNewTab,
   printLog,
+  removeData,
   saveData,
   truncate,
 } from "../utils/Helper";
@@ -52,6 +53,7 @@ import { TbReportSearch } from "react-icons/tb";
 import { ContactDialog } from "../components/dialog/ContactDialog";
 import { BookmarkDialog } from "../components/dialog/BookmarkDialog";
 import { SendToDialog } from "../components/dialog/SendToDialog";
+import { defNetworkCnt, defNetworks } from "../utils/Network";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
@@ -59,6 +61,7 @@ export const MainPage = () => {
   const [isMenuHover, setIsMenuHover] = useState(false);
   const toast = useToast();
   const [accountIdx, setAccountIdx] = useState(0);
+  const [networkIdx, setNetworkIdx] = useState(0);
   const [accounts, setAccounts] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
@@ -116,7 +119,17 @@ export const MainPage = () => {
   };
 
   const loadNetworks = async () => {
+    let idx = (await loadData("networkIdx")) || 0;
     let networkData = (await loadData("networks")) || [];
+
+    if (idx < defNetworkCnt) {
+      setCurNetwork(defNetworks[idx]);
+      printLog(defNetworks[idx]);
+    } else {
+      setCurNetwork(networkData[idx - defNetworkCnt]);
+      printLog(defNetworks[idx - defNetworkCnt]);
+    }
+
     setNetworks(networkData);
     printLog(networkData);
   };
@@ -179,7 +192,6 @@ export const MainPage = () => {
         accounts={accounts}
         curIdx={accountIdx}
         loadAccount={() => {
-          console.log("fsdfds");
           loadAccounts();
         }}
         setCurIdx={setAccountIdx}
@@ -191,6 +203,9 @@ export const MainPage = () => {
         networks={networks}
         setCurNetwork={setCurNetwork}
         curNetwork={curNetwork}
+        loadNetworks={() => {
+          loadNetworks();
+        }}
       />
 
       <ContactDialog

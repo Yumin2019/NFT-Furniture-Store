@@ -30,11 +30,11 @@ export const EditNetworkDialog = ({
   const [explorerUrl, setExplorerUrl] = useState("");
 
   useEffect(() => {
-    setNetworkName(networkInfo.name);
-    setRpcUrl(networkInfo.rpcUrl);
-    setChainId(networkInfo.chainId);
-    setCurSymbol(networkInfo.currency);
-    setExplorerUrl(networkInfo.explorerUrl);
+    setNetworkName(networkInfo?.name || "");
+    setRpcUrl(networkInfo?.rpcUrl || "");
+    setChainId(networkInfo?.chainId || "");
+    setCurSymbol(networkInfo?.currency || "");
+    setExplorerUrl(networkInfo?.explorerUrl || "");
   }, [isOpen]);
 
   return (
@@ -120,7 +120,7 @@ export const EditNetworkDialog = ({
         />
 
         <Text fontSize={16} fontWeight="bold" mt={4}>
-          Block explorer URL (Optional)
+          Block explorer URL
         </Text>
         <Input
           mt={1}
@@ -142,7 +142,15 @@ export const EditNetworkDialog = ({
             </Button>
           )}
 
-          <Button ml={4} colorScheme="blue" onClick={onClick}>
+          <Button
+            ml={4}
+            colorScheme="blue"
+            onClick={() => {
+              if (onClick) {
+                onClick(networkName, rpcUrl, chainId, curSymbol, explorerUrl);
+              }
+            }}
+          >
             {yesText}
           </Button>
         </Flex>
