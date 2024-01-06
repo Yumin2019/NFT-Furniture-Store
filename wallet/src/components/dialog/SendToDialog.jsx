@@ -100,13 +100,15 @@ export const SendToDialog = ({ onClose, isOpen }) => {
 
             {accounts.map((v, index) => {
               return (
-                <AccountRow
-                  hoverIdx={hoverIdx}
-                  index={index}
-                  setHoverIdx={setHoverIdx}
-                  v={v}
-                  onClick={() => setCurStep(2)}
-                />
+                <Box key={index}>
+                  <AccountRow
+                    hoverIdx={hoverIdx}
+                    index={index}
+                    setHoverIdx={setHoverIdx}
+                    v={v}
+                    onClick={() => setCurStep(2)}
+                  />
+                </Box>
               );
             })}
 
@@ -117,13 +119,15 @@ export const SendToDialog = ({ onClose, isOpen }) => {
             </Text>
             {contacts.map((v, index) => {
               return (
-                <AccountRow
-                  hoverIdx={hoverIdx}
-                  index={index + accounts.length}
-                  setHoverIdx={setHoverIdx}
-                  v={v}
-                  onClick={() => setCurStep(2)}
-                />
+                <Box key={index}>
+                  <AccountRow
+                    hoverIdx={hoverIdx}
+                    index={index + accounts.length}
+                    setHoverIdx={setHoverIdx}
+                    v={v}
+                    onClick={() => setCurStep(2)}
+                  />
+                </Box>
               );
             })}
           </Box>

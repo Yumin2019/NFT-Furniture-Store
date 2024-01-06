@@ -8,9 +8,17 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { errorToast, infoToast, successToast } from "../../utils/Helper";
+import {
+  createEtherAccount,
+  errorToast,
+  infoToast,
+  printLog,
+  saveData,
+  successToast,
+} from "../../utils/Helper";
 import { IoMdEyeOff, IoMdEye } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import { validateMnemonic } from "bip39";
 
 export const WalletRecoveryPage = ({ onNext }) => {
   const toast = useToast();
@@ -18,16 +26,14 @@ export const WalletRecoveryPage = ({ onNext }) => {
   const [isValid, setIsValid] = useState(true);
   const [wordList, setWordList] = useState(Array(12).fill(""));
   const [hideList, setHideList] = useState(Array(12).fill(false));
+  const [mnemonicText, setMnemonicText] = useState("");
 
   useEffect(() => {
-    let valid = true;
-    wordList.map((v, index) => {
-      if (v === "") {
-        valid = false;
-      }
-    });
-
+    let mnemonic = wordList.join(" ");
+    let valid = validateMnemonic(mnemonic);
+    printLog(valid);
     setIsValid(valid);
+    setMnemonicText(mnemonic);
   }, [wordList]);
 
   return (
@@ -97,8 +103,11 @@ export const WalletRecoveryPage = ({ onNext }) => {
           w="80%"
           borderRadius={32}
           mb={4}
-          onClick={() => {
+          onClick={async () => {
             if (isValid) {
+              let accounts = await createEtherAccount(mnemonicText);
+              saveData("accounts", accounts);
+              saveData("accountIdx", 0);
               onNext();
             }
           }}

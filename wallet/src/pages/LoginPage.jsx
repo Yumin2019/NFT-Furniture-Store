@@ -11,39 +11,20 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { api } from "../utils/Axios";
-import { errorToast, successToast } from "../utils/Helper";
+import { errorToast, loadData, successToast } from "../utils/Helper";
 import { useNavigate } from "react-router-dom";
 
 export const LoginPage = () => {
-  const [show, setShow] = useState(false);
   const [emailText, setEmailText] = useState("");
   const [passwordText, setPasswordText] = useState("");
-
-  const handleClick = () => setShow(!show);
   const toast = useToast();
   const navigate = useNavigate();
 
   const clickLogin = async () => {
-    navigate("/main");
-
-    return;
-    try {
-      console.log(`email ${emailText}`);
-      console.log(`password ${passwordText}`);
-
-      let res = await api.post("login", {
-        email: emailText,
-        password: passwordText,
-      });
-
-      if (res.status === 200) {
-        successToast(toast, `Login Success`);
-        navigate("/");
-      } else {
-        errorToast(toast, `Login Failed`);
-      }
-    } catch (e) {
-      console.log(e);
+    let password = await loadData("password");
+    if (passwordText === password) {
+      navigate("/main");
+    } else {
       errorToast(toast, `Login Failed`);
     }
   };

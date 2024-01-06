@@ -13,9 +13,13 @@ import { ListItem, UnorderedList } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaEye } from "react-icons/fa";
 import {
+  createEtherAccount,
+  createMnemonic,
   errorToast,
   getRandomInt,
   infoToast,
+  printLog,
+  saveData,
   successToast,
 } from "../../utils/Helper";
 import { IoCopy } from "react-icons/io5";
@@ -25,6 +29,15 @@ import { useNavigate } from "react-router-dom";
 export const PhasePage = ({ onNext }) => {
   const toast = useToast();
   const navigate = useNavigate();
+  const [isNext, setIsNext] = useState(false);
+  const [hidePhase, setHidePhase] = useState(true);
+  const [originalWordList, setOriginalWordList] = useState(Array(12).fill(""));
+  const [wordList, setWordList] = useState(Array(12).fill(""));
+  const [mnemonicText, setMnemonicText] = useState("");
+
+  const [confirmIndexs, setConfirmIndexes] = useState(new Set([]));
+  const [isValid, setIsValid] = useState(true);
+
   const handleCopyClipBoard = async (text) => {
     try {
       let text = "";
@@ -39,44 +52,14 @@ export const PhasePage = ({ onNext }) => {
     }
   };
 
-  const [isNext, setIsNext] = useState(false);
-  const [hidePhase, setHidePhase] = useState(true);
-  const [originalWordList, setOriginalWordList] = useState([
-    "test11",
-    "test12",
-    "test13",
-    "test14",
-
-    "test21",
-    "test22",
-    "test23",
-    "test24",
-
-    "test31",
-    "test32",
-    "test33",
-    "test34",
-  ]);
-
-  const [wordList, setWordList] = useState([
-    "test11",
-    "test12",
-    "test13",
-    "test14",
-
-    "test21",
-    "test22",
-    "test23",
-    "test24",
-
-    "test31",
-    "test32",
-    "test33",
-    "test34",
-  ]);
-
-  const [confirmIndexs, setConfirmIndexes] = useState(new Set([]));
-  const [isValid, setIsValid] = useState(true);
+  useEffect(() => {
+    let mnemonic = createMnemonic();
+    let array = mnemonic.split(" ");
+    printLog(array);
+    setWordList(array);
+    setOriginalWordList(array);
+    setMnemonicText(mnemonic);
+  }, []);
 
   useEffect(() => {
     let valid = true;
@@ -86,6 +69,7 @@ export const PhasePage = ({ onNext }) => {
       }
     });
 
+    printLog(valid);
     setIsValid(valid);
   }, [wordList]);
 
@@ -217,7 +201,7 @@ export const PhasePage = ({ onNext }) => {
           w="80%"
           borderRadius={32}
           mb={4}
-          onClick={() => {
+          onClick={async () => {
             // 초기 구문보기 처리
             if (hidePhase) {
               setHidePhase(!hidePhase);
@@ -236,14 +220,16 @@ export const PhasePage = ({ onNext }) => {
                 list[v] = "";
               });
 
-              console.log(list);
-              console.log(set);
-
+              printLog(list);
+              printLog(set);
               setWordList(list);
               setConfirmIndexes(set);
             } else if (isValid) {
-              successToast(toast, "Account created");
+              let accounts = await createEtherAccount(mnemonicText);
+              saveData("accounts", accounts);
+              saveData("accountIdx", 0);
               navigate("/main");
+              successToast(toast, "Account created");
             }
           }}
         >

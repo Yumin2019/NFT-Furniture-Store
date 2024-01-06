@@ -1,4 +1,7 @@
 /*global chrome*/
+import * as bip39 from "bip39";
+import { hdkey } from "ethereumjs-wallet";
+
 const validateEmail = (email) => {
   return email.match(
     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -82,44 +85,40 @@ const showTab = (hash, pageCallback) => {
   }
 };
 
-// ex: {password: "1234"}
+// ex: key: password value: 1234 => password: {password: 1234} (Page) chrome extension => password: 1234
+// array를 저장하는 경우에는 자체 규격을 사용하는 것이 아닌 json으로 처리하는 것이 나은데, 처리가 복잡해지는 것 같아 항상 json으로 저장한다.
 const saveData = (key, value) => {
-  if (isExtension()) {
-    try {
-      let json = {};
-      json[key] = value;
+  printLog(`setItem key: ${key}`);
+  printLog(value);
+  let json = {};
+  json[key] = value;
+
+  try {
+    if (isExtension()) {
       chrome.storage.local.set(json).then(() => {
-        sendWorkerEvent("logger", { data: json, msg: "saved" });
+        printLog({ data: json, msg: "saved" });
       });
-    } catch (e) {
-      printLog(e);
+    } else {
+      let str = JSON.stringify(json);
+      localStorage.setItem(key, str);
     }
-  } else {
-    try {
-      console.log(`setItem key: ${key} value: ${value}`);
-      localStorage.setItem(key, value);
-    } catch (e) {
-      printLog(e);
-    }
+  } catch (e) {
+    printLog(e);
   }
 };
 
 const removeData = (key) => {
-  if (isExtension()) {
-    try {
+  printLog(`removeItem key: ${key}`);
+  try {
+    if (isExtension()) {
       chrome.storage.local.remove(key).then(() => {
         printLog(`key: ${key} removed`);
       });
-    } catch (e) {
-      printLog(e);
-    }
-  } else {
-    try {
-      console.log(`removeItem key: ${key}`);
+    } else {
       localStorage.removeItem(key);
-    } catch (e) {
-      printLog(e);
     }
+  } catch (e) {
+    printLog(e);
   }
 };
 
@@ -130,9 +129,41 @@ const loadData = async (key) => {
         resolve(result[key]);
       });
     } else {
-      resolve(localStorage.getItem(key));
+      let str = localStorage.getItem(key);
+      let json = JSON.parse(str);
+      resolve(json[key]);
     }
   });
+};
+
+const createEtherAccount = async (mnemonic) => {
+  const seed = await bip39.mnemonicToSeed(mnemonic);
+  const rootKey = hdkey.fromMasterSeed(seed);
+  const hardenedKey = rootKey.derivePath("m/44'/60'/0'/0");
+
+  let accounts = [];
+  for (let i = 0; i < 10; i++) {
+    const wallet = hardenedKey.deriveChild(i).getWallet();
+    let name = `Account ${i + 1}`;
+    let address = "0x" + wallet.getAddress().toString("hex");
+    let privateKey = wallet.getPrivateKey().toString("hex");
+    accounts.push({ name, address, privateKey, isVisible: i === 0 });
+  }
+
+  printLog(accounts);
+  return accounts;
+};
+
+const createMnemonic = () => {
+  return bip39.generateMnemonic();
+};
+
+const validateMnemonic = (mnemonic) => {
+  return bip39.validateMnemonic(mnemonic);
+};
+
+const truncate = (str, maxlength) => {
+  return str.length > maxlength ? str.slice(0, maxlength - 1) + "…" : str;
 };
 
 export {
@@ -151,4 +182,8 @@ export {
   saveData,
   removeData,
   loadData,
+  createEtherAccount,
+  createMnemonic,
+  validateMnemonic,
+  truncate,
 };

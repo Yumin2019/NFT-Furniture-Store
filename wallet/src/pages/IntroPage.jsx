@@ -9,10 +9,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as bip39 from "bip39";
 import HDWalletProvider from "@truffle/hdwallet-provider";
 import { Web3 } from "web3";
-import { hdkey } from "ethereumjs-wallet";
 import {
   isExtension,
   printLog,
@@ -22,10 +20,6 @@ import {
 } from "../utils/Helper";
 import { useAtom } from "jotai";
 import { tabAtom } from "..";
-
-const mnemonic = bip39.generateMnemonic();
-console.log("isValid: ", bip39.validateMnemonic(mnemonic));
-console.log(mnemonic);
 
 export const IntroPage = () => {
   const [isTabAtom, setIsTabAtom] = useAtom(tabAtom);
@@ -46,25 +40,6 @@ export const IntroPage = () => {
     });
   };
 
-  const createAccount = async () => {
-    const seed = await bip39.mnemonicToSeed(
-      "large taxi system hamster undo off field bamboo ramp excuse enrich panda"
-    ); // seed === entropy
-    const rootKey = hdkey.fromMasterSeed(seed);
-    const hardenedKey = rootKey.derivePath("m/44'/60'/0'/0");
-
-    let accounts = [];
-    for (let i = 0; i < 1; i++) {
-      const wallet = hardenedKey.deriveChild(i).getWallet();
-      let address = "0x" + wallet.getAddress().toString("hex");
-      let privateKey = wallet.getPrivateKey().toString("hex");
-      accounts.push({ address: address, privateKey: privateKey });
-    }
-
-    console.log(accounts);
-    return accounts;
-  };
-
   useEffect(() => {
     if (isExtension()) {
       printLog(`${window.location.hash} hash on react`);
@@ -77,7 +52,6 @@ export const IntroPage = () => {
       }
     }
 
-    // createAccount();
     // let provider = new HDWalletProvider({
     //   mnemonic: {
     //     phrase:
@@ -85,9 +59,7 @@ export const IntroPage = () => {
     //     // password: 'test',
     //   },
     //   providerOrUrl:
-    //     "https://polygon-mumbai.g.alchemy.com/v2/K1bKo7VgILODfuOm3BD6D0GcZO42i7os",
-    //   // "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
-    //   // providerOrUrl: "http://localhost:8545",
+    //   "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
     //   numberOfAddresses: 1,
     //   derivationPath: "m/44'/60'/0'/0/", // bip44, ethereum, account, change, index
     // });

@@ -29,14 +29,21 @@ import {
   IoIosArrowDown,
   IoIosMenu,
 } from "react-icons/io";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityTab } from "../components/tabs/ActivityTab";
 import { TokensTab } from "../components/tabs/TokensTab";
 import { FaUserCircle } from "react-icons/fa";
 import { NetworkDialog } from "../components/dialog/NetworkDialog";
 import { AccountDialog } from "../components/dialog/AccountDialog";
 
-import { errorToast, infoToast } from "../utils/Helper";
+import {
+  errorToast,
+  infoToast,
+  loadData,
+  printLog,
+  saveData,
+  truncate,
+} from "../utils/Helper";
 import { RiShareBoxFill } from "react-icons/ri";
 import { TbReportSearch } from "react-icons/tb";
 import { ContactDialog } from "../components/dialog/ContactDialog";
@@ -48,15 +55,34 @@ export const MainPage = () => {
   const [isAccountHover, setIsAccountHover] = useState(false);
   const [isMenuHover, setIsMenuHover] = useState(false);
   const toast = useToast();
+  const [accountIdx, setAccountIdx] = useState(0);
+  const [accounts, setAccounts] = useState([]);
+  const [curAccount, setCurAccount] = useState({});
 
   const handleCopyClipBoard = async (text) => {
     try {
-      await navigator.clipboard.writeText("test");
+      await navigator.clipboard.writeText(curAccount?.address || "");
       infoToast(toast, "Copied");
     } catch (e) {
       errorToast(toast, "Failed to copy");
     }
   };
+
+  const loadAccount = async () => {
+    let idx = (await loadData("accountIdx")) || 0;
+    let accountsData = (await loadData("accounts")) || [];
+    setAccountIdx(idx);
+    setAccounts(accountsData);
+    setCurAccount(accountsData[idx]);
+
+    printLog(`accountIdx = ${idx}`);
+    printLog(accountsData);
+    printLog(accountsData[idx]);
+  };
+
+  useEffect(() => {
+    loadAccount();
+  }, []);
 
   const clickNetwork = () => {
     console.log("tab");
@@ -148,7 +174,7 @@ export const MainPage = () => {
             >
               <FaUserCircle size={24} color="#3082ce" />
               <Text textAlign="center" fontWeight="700" fontSize={14} mb={1}>
-                Account 1
+                {curAccount && curAccount.name}
               </Text>
               <IoIosArrowDown size={14} />
             </Stack>
@@ -198,7 +224,7 @@ export const MainPage = () => {
           rightIcon={<FaClipboard />}
           onClick={handleCopyClipBoard}
         >
-          0x8aDd5..16bda
+          {curAccount?.address && truncate(curAccount.address, 10)}
         </Button>
       </Tooltip>
       <Text fontSize={32} mt={4}>
