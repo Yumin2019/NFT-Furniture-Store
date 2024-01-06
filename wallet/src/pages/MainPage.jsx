@@ -19,6 +19,7 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Image,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { FaClipboard, FaBookmark } from "react-icons/fa";
@@ -35,11 +36,13 @@ import { TokensTab } from "../components/tabs/TokensTab";
 import { FaUserCircle } from "react-icons/fa";
 import { NetworkDialog } from "../components/dialog/NetworkDialog";
 import { AccountDialog } from "../components/dialog/AccountDialog";
-
+import { Web3 } from "web3";
 import {
   errorToast,
+  excludeHttp,
   infoToast,
   loadData,
+  openInNewTab,
   printLog,
   saveData,
   truncate,
@@ -58,7 +61,18 @@ export const MainPage = () => {
   const [accountIdx, setAccountIdx] = useState(0);
   const [accounts, setAccounts] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [networks, setNetworks] = useState([]);
   const [curAccount, setCurAccount] = useState({});
+  const [curNetwork, setCurNetwork] = useState({
+    name: "Ethereum Mainnet",
+    src: "/image/eth_logo.png",
+    rpcUrl:
+      "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
+    chainId: 1,
+    currency: "ETH",
+    explorerUrl: "https://etherscan.io",
+  });
 
   const handleCopyClipBoard = async (text) => {
     try {
@@ -79,6 +93,14 @@ export const MainPage = () => {
     printLog(`accountIdx = ${idx}`);
     printLog(accountsData);
     printLog(accountsData[idx]);
+
+    let rpcUrl =
+      "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv";
+    let httpProvider = new Web3.providers.HttpProvider(rpcUrl);
+    const web3 = new Web3(httpProvider);
+
+    let balance = await web3.eth.getBalance(accountsData[idx].address);
+    console.log("balance", balance);
   };
 
   const loadContacts = async () => {
@@ -87,9 +109,23 @@ export const MainPage = () => {
     printLog(contactsData);
   };
 
+  const loadBookmarks = async () => {
+    let bookmarkData = (await loadData("bookmarks")) || [];
+    setBookmarks(bookmarkData);
+    printLog(bookmarkData);
+  };
+
+  const loadNetworks = async () => {
+    let networkData = (await loadData("networks")) || [];
+    setNetworks(networkData);
+    printLog(networkData);
+  };
+
   useEffect(() => {
     loadAccounts();
     loadContacts();
+    loadBookmarks();
+    loadNetworks();
   }, []);
 
   useEffect(() => {
@@ -149,7 +185,13 @@ export const MainPage = () => {
         setCurIdx={setAccountIdx}
       />
 
-      <NetworkDialog isOpen={isNetworkOpen} onClose={onNetworkClose} />
+      <NetworkDialog
+        isOpen={isNetworkOpen}
+        onClose={onNetworkClose}
+        networks={networks}
+        setCurNetwork={setCurNetwork}
+        curNetwork={curNetwork}
+      />
 
       <ContactDialog
         isOpen={isContactOpen}
@@ -160,12 +202,19 @@ export const MainPage = () => {
         }}
       />
 
-      <BookmarkDialog isOpen={isBookmarkOpen} onClose={onBookmarkClose} />
+      <BookmarkDialog
+        isOpen={isBookmarkOpen}
+        onClose={onBookmarkClose}
+        bookmarks={bookmarks}
+        loadBookmarks={() => {
+          loadBookmarks();
+        }}
+      />
 
       <SendToDialog isOpen={isSendOpen} onClose={onSendClose} />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
-        <Tooltip label="Mumbai Testnet" placement="right" fontSize={12}>
+        <Tooltip label={curNetwork?.name} placement="right" fontSize={12}>
           <Stack
             onClick={clickNetwork}
             cursor="pointer"
@@ -173,15 +222,25 @@ export const MainPage = () => {
             alignItems="center"
             backgroundColor="#f2f4f6"
             borderRadius={24}
-            w="55px"
             ml={2}
             pl={3}
             pr={3}
             pt={1.5}
             pb={1.5}
           >
-            <Text fontSize={12}>M</Text>
-            <IoIosArrowDown size={14} />
+            {curNetwork?.src?.length === 0 && (
+              <Stack direction="row" alignItems="center">
+                <Text fontSize={12}>{curNetwork?.name?.charAt(0)}</Text>
+                <IoIosArrowDown size={14} />
+              </Stack>
+            )}
+
+            {curNetwork?.src?.length !== 0 && (
+              <Stack direction="row" alignItems="center">
+                <Image w={4} src={curNetwork.src} borderRadius="full" />
+                <IoIosArrowDown size={14} />
+              </Stack>
+            )}
           </Stack>
         </Tooltip>
 
@@ -226,16 +285,26 @@ export const MainPage = () => {
             </MenuButton>
             <MenuList padding={0}>
               <MenuItem padding={3}>
-                <RiShareBoxFill size={18} />
+                <TbReportSearch size={20} />
                 <Text ml={2} fontSize={14}>
-                  View on explorer
+                  Privacy policy
                 </Text>
               </MenuItem>
-              <MenuItem padding={3}>
-                <TbReportSearch size={20} />
+              <MenuItem
+                padding={3}
+                onClick={() => {
+                  openInNewTab(
+                    `${curNetwork?.explorerUrl}/address/${curAccount.address}`
+                  );
+                }}
+              >
+                <RiShareBoxFill size={18} />
+
                 <Box ml={2}>
-                  <Text fontSize={14}>Privacy policy</Text>
-                  <Text fontSize={12}>mumbai.polygonscan.com</Text>
+                  <Text fontSize={14}>View on explorer</Text>
+                  <Text fontSize={12}>
+                    {excludeHttp(curNetwork?.explorerUrl)}
+                  </Text>
                 </Box>
               </MenuItem>
             </MenuList>
@@ -257,7 +326,7 @@ export const MainPage = () => {
         </Button>
       </Tooltip>
       <Text fontSize={32} mt={4}>
-        0.1807 MATIC
+        0.1807 {curNetwork?.currency}
       </Text>
       <Text fontSize={16}>$0.19 USD</Text>
       <Center mt={6}>
@@ -332,10 +401,10 @@ export const MainPage = () => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <TokensTab />
+            <TokensTab curNetwork={curNetwork} />
           </TabPanel>
           <TabPanel>
-            <ActivityTab />
+            <ActivityTab curNetwork={curNetwork} />
           </TabPanel>
         </TabPanels>
       </Tabs>

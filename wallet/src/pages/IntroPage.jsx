@@ -9,14 +9,12 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HDWalletProvider from "@truffle/hdwallet-provider";
-import { Web3 } from "web3";
 import {
   isExtension,
   printLog,
   removeData,
   sendWorkerEvent,
-  showTab as showTabOr,
+  showTabOr,
 } from "../utils/Helper";
 import { useAtom } from "jotai";
 import { tabAtom } from "..";
@@ -51,25 +49,6 @@ export const IntroPage = () => {
         navigate("/importWallet");
       }
     }
-
-    // let provider = new HDWalletProvider({
-    //   mnemonic: {
-    //     phrase:
-    //       "large taxi system hamster undo off field bamboo ramp excuse enrich panda",
-    //     // password: 'test',
-    //   },
-    //   providerOrUrl:
-    //   "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
-    //   numberOfAddresses: 1,
-    //   derivationPath: "m/44'/60'/0'/0/", // bip44, ethereum, account, change, index
-    // });
-    // // // Or, if web3 is alreay initialized, you can call the 'setProvider' on web3, web3.eth, web3.shh and/or web3.bzz
-
-    // const web3 = new Web3(provider);
-    // const wallets = provider.getAddresses();
-    // console.log(wallets);
-    // // web3.eth.accounts.privateKeyToAccount([0])
-    // web3.eth.getAccounts().then(console.log);
   }, []);
 
   return (

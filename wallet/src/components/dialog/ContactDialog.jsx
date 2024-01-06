@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
-import { FaUserCircle, FaUserEdit } from "react-icons/fa";
+import { FaClipboard, FaUserCircle, FaUserEdit } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { EditContactDialog } from "./EditContactDialog";
@@ -26,6 +26,7 @@ import { BasicDialog } from "./BasicDialog";
 import {
   dialogMaxWidth,
   errorToast,
+  infoToast,
   printLog,
   saveData,
   validateEtherAddress,
@@ -36,6 +37,15 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
   const toast = useToast();
   const [hoverIdx, setHoverIdx] = useState(-1);
   const [newAccountIdx, setNewAccountIdx] = useState(0);
+
+  const handleCopyClipBoard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      infoToast(toast, "Copied");
+    } catch (e) {
+      errorToast(toast, "Failed to copy");
+    }
+  };
 
   useEffect(() => {
     let list = contacts || [];
@@ -191,6 +201,17 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
                     </Box>
                   </MenuButton>
                   <MenuList padding={0}>
+                    <MenuItem
+                      padding={3}
+                      onClick={(e) => {
+                        handleCopyClipBoard(v.address);
+                      }}
+                    >
+                      <FaClipboard size={18} color="#3182ce" />
+                      <Text ml={2} fontSize={14}>
+                        Copy address
+                      </Text>
+                    </MenuItem>
                     <MenuItem
                       padding={3}
                       onClick={(e) => {

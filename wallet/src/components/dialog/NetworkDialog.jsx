@@ -18,57 +18,67 @@ import {
   MenuItem,
 } from "@chakra-ui/react";
 import { IoIosMenu } from "react-icons/io";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaUserEdit, FaInfoCircle } from "react-icons/fa";
 import { EditNetworkDialog } from "./EditNetworkDialog";
 import { BasicDialog } from "./BasicDialog";
 import { MdDeleteForever } from "react-icons/md";
 import { dialogMaxWidth } from "../../utils/Helper";
 
-export const NetworkDialog = ({ onClose, isOpen }) => {
+export const NetworkDialog = ({
+  onClose,
+  isOpen,
+  networks,
+  setCurNetwork,
+  curNetwork,
+}) => {
   const btnRef = useRef(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
+  const [rowNetworks, setRowNetworks] = useState([]);
 
-  const networks = [
+  useEffect(() => {
+    let list = networks || [];
+    let newNetworks = [...defNetworks, ...list];
+    setRowNetworks(newNetworks);
+    console.log(newNetworks);
+  }, [isOpen]);
+
+  const defNetworkCnt = 4;
+  const defNetworks = [
     {
       name: "Ethereum Mainnet",
       src: "/image/eth_logo.png",
-      rpcUrl: "Ethereum rpc url",
-      chainId: 10,
-      currency: "Ether",
-      explorerUrl: "ether explorer url",
-      isSelected: true,
-      isEditable: false,
-    },
-    {
-      name: "Polygon Mainnet",
-      src: "/image/polygon_logo.png",
-      rpcUrl: "Polygon rpc url",
-      chainId: 12,
-      currency: "Matic",
-      explorerUrl: "Polygon explorer url",
-      isSelected: false,
-      isEditable: false,
+      rpcUrl:
+        "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
+      chainId: 1,
+      currency: "ETH",
+      explorerUrl: "https://etherscan.io",
     },
     {
       name: "Linea Mainnet",
       src: "/image/linea_logo.png",
-      rpcUrl: "Linea rpc url",
-      chainId: 14,
-      currency: "Linea",
-      explorerUrl: "Linea explorer url",
-      isSelected: false,
-      isEditable: false,
+      rpcUrl: "https://1rpc.io/linea",
+      chainId: 59144,
+      currency: "ETH",
+      explorerUrl: "https://lineascan.build",
     },
     {
-      name: "Mumbai Testnet",
+      name: "Polygon Mainnet",
+      src: "/image/polygon_logo.png",
+      rpcUrl:
+        "https://polygon-mainnet.g.alchemy.com/v2/5uXiwGkwZjWmK4tLeBiLBsSvC4c5663w",
+      chainId: 137,
+      currency: "MATIC",
+      explorerUrl: "https://polygonscan.com",
+    },
+    {
+      name: "Polygon Mumbai",
       src: "",
-      rpcUrl: "Mumbai rpc url",
-      chainId: 51,
-      currency: "Mumbai",
-      explorerUrl: "Mumbai explorer url",
-      isSelected: false,
-      isEditable: true,
+      rpcUrl:
+        "https://polygon-mumbai.g.alchemy.com/v2/K1bKo7VgILODfuOm3BD6D0GcZO42i7os",
+      chainId: 80001,
+      currency: "MATIC",
+      explorerUrl: "https://mumbai.polygonscan.com",
     },
   ];
 
@@ -124,7 +134,9 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
           Select a network
         </ModalHeader>
         <ModalCloseButton size={32} mr={4} mt={4} />
-        {networks.map((v, index) => {
+        {rowNetworks.map((v, index) => {
+          let isSelected = curNetwork?.name === v.name;
+          let isEditable = index >= defNetworkCnt;
           return (
             <Flex
               key={index}
@@ -134,10 +146,14 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
               pt={2}
               pr={4}
               background={
-                v.isSelected ? "#eaf1fa" : hoverIdx === index ? "#f9faf9" : null
+                isSelected ? "#eaf1fa" : hoverIdx === index ? "#f9faf9" : null
               }
               onMouseOver={() => setHoverIdx(index)}
               onMouseOut={() => setHoverIdx(-1)}
+              onClick={() => {
+                setCurNetwork(rowNetworks[index]);
+                onClose();
+              }}
             >
               <Box
                 background="#0376c9"
@@ -145,7 +161,7 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
                 h="45px"
                 ml={1}
                 borderRadius={4}
-                visibility={v.isSelected ? "visible" : "hidden"}
+                visibility={isSelected ? "visible" : "hidden"}
               />
               {v.src.length !== 0 && (
                 <Image boxSize={8} src={v.src} borderRadius="full" ml={4} />
@@ -169,7 +185,11 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
               </Text>
               <Spacer />
               <Menu>
-                <MenuButton>
+                <MenuButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
                   <Box mb="4px">
                     <IoIosMenu size={20} color="black" />
                   </Box>
@@ -177,13 +197,14 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
                 <MenuList padding={0}>
                   <MenuItem
                     padding={3}
-                    onClick={() => {
+                    onClick={(e) => {
                       setDialogInfo({
                         yesText: "OK",
                         networkInfo: v,
                         isEditMode: false,
                       });
                       onEditOpen();
+                      e.stopPropagation();
                     }}
                   >
                     <FaInfoCircle size={18} color="#3082ce" />
@@ -192,17 +213,18 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
                       Show Information
                     </Text>
                   </MenuItem>
-                  <Box opacity={!v.isEditable ? 0.5 : 1.0}>
+                  <Box opacity={!isEditable ? 0.5 : 1.0}>
                     <MenuItem
                       padding={3}
-                      onClick={() => {
-                        if (!v.isEditable) return;
+                      onClick={(e) => {
+                        if (!isEditable) return;
                         setDialogInfo({
                           yesText: "Edit",
                           networkInfo: v,
                           isEditMode: true,
                         });
                         onEditOpen();
+                        e.stopPropagation();
                       }}
                     >
                       <FaUserEdit size={18} color="grey" />
@@ -212,14 +234,15 @@ export const NetworkDialog = ({ onClose, isOpen }) => {
                     </MenuItem>
                     <MenuItem
                       padding={3}
-                      onClick={() => {
-                        if (!v.isEditable) return;
+                      onClick={(e) => {
+                        if (!isEditable) return;
                         setDialogInfo({
                           title: "Delete network",
                           yesText: "Delete",
                           text: `Are you sure you want to delete ${v.name}?`,
                         });
                         onBasicOpen();
+                        e.stopPropagation();
                       }}
                     >
                       <MdDeleteForever size={18} color="red" />

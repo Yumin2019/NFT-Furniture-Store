@@ -4,24 +4,23 @@ import {
   Text,
   Spacer,
   useDisclosure,
-  Button,
+  Image,
 } from "@chakra-ui/react";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { ActivityDialog } from "../dialog/ActivityDialog";
-import { NetworkDialog } from "../dialog/NetworkDialog";
 
-export const ActivityTab = () => {
+export const ActivityTab = ({ curNetwork }) => {
   const activities = [
     {
       title: "Buy Token",
       action: "Confirmed",
-      used: "-0.001 MATIC",
+      used: "-0.001",
       usedUsd: "-$0.00 USD",
     },
     {
       title: "Sell Token",
       action: "Confirmed",
-      used: "-0.001 MATIC",
+      used: "-0.001",
       usedUsd: "-$0.00 USD",
     },
   ];
@@ -51,18 +50,30 @@ export const ActivityTab = () => {
       {activities.map((v, index) => {
         return (
           <Box key={index} onClick={clickActivity} cursor="pointer">
-            <Box
-              alignItems="center"
-              backgroundColor="#f2f4f6"
-              borderRadius={24}
-              pl={1}
-              pr={1}
-              fontSize={10}
-              position="absolute"
-              left="44px"
-            >
-              M
-            </Box>
+            {curNetwork?.src?.length === 0 && (
+              <Box
+                alignItems="center"
+                backgroundColor="#f2f4f6"
+                borderRadius={24}
+                pl={1}
+                pr={1}
+                fontSize={10}
+                position="absolute"
+                left="44px"
+              >
+                {curNetwork?.name?.charAt(0)}
+              </Box>
+            )}
+
+            {curNetwork?.src?.length !== 0 && (
+              <Image
+                w={4}
+                src={curNetwork.src}
+                borderRadius="full"
+                position="absolute"
+                left="44px"
+              />
+            )}
             <Stack direction="row" alignItems="center">
               <Box
                 backgroundColor="#eaf1fa"
@@ -73,7 +84,7 @@ export const ActivityTab = () => {
                 <HiOutlineSwitchHorizontal color="#0672c2" size={22} />
               </Box>
 
-              <Stack direction="column" textAlign="left" ml={1}>
+              <Stack direction="column" textAlign="left" ml={1.5}>
                 <Text fontSize={16} fontWeight="600">
                   {v.title}
                 </Text>
@@ -84,7 +95,7 @@ export const ActivityTab = () => {
               <Spacer />
               <Stack direction="column" textAlign="right">
                 <Text fontWeight="600" fontSize={16}>
-                  {v.used}
+                  {`${v.used} ${curNetwork?.currency}`}
                 </Text>
                 <Text textColor="grey" fontSize={16}>
                   {v.usedUsd}

@@ -14,33 +14,44 @@ import {
   MenuList,
   MenuItem,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { FaBookmark } from "react-icons/fa";
 import { IoIosMenu } from "react-icons/io";
 import { MdDeleteForever } from "react-icons/md";
 import { EditContactDialog } from "./EditContactDialog";
 import { BasicDialog } from "./BasicDialog";
-import { dialogMaxWidth } from "../../utils/Helper";
+import { BsPencilSquare } from "react-icons/bs";
+import {
+  dialogMaxWidth,
+  errorToast,
+  openInNewTab,
+  printLog,
+  saveData,
+  validateUrl,
+} from "../../utils/Helper";
 
-export const BookmarkDialog = ({ onClose, isOpen }) => {
+export const BookmarkDialog = ({
+  onClose,
+  isOpen,
+  bookmarks,
+  loadBookmarks,
+}) => {
   const btnRef = useRef(null);
+  const toast = useToast();
   const [hoverIdx, setHoverIdx] = useState(-1);
-  const bookmarks = [
-    {
-      name: "Naver",
-      url: "www.naver.com",
-    },
-    {
-      name: "Github",
-      url: "www.github.com",
-    },
-    {
-      name: "Google",
-      url: "www.google.com",
-    },
-  ];
+  const [newBookmarkIdx, setNewBookmarkIdx] = useState(0);
+
+  const [dialogInfo, setDialogInfo] = useState({
+    name: "",
+    url: "",
+    title: "",
+    yesText: "",
+    text: "",
+    idx: -1,
+  });
 
   const {
     isOpen: isContactOpen,
@@ -54,13 +65,11 @@ export const BookmarkDialog = ({ onClose, isOpen }) => {
     onClose: onBasicClose,
   } = useDisclosure();
 
-  const [dialogInfo, setDialogInfo] = useState({
-    name: "",
-    url: "",
-    title: "",
-    yesText: "",
-    text: "",
-  });
+  useEffect(() => {}, [isOpen]);
+  useEffect(() => {
+    let list = bookmarks || [];
+    setNewBookmarkIdx(list.length);
+  }, []);
 
   return (
     <Modal
@@ -73,12 +82,43 @@ export const BookmarkDialog = ({ onClose, isOpen }) => {
         isOpen={isContactOpen}
         onClose={onContactClose}
         initialName={dialogInfo.name}
-        initialAddress={dialogInfo.address}
+        initialAddress={dialogInfo.url}
         title={dialogInfo.title}
         yesText={dialogInfo.yesText}
         noText="Cancel"
         placeHolder2="URL"
         rowText2="URL"
+        onClick={(nameText, urlText) => {
+          let name = nameText || "";
+          let url = urlText || "";
+          let idx = dialogInfo.idx;
+          let saveBookmarks = [...bookmarks];
+
+          if (name === "" || url === "") {
+            errorToast(toast, "name or url is empty");
+            return;
+          } else if (!validateUrl(url)) {
+            errorToast(toast, "url is invalid");
+            return;
+          }
+
+          if (dialogInfo.yesText === "Create") {
+            let row = { name, url };
+            saveBookmarks.push(row);
+          } else if (dialogInfo.yesText === "Edit") {
+            saveBookmarks[idx].name = name;
+            saveBookmarks[idx].url = url;
+          }
+
+          printLog(name);
+          printLog(url);
+          printLog(idx);
+          printLog(saveBookmarks);
+
+          saveData("bookmarks", saveBookmarks);
+          loadBookmarks();
+          onContactClose();
+        }}
       />
 
       <BasicDialog
@@ -88,6 +128,20 @@ export const BookmarkDialog = ({ onClose, isOpen }) => {
         title={dialogInfo.title}
         yesText={dialogInfo.yesText}
         noText="Cancel"
+        onClick={() => {
+          let saveBookmarks = [...bookmarks];
+          if (dialogInfo.yesText === "Delete") {
+            for (let i = dialogInfo.idx + 1; i < saveBookmarks.length; ++i) {
+              saveBookmarks[i - 1] = saveBookmarks[i];
+            }
+            saveBookmarks.pop();
+          }
+
+          printLog(saveBookmarks);
+          saveData("bookmarks", saveBookmarks);
+          loadBookmarks();
+          onBasicClose();
+        }}
       />
 
       <ModalOverlay />
@@ -158,17 +212,29 @@ export const BookmarkDialog = ({ onClose, isOpen }) => {
                   <MenuItem
                     padding={3}
                     onClick={() => {
+                      openInNewTab(v.url);
+                    }}
+                  >
+                    <FaBookmark size={18} color="#3082ce" />
+                    <Text ml={2} fontSize={14}>
+                      Open in new tab
+                    </Text>
+                  </MenuItem>
+                  <MenuItem
+                    padding={3}
+                    onClick={() => {
                       setDialogInfo({
                         name: v.name,
                         url: v.url,
                         title: "Edit bookmark",
                         yesText: "Edit",
                         text: "",
+                        idx: index,
                       });
                       onContactOpen();
                     }}
                   >
-                    <FaBookmark size={18} color="#3082ce" />
+                    <BsPencilSquare size={18} color="grey" />
                     <Text ml={2} fontSize={14}>
                       Edit bookmark
                     </Text>
@@ -181,7 +247,8 @@ export const BookmarkDialog = ({ onClose, isOpen }) => {
                         url: v.url,
                         title: "Delete bookmark",
                         yesText: "Delete",
-                        text: `Are you sure you want to delete this? (${dialogInfo.name}, ${dialogInfo.url})`,
+                        text: `Are you sure you want to delete this? (${v.name}, ${v.url})`,
+                        idx: index,
                       });
                       onBasicOpen();
                     }}
@@ -214,6 +281,7 @@ export const BookmarkDialog = ({ onClose, isOpen }) => {
               title: "Create bookmark",
               yesText: "Create",
               text: "",
+              idx: newBookmarkIdx,
             });
 
             onContactOpen();

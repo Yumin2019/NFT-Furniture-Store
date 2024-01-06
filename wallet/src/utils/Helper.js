@@ -73,7 +73,7 @@ const sendWorkerEvent = (type, data, callback) => {
   }
 };
 
-const showTab = (hash, pageCallback) => {
+const showTabOr = (hash, pageCallback) => {
   if (isExtension()) {
     try {
       chrome.tabs.create({ url: `index.html#${hash}` });
@@ -160,10 +160,6 @@ const createEtherAccount = async (mnemonic) => {
   return accounts;
 };
 
-const validateEtherAddress = (address) => {
-  return web3.utils.isAddress(address);
-};
-
 const createMnemonic = () => {
   return bip39.generateMnemonic();
 };
@@ -172,8 +168,36 @@ const validateMnemonic = (mnemonic) => {
   return bip39.validateMnemonic(mnemonic);
 };
 
+const validateEtherAddress = (address) => {
+  return web3.utils.isAddress(address);
+};
+
+const validateUrl = (string) => {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+};
+
+const openInNewTab = (url) => {
+  window.open(url, "_blank");
+};
+
 const truncate = (str, maxlength) => {
   return str.length > maxlength ? str.slice(0, maxlength - 1) + "…" : str;
+};
+
+const excludeHttp = (url) => {
+  if (url.includes("https://")) {
+    return url.substring("https://".length);
+  } else if (url.includes("http://")) {
+    return url.substring("http://".length);
+  }
+  return url;
 };
 
 export {
@@ -188,7 +212,7 @@ export {
   sendWorkerEvent,
   printLog,
   isExtension,
-  showTab,
+  showTabOr,
   saveData,
   removeData,
   loadData,
@@ -196,5 +220,8 @@ export {
   createMnemonic,
   validateMnemonic,
   validateEtherAddress,
+  validateUrl,
   truncate,
+  excludeHttp,
+  openInNewTab,
 };

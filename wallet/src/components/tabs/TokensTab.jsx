@@ -1,11 +1,11 @@
-import { Box, Stack, Text, Spacer, Button } from "@chakra-ui/react";
+import { Box, Stack, Text, Spacer, Button, Image } from "@chakra-ui/react";
 import { IoMdRefresh } from "react-icons/io";
 
-export const TokensTab = () => {
+export const TokensTab = ({ curNetwork }) => {
   const activities = [
     {
       title: "MATIC",
-      matic: "0.1807 MATIC",
+      matic: "0.1807",
       usd: "$0.20 USD",
     },
   ];
@@ -15,41 +15,29 @@ export const TokensTab = () => {
       <Text textAlign="left" mb={4} fontSize={16}>
         Dec 26, 2023
       </Text>
+
       {activities.map((v, index) => {
         return (
           <Box key={index}>
-            <Box
-              alignItems="center"
-              backgroundColor="#f2f4f6"
-              borderRadius={24}
-              pl={1}
-              pr={1}
-              fontSize={10}
-              position="absolute"
-              left="44px"
-            >
-              M
-            </Box>
             <Stack direction="row" alignItems="center">
-              <Box
-                backgroundColor="#f2f4f6"
-                pt={1.5}
-                pb={1.5}
-                pl={3}
-                pr={3}
-                mb={4}
-                borderRadius={24}
-                fontSize={16}
-              >
-                M
-              </Box>
+              {curNetwork?.src?.length === 0 && (
+                <Box w={8} h={8} background="#f2f4f6" borderRadius={24}>
+                  <Text pt={1} fontSize={16}>
+                    {curNetwork?.name?.charAt(0)}
+                  </Text>
+                </Box>
+              )}
+
+              {curNetwork?.src?.length !== 0 && (
+                <Image w={8} src={curNetwork.src} borderRadius="full" />
+              )}
 
               <Stack direction="column" textAlign="left" ml={1}>
                 <Text fontSize={16} fontWeight="600">
-                  {v.title}
+                  {curNetwork?.currency}
                 </Text>
                 <Text textColor="grey" fontSize={16}>
-                  {v.matic}
+                  {`${v.matic} ${curNetwork?.currency}`}
                 </Text>
               </Stack>
               <Spacer />
