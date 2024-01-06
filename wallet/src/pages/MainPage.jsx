@@ -84,6 +84,10 @@ export const MainPage = () => {
     loadAccount();
   }, []);
 
+  useEffect(() => {
+    setCurAccount(accounts[accountIdx]);
+  }, [accountIdx]);
+
   const clickNetwork = () => {
     console.log("tab");
     onNetworkOpen();
@@ -125,7 +129,17 @@ export const MainPage = () => {
 
   return (
     <Box textAlign="center">
-      <AccountDialog isOpen={isAccountOpen} onClose={onAccountClose} />
+      <AccountDialog
+        isOpen={isAccountOpen}
+        onClose={onAccountClose}
+        accounts={accounts}
+        curIdx={accountIdx}
+        loadAccount={() => {
+          console.log("fsdfds");
+          loadAccount();
+        }}
+        setCurIdx={setAccountIdx}
+      />
 
       <NetworkDialog isOpen={isNetworkOpen} onClose={onNetworkClose} />
 
