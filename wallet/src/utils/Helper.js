@@ -1,6 +1,7 @@
 /*global chrome*/
 import * as bip39 from "bip39";
 import { hdkey } from "ethereumjs-wallet";
+import { Web3 as web3 } from "web3";
 
 const validateEmail = (email) => {
   return email.match(
@@ -124,14 +125,19 @@ const removeData = (key) => {
 
 const loadData = async (key) => {
   return new Promise((resolve, reject) => {
-    if (isExtension()) {
-      chrome.storage.local.get([key], (result) => {
-        resolve(result[key]);
-      });
-    } else {
-      let str = localStorage.getItem(key);
-      let json = JSON.parse(str);
-      resolve(json[key]);
+    try {
+      if (isExtension()) {
+        chrome.storage.local.get([key], (result) => {
+          resolve(result[key]);
+        });
+      } else {
+        let str = localStorage.getItem(key);
+        let json = JSON.parse(str);
+        resolve(json[key]);
+      }
+    } catch (e) {
+      printLog(e);
+      resolve();
     }
   });
 };
@@ -152,6 +158,10 @@ const createEtherAccount = async (mnemonic) => {
 
   printLog(accounts);
   return accounts;
+};
+
+const validateEtherAddress = (address) => {
+  return web3.utils.isAddress(address);
 };
 
 const createMnemonic = () => {
@@ -185,5 +195,6 @@ export {
   createEtherAccount,
   createMnemonic,
   validateMnemonic,
+  validateEtherAddress,
   truncate,
 };

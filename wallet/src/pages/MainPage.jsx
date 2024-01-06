@@ -57,6 +57,7 @@ export const MainPage = () => {
   const toast = useToast();
   const [accountIdx, setAccountIdx] = useState(0);
   const [accounts, setAccounts] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [curAccount, setCurAccount] = useState({});
 
   const handleCopyClipBoard = async (text) => {
@@ -68,7 +69,7 @@ export const MainPage = () => {
     }
   };
 
-  const loadAccount = async () => {
+  const loadAccounts = async () => {
     let idx = (await loadData("accountIdx")) || 0;
     let accountsData = (await loadData("accounts")) || [];
     setAccountIdx(idx);
@@ -80,8 +81,15 @@ export const MainPage = () => {
     printLog(accountsData[idx]);
   };
 
+  const loadContacts = async () => {
+    let contactsData = (await loadData("contacts")) || [];
+    setContacts(contactsData);
+    printLog(contactsData);
+  };
+
   useEffect(() => {
-    loadAccount();
+    loadAccounts();
+    loadContacts();
   }, []);
 
   useEffect(() => {
@@ -136,14 +144,21 @@ export const MainPage = () => {
         curIdx={accountIdx}
         loadAccount={() => {
           console.log("fsdfds");
-          loadAccount();
+          loadAccounts();
         }}
         setCurIdx={setAccountIdx}
       />
 
       <NetworkDialog isOpen={isNetworkOpen} onClose={onNetworkClose} />
 
-      <ContactDialog isOpen={isContactOpen} onClose={onContactClose} />
+      <ContactDialog
+        isOpen={isContactOpen}
+        onClose={onContactClose}
+        contacts={contacts}
+        loadContacts={() => {
+          loadContacts();
+        }}
+      />
 
       <BookmarkDialog isOpen={isBookmarkOpen} onClose={onBookmarkClose} />
 

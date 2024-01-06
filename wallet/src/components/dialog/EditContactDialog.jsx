@@ -19,7 +19,7 @@ export const EditContactDialog = ({
   onClose,
   onClick,
   initialName,
-  initalAddress,
+  initialAddress,
   title,
   yesText,
   noText,
@@ -33,7 +33,7 @@ export const EditContactDialog = ({
   const [addressText, setAddressText] = useState("");
   useEffect(() => {
     setNameText(initialName);
-    setAddressText(initalAddress);
+    setAddressText(initialAddress);
   }, [isOpen]);
 
   return (
@@ -79,7 +79,7 @@ export const EditContactDialog = ({
             colorScheme="blue"
             ml={3}
             onClick={() => {
-              if (onClick) onClick(nameText);
+              if (onClick) onClick(nameText, addressText);
             }}
             size="sm"
           >
