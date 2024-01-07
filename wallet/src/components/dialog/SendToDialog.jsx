@@ -52,7 +52,9 @@ export const SendToDialog = ({
   const [amountText, setAmountText] = useState("0");
   const [usdExchangeText, setUsdExchangeText] = useState("0");
   const [usdExchangeGasText, setUsdExchangeGasText] = useState("0");
+  const [usdExchangeTotalGasText, setUsdExchangeTotalGasText] = useState("0");
   const [estimatedGasText, setEstimatedGasText] = useState("0");
+  const [totalGasText, setTotalGasText] = useState("0");
   const [selectedAccount, setSelectedAccount] = useState({});
   const [addressText, setAddressText] = useState("");
 
@@ -67,19 +69,31 @@ export const SendToDialog = ({
   }, [isOpen]);
 
   useEffect(() => {
-    web3.eth.getGasPrice().then((result) => {
-      let gasPrice = parseFloat(web3.utils.fromWei(result, "ether")).toFixed(
-        12
-      );
-      let usdExchange = (gasPrice * balanceInfo.usdRatio || 0).toFixed(2);
-      let isInvalid = gasPrice > balanceInfo.value;
+    web3.eth.getGasPrice().then(async (result) => {
+      let tx = {
+        from: curAccount.address,
+        to: curAccount.address,
+      };
 
+      // fee = gasPrice * gasLimit
+      let gasLimit = await web3.eth.estimateGas(tx);
+      let gasPrice = parseFloat(web3.utils.fromWei(result * gasLimit, "ether"));
+      let usdExchange = gasPrice * balanceInfo.usdRatio || 0;
+      let totalPrice = parseFloat(amountText) + gasPrice;
+      let usdExchangeTotal = totalPrice * balanceInfo.usdRatio;
+      let isInvalid = totalPrice > balanceInfo.value;
+      gasPrice = gasPrice.toFixed(12);
+      usdExchange = usdExchange.toFixed(2);
+
+      printLog(gasLimit);
       printLog(gasPrice);
       printLog(usdExchange);
       printLog(isInvalid);
 
       setEstimatedGasText(gasPrice);
       setUsdExchangeGasText(usdExchange);
+      setUsdExchangeTotalGasText(usdExchangeTotal.toFixed(2));
+      setTotalGasText(totalPrice.toFixed(12));
       setIsConfirmInvalid(isInvalid);
     });
   }, [curStep]);
@@ -264,7 +278,6 @@ export const SendToDialog = ({
                       <Input
                         size="xs"
                         type="number"
-                        prefix="ETH"
                         value={amountText}
                         onChange={(e) => {
                           setAmountText(e.target.value);
@@ -311,7 +324,7 @@ export const SendToDialog = ({
               pb={8}
             >
               <Flex alignItems="center">
-                <Text fontSize={16} fontWeight="800">
+                <Text fontSize={14} fontWeight="800">
                   Gas
                 </Text>
                 <Text
@@ -325,7 +338,7 @@ export const SendToDialog = ({
                 </Text>
                 <FaInfoCircle color="#6a737d" size={12} />
                 <Spacer />
-                <Text fontSize={16} fontWeight="800">
+                <Text fontSize={14} fontWeight="800">
                   {estimatedGasText} {curNetwork?.currency}
                 </Text>
               </Flex>
@@ -335,10 +348,10 @@ export const SendToDialog = ({
                   {"Likely in < 30 seconds"}
                 </Text>
                 <Spacer />
-                <Text fontSize={14} fontWeight="800" textColor="#535a62" mr={2}>
+                <Text fontSize={12} fontWeight="800" textColor="#535a62" mr={2}>
                   Max fee:
                 </Text>
-                <Text fontSize={14} fontWeight="400">
+                <Text fontSize={12} fontWeight="400">
                   {estimatedGasText} {curNetwork?.currency}
                 </Text>
               </Flex>
@@ -425,11 +438,11 @@ export const SendToDialog = ({
                 <Text fontSize={12}>SENDING {curNetwork?.currency}</Text>
               </Box>
 
-              <Text mt={2} ml={4} fontSize={24}>
+              <Text mt={2} ml={4} fontSize={22}>
                 {amountText}
               </Text>
 
-              <Text ml={4} fontSize={16}>
+              <Text ml={4} fontSize={14}>
                 ${usdExchangeText}
               </Text>
             </Box>
@@ -438,10 +451,10 @@ export const SendToDialog = ({
               <Box mt={1} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
                 <Flex>
                   <Spacer />
-                  <Text fontSize={16}>${usdExchangeGasText}</Text>
+                  <Text fontSize={14}>${usdExchangeGasText}</Text>
                 </Flex>
                 <Flex alignItems="center">
-                  <Text fontSize={16} fontWeight="800">
+                  <Text fontSize={14} fontWeight="800">
                     Gas
                   </Text>
                   <Text
@@ -456,7 +469,7 @@ export const SendToDialog = ({
                   <FaInfoCircle color="#6a737d" size={12} />
                   <Spacer />
 
-                  <Text ml={2} fontSize={16} fontWeight="800">
+                  <Text ml={2} fontSize={14} fontWeight="800">
                     {estimatedGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
@@ -467,7 +480,7 @@ export const SendToDialog = ({
                   </Text>
                   <Spacer />
                   <Text
-                    fontSize={14}
+                    fontSize={12}
                     fontWeight="800"
                     textColor="#535a62"
                     mr={2}
@@ -484,15 +497,15 @@ export const SendToDialog = ({
               <Box mt={1} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
                 <Flex>
                   <Spacer />
-                  <Text fontSize={16}>${usdExchangeGasText}</Text>
+                  <Text fontSize={14}>${usdExchangeTotalGasText}</Text>
                 </Flex>
                 <Flex alignItems="center">
-                  <Text fontSize={16} fontWeight="800">
+                  <Text fontSize={14} fontWeight="800">
                     Total
                   </Text>
                   <Spacer />
-                  <Text ml={2} fontSize={16} fontWeight="800">
-                    {estimatedGasText} {curNetwork?.currency}
+                  <Text ml={2} fontSize={14} fontWeight="800">
+                    {totalGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
 
@@ -502,7 +515,7 @@ export const SendToDialog = ({
                   </Text>
                   <Spacer />
                   <Text
-                    fontSize={14}
+                    fontSize={12}
                     fontWeight="800"
                     textColor="#535a62"
                     mr={2}
@@ -511,7 +524,7 @@ export const SendToDialog = ({
                   </Text>
 
                   <Text fontSize={14} fontWeight="400">
-                    {estimatedGasText} {curNetwork?.currency}
+                    {totalGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
               </Box>
@@ -563,10 +576,35 @@ export const SendToDialog = ({
                 size="md"
                 borderRadius={32}
                 mb={4}
-                onClick={() => {
+                onClick={async () => {
                   if (curStep === 3) {
                     if (isConfirmInValid) return;
-                    console.log("signing");
+
+                    let sendAddress = curAccount.address;
+                    let recvAddress = selectedAccount.address;
+                    let value = web3.utils.toWei(amountText, "ether");
+
+                    let tx = {
+                      from: sendAddress,
+                      to: recvAddress,
+                      value: value,
+                    };
+
+                    tx.gas = await web3.eth.estimateGas(tx);
+                    printLog(tx);
+                    const receipt = await web3.eth.sendTransaction(tx);
+                    const transaction = await web3.eth.getTransaction(
+                      receipt.transactionHash
+                    );
+                    let blockInfo = await web3.eth.getBlock(
+                      receipt.blockNumber
+                    );
+
+                    printLog(receipt);
+                    printLog(blockInfo);
+                    printLog(transaction);
+
+                    // 계정별 정보 저장하기
                   } else {
                     if (isInvalid) return;
                     setCurStep(3);

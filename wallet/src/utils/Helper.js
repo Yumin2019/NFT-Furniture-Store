@@ -151,8 +151,8 @@ const createEtherAccount = async (mnemonic) => {
   for (let i = 0; i < 10; i++) {
     const wallet = hardenedKey.deriveChild(i).getWallet();
     let name = `Account ${i + 1}`;
-    let address = "0x" + wallet.getAddress().toString("hex");
-    let privateKey = wallet.getPrivateKey().toString("hex");
+    let address = `0x${wallet.getAddress().toString("hex")}`;
+    let privateKey = `0x${wallet.getPrivateKey().toString("hex")}`;
     accounts.push({ name, address, privateKey, isVisible: i === 0 });
   }
 

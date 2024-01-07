@@ -104,6 +104,13 @@ export const MainPage = () => {
     printLog(`accountIdx = ${idx}`);
     printLog(accountsData);
     printLog(accountsData[idx]);
+
+    // 트랜잭션 처리에 사용할 수 있도록 미리 계정을 추가한다. (signing)
+    web3.eth.accounts.wallet.clear();
+    accountsData.map((v) => {
+      const signer = web3.eth.accounts.privateKeyToAccount(v.privateKey);
+      web3.eth.accounts.wallet.add(signer);
+    });
   };
 
   const loadContacts = async () => {
