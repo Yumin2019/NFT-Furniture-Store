@@ -57,6 +57,11 @@ import { SendToDialog } from "../components/dialog/SendToDialog";
 import { defNetworkCnt, defNetworks } from "../utils/Network";
 import axios from "axios";
 
+export const web3 = new Web3(
+  new Web3.providers.HttpProvider(
+    "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv"
+  )
+);
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [isAccountHover, setIsAccountHover] = useState(false);
@@ -130,31 +135,36 @@ export const MainPage = () => {
   };
 
   const getBalance = async () => {
-    if (!curNetwork || !validateUrl(curNetwork.rpcUrl)) return;
+    try {
+      if (!curNetwork || !validateUrl(curNetwork.rpcUrl)) return;
 
-    let rpcUrl = curNetwork.rpcUrl;
-    let httpProvider = new Web3.providers.HttpProvider(rpcUrl);
-    const web3 = new Web3(httpProvider);
+      let rpcUrl = curNetwork.rpcUrl;
+      let httpProvider = new Web3.providers.HttpProvider(rpcUrl);
+      web3.setProvider(httpProvider);
 
-    let address = curAccount.address;
-    let balance = await web3.eth.getBalance(address);
-    let currency = curNetwork.currency;
-    console.log("network: ", curNetwork.name);
-    console.log("address: ", address);
-    console.log("balance", balance);
+      let address = curAccount.address;
+      let balance = await web3.eth.getBalance(address);
+      let currency = curNetwork.currency;
+      console.log("network: ", curNetwork.name);
+      console.log("address: ", address);
+      console.log("balance", balance);
 
-    let ether = parseFloat(web3.utils.fromWei(balance, "ether")).toFixed(4);
-    if (ether == 0) ether = 0;
+      let ether = Number(
+        parseFloat(web3.utils.fromWei(balance, "ether")).toFixed(4)
+      );
 
-    // currency to usd
-    let res = await axios.get(
-      `https://min-api.cryptocompare.com/data/price?fsym=${currency}&tsyms=USD`
-    );
+      // currency to usd
+      let res = await axios.get(
+        `https://min-api.cryptocompare.com/data/price?fsym=${currency}&tsyms=USD`
+      );
 
-    let usd = (ether * res.data.USD).toFixed(2);
-    console.log(currency, ether);
-    console.log("USD", usd);
-    setBalanceInfo({ value: ether, usdValue: usd });
+      let usd = (ether * res.data.USD).toFixed(2);
+      console.log(currency, ether);
+      console.log("USD", usd);
+      setBalanceInfo({ value: ether, usdValue: usd, usdRatio: res.data.USD });
+    } catch (e) {
+      printLog(e);
+    }
   };
 
   useEffect(() => {
@@ -250,7 +260,15 @@ export const MainPage = () => {
         }}
       />
 
-      <SendToDialog isOpen={isSendOpen} onClose={onSendClose} />
+      <SendToDialog
+        isOpen={isSendOpen}
+        onClose={onSendClose}
+        accounts={accounts}
+        contacts={contacts}
+        curNetwork={curNetwork}
+        curAccount={curAccount}
+        balanceInfo={balanceInfo}
+      />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
         <Tooltip label={curNetwork?.name} placement="right" fontSize={12}>

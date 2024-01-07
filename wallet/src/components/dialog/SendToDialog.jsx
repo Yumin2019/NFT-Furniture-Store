@@ -18,64 +18,102 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Image,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { IoMdClose, IoMdArrowDropdown, IoIosArrowBack } from "react-icons/io";
 import { AiOutlineClear } from "react-icons/ai";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaUserCircle, FaQuestionCircle } from "react-icons/fa";
 import { AccountRow } from "../AccountRow";
-import { FaUserCircle } from "react-icons/fa";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
-import { dialogMaxWidth } from "../../utils/Helper";
+import {
+  dialogMaxWidth,
+  printLog,
+  truncate,
+  validateEtherAddress,
+} from "../../utils/Helper";
+import { web3 } from "../../pages/MainPage";
 
-export const SendToDialog = ({ onClose, isOpen }) => {
+export const SendToDialog = ({
+  onClose,
+  isOpen,
+  accounts,
+  contacts,
+  curNetwork,
+  curAccount,
+  balanceInfo,
+}) => {
   const btnRef = useRef(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
   const [curStep, setCurStep] = useState(1);
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [isConfirmInValid, setIsConfirmInvalid] = useState(false);
+  const [isAddrValid, setIsAddrValid] = useState(false);
   const [amountText, setAmountText] = useState("0");
+  const [usdExchangeText, setUsdExchangeText] = useState("0");
+  const [usdExchangeGasText, setUsdExchangeGasText] = useState("0");
+  const [estimatedGasText, setEstimatedGasText] = useState("0");
+  const [selectedAccount, setSelectedAccount] = useState({});
+  const [addressText, setAddressText] = useState("");
 
   useEffect(() => {
     setCurStep(1);
+    setAmountText("0");
+    setAddressText("");
+
+    printLog(curAccount);
+    printLog(curNetwork);
+    printLog(balanceInfo);
   }, [isOpen]);
 
-  useEffect(() => {}, [curStep]);
+  useEffect(() => {
+    web3.eth.getGasPrice().then((result) => {
+      let gasPrice = parseFloat(web3.utils.fromWei(result, "ether")).toFixed(
+        12
+      );
+      let usdExchange = (gasPrice * balanceInfo.usdRatio || 0).toFixed(2);
+      let isInvalid = gasPrice > balanceInfo.value;
 
-  const accounts = [
-    {
-      name: "account 1",
-      address: "0x81Dd5..1.....",
-    },
-    {
-      name: "account 2",
-      address: "0x81Dd5..1.....",
-    },
-    {
-      name: "account 3",
-      address: "0x81Dd5..1.....",
-    },
-  ];
+      printLog(gasPrice);
+      printLog(usdExchange);
+      printLog(isInvalid);
 
-  const contacts = [
-    {
-      name: "contacts 1",
-      address: "0x81Dd5..1.....",
-    },
-    {
-      name: "contacts 2",
-      address: "0x81Dd5..1.....",
-    },
-    {
-      name: "contacts 3",
-      address: "0x81Dd5..1.....",
-    },
-  ];
+      setEstimatedGasText(gasPrice);
+      setUsdExchangeGasText(usdExchange);
+      setIsConfirmInvalid(isInvalid);
+    });
+  }, [curStep]);
+
+  useEffect(() => {
+    if (!balanceInfo || !curAccount || !curNetwork) return;
+
+    let usdExchange = parseFloat(amountText) * balanceInfo.usdRatio || 0;
+    let isInvalid = parseFloat(amountText) > balanceInfo.value;
+
+    printLog(usdExchange.toFixed(2));
+    printLog(`isInvalid = ${isInvalid}`);
+
+    setUsdExchangeText(usdExchange.toFixed(2));
+    setIsInvalid(isInvalid);
+  }, [amountText]);
+
+  useEffect(() => {
+    let isValid = validateEtherAddress(addressText);
+    setIsAddrValid(isValid);
+    printLog(`isAddressValid = ${isValid}`);
+
+    if (isValid) {
+      setSelectedAccount({ name: addressText, address: addressText });
+      setCurStep(2);
+    }
+  }, [addressText]);
 
   return (
     <Modal
       onClose={onClose}
       finalFocusRef={btnRef}
       isOpen={isOpen}
-      scrollBehavior="inside"
+      scrollBehavior="outside"
       size="full"
     >
       <ModalOverlay />
@@ -91,45 +129,68 @@ export const SendToDialog = ({ onClose, isOpen }) => {
           <Box>
             <ModalCloseButton size={32} mr={4} mt={4} />
             <Box margin={4}>
-              <Input variant="outline" placeholder="Enter public address" />
+              <Input
+                variant="outline"
+                placeholder="Enter public address"
+                value={addressText}
+                onChange={(e) => setAddressText(e.target.value)}
+              />
             </Box>
 
-            <Text fontSize={18} ml={4} fontWeight="600">
-              Your accounts
-            </Text>
+            {addressText !== "" && !isAddrValid && (
+              <Text textColor="#dc362e" ml={4}>
+                Invalid Address
+              </Text>
+            )}
 
-            {accounts.map((v, index) => {
-              return (
-                <Box key={index}>
-                  <AccountRow
-                    hoverIdx={hoverIdx}
-                    index={index}
-                    setHoverIdx={setHoverIdx}
-                    v={v}
-                    onClick={() => setCurStep(2)}
-                  />
-                </Box>
-              );
-            })}
+            {addressText === "" && (
+              <Box>
+                <Text fontSize={18} ml={4} fontWeight="600">
+                  Your accounts
+                </Text>
 
-            <Divider />
+                {accounts.map((v, index) => {
+                  return (
+                    <Box key={index}>
+                      <AccountRow
+                        hoverIdx={hoverIdx}
+                        index={index}
+                        setHoverIdx={setHoverIdx}
+                        v={v}
+                        onClick={() => {
+                          printLog(v);
+                          setSelectedAccount(v);
+                          setCurStep(2);
+                        }}
+                      />
+                    </Box>
+                  );
+                })}
 
-            <Text fontSize={18} ml={4} mt={4} fontWeight="600">
-              Contact
-            </Text>
-            {contacts.map((v, index) => {
-              return (
-                <Box key={index}>
-                  <AccountRow
-                    hoverIdx={hoverIdx}
-                    index={index + accounts.length}
-                    setHoverIdx={setHoverIdx}
-                    v={v}
-                    onClick={() => setCurStep(2)}
-                  />
-                </Box>
-              );
-            })}
+                <Divider />
+
+                <Text fontSize={18} ml={4} mt={4} fontWeight="600">
+                  Contact
+                </Text>
+                {contacts.map((v, index) => {
+                  return (
+                    <Box key={index}>
+                      <AccountRow
+                        hoverIdx={hoverIdx}
+                        index={index + accounts.length}
+                        setHoverIdx={setHoverIdx}
+                        v={v}
+                        onClick={() => {
+                          printLog(v);
+                          setSelectedAccount(v);
+                          setCurStep(2);
+                        }}
+                      />
+                    </Box>
+                  );
+                })}
+              </Box>
+            )}
           </Box>
         )}
 
@@ -140,11 +201,11 @@ export const SendToDialog = ({ onClose, isOpen }) => {
               <Flex alignItems="center">
                 <Box>
                   <Text fontSize={16} textColor="#0377ca">
-                    Account 1
+                    {selectedAccount?.name}
                   </Text>
-                  <Text fontSize={12}>
-                    0x8add53b91f178832620ac4e83b29f94bfd716bda
-                  </Text>
+                  {selectedAccount?.name !== selectedAccount?.address && (
+                    <Text fontSize={12}>{selectedAccount?.address}</Text>
+                  )}
                 </Box>
                 <Spacer />
                 <IoMdClose
@@ -164,9 +225,11 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 <Flex alignItems="center" pr={2}>
                   <Box>
                     <Text fontSize={15} fontWeight={500}>
-                      ETH
+                      {curNetwork?.currency}
                     </Text>
-                    <Text fontSize={12}>Balance: 0 ETH</Text>
+                    <Text fontSize={12}>
+                      Balance: {balanceInfo?.value} {curNetwork?.currency}
+                    </Text>
                   </Box>
                   <Spacer />
                   <Menu>
@@ -177,17 +240,11 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                       <MenuItem padding={2}>
                         <Box>
                           <Text fontSize={15} fontWeight={500}>
-                            ETH
+                            {curNetwork?.currency}
                           </Text>
-                          <Text fontSize={12}>Balance: 0 ETH</Text>
-                        </Box>
-                      </MenuItem>
-                      <MenuItem padding={2}>
-                        <Box>
-                          <Text fontSize={15} fontWeight={500}>
-                            MATIC
+                          <Text fontSize={12}>
+                            Balance: {balanceInfo?.value} {curNetwork?.currency}
                           </Text>
-                          <Text fontSize={12}>Balance: 0 MATIC</Text>
                         </Box>
                       </MenuItem>
                     </MenuList>
@@ -214,11 +271,11 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                         }}
                       />
                       <Text fontSize={15} fontWeight={500} ml={2}>
-                        ETH
+                        {curNetwork?.currency}
                       </Text>
                     </Flex>
-                    <Text mt={1} fontSize={12}>
-                      $2.8 USD
+                    <Text mt={1} fontSize={12} fontWeight={500}>
+                      ${usdExchangeText} USD
                     </Text>
                   </Box>
                   <Spacer />
@@ -231,7 +288,15 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 </Flex>
               </Box>
             </Flex>
-            <Text fontSize={12} textColor="#d73848" ml="30%" mt={1}>
+
+            <Text
+              fontSize={12}
+              textColor="#d73848"
+              ml="30%"
+              mt={1}
+              fontWeight={500}
+              visibility={isInvalid ? "visible" : "hidden"}
+            >
               Insufficient funds for gas
             </Text>
 
@@ -261,7 +326,7 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 <FaInfoCircle color="#6a737d" size={12} />
                 <Spacer />
                 <Text fontSize={16} fontWeight="800">
-                  0.0000000403 ETH
+                  {estimatedGasText} {curNetwork?.currency}
                 </Text>
               </Flex>
 
@@ -273,9 +338,8 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 <Text fontSize={14} fontWeight="800" textColor="#535a62" mr={2}>
                   Max fee:
                 </Text>
-
                 <Text fontSize={14} fontWeight="400">
-                  0.00026666 ETH
+                  {estimatedGasText} {curNetwork?.currency}
                 </Text>
               </Flex>
             </Box>
@@ -285,34 +349,66 @@ export const SendToDialog = ({ onClose, isOpen }) => {
         {/* Page 3 */}
         {curStep === 3 && (
           <Box>
-            <Flex
-              alignItems="center"
-              onClick={() => {
-                setCurStep(2);
-              }}
-              cursor="pointer"
-              mt={1}
-              mb={1}
-            >
-              <IoIosArrowBack size={24} color="#0377ca" />
-              <Text fontSize={16} textColor="#0377ca">
-                Edit
-              </Text>
+            <Flex alignItems="center" mt={1} mb={1}>
+              <Flex
+                onClick={() => {
+                  setCurStep(2);
+                }}
+                cursor="pointer"
+              >
+                <IoIosArrowBack size={24} color="#0377ca" />
+                <Text fontSize={16} textColor="#0377ca">
+                  Edit
+                </Text>
+              </Flex>
+
+              <Spacer />
+
+              <Stack
+                direction="row"
+                alignItems="center"
+                backgroundColor="#f2f4f6"
+                borderRadius={24}
+                border="1px solid #bbc0c4"
+                ml={2}
+                mr={2}
+                pl={2}
+                pr={2}
+                pt={1}
+                pb={1}
+              >
+                {curNetwork?.src?.length === 0 && (
+                  <FaQuestionCircle color="grey" />
+                )}
+
+                {curNetwork?.src?.length !== 0 && (
+                  <Image w={4} src={curNetwork.src} borderRadius="full" />
+                )}
+
+                <Text fontSize={12} fontWeight={500}>
+                  {curNetwork?.name}
+                </Text>
+              </Stack>
             </Flex>
             <Box borderTop="1px solid #bbc0c5" borderBottom="1px solid #bbc0c5">
               <Stack direction="row" alignItems="center" pl={4} pr={4}>
                 <Flex flex={1}>
                   <FaUserCircle size={28} color="#3082ce" />
                   <Text textAlign="center" fontSize={14} ml={3} mt="2px">
-                    0x8aDd5..1......
+                    {curAccount?.name}
                   </Text>
                 </Flex>
                 <IoArrowForwardCircleOutline size={40} color="#bbc0c5" />
                 <Flex flex={1}>
                   <FaUserCircle size={28} color="#3082ce" />
-                  <Text textAlign="center" fontSize={14} ml={3} mt="2px">
-                    0x8aDd5..1......
-                  </Text>
+
+                  {selectedAccount && (
+                    <Text textAlign="center" fontSize={14} ml={3} mt="2px">
+                      {validateEtherAddress(selectedAccount.name)
+                        ? truncate(selectedAccount.address, 12)
+                        : selectedAccount.name}
+                    </Text>
+                  )}
                 </Flex>
               </Stack>
             </Box>
@@ -326,20 +422,24 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 p="1px"
                 textAlign="center"
               >
-                <Text fontSize={12}>SENDING ETH</Text>
+                <Text fontSize={12}>SENDING {curNetwork?.currency}</Text>
               </Box>
 
               <Text mt={2} ml={4} fontSize={24}>
-                0
+                {amountText}
               </Text>
 
               <Text ml={4} fontSize={16}>
-                $0.15
+                ${usdExchangeText}
               </Text>
             </Box>
             {/* Page 3 White */}
             <Box background="white" pb={4} pl={4} pr={4}>
-              <Box mt={4} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
+              <Box mt={1} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
+                <Flex>
+                  <Spacer />
+                  <Text fontSize={16}>${usdExchangeGasText}</Text>
+                </Flex>
                 <Flex alignItems="center">
                   <Text fontSize={16} fontWeight="800">
                     Gas
@@ -355,9 +455,9 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                   </Text>
                   <FaInfoCircle color="#6a737d" size={12} />
                   <Spacer />
-                  <Text fontSize={16}>$0.43</Text>
+
                   <Text ml={2} fontSize={16} fontWeight="800">
-                    0.0000000403 ETH
+                    {estimatedGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
 
@@ -376,20 +476,23 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                   </Text>
 
                   <Text fontSize={14} fontWeight="400">
-                    0.00026666 ETH
+                    {estimatedGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
               </Box>
               <Divider />
-              <Box mt={4} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
+              <Box mt={1} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
+                <Flex>
+                  <Spacer />
+                  <Text fontSize={16}>${usdExchangeGasText}</Text>
+                </Flex>
                 <Flex alignItems="center">
                   <Text fontSize={16} fontWeight="800">
                     Total
                   </Text>
                   <Spacer />
-                  <Text fontSize={16}>$0.43</Text>
                   <Text ml={2} fontSize={16} fontWeight="800">
-                    0.0000000403 ETH
+                    {estimatedGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
 
@@ -408,16 +511,18 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                   </Text>
 
                   <Text fontSize={14} fontWeight="400">
-                    0.00026666 ETH
+                    {estimatedGasText} {curNetwork?.currency}
                   </Text>
                 </Flex>
               </Box>
 
-              <Alert status="error" variant="left-accent">
-                <AlertIcon />
-                You do not have enough ETH in your account to pay for
-                transaction fees on Ethereum Mainnet network.
-              </Alert>
+              {isConfirmInValid && (
+                <Alert status="error" variant="left-accent">
+                  <AlertIcon />
+                  You do not have enough {curNetwork?.currency} in your account
+                  to pay for transaction fees on {curNetwork?.name}.
+                </Alert>
+              )}
             </Box>
           </Box>
         )}
@@ -442,6 +547,15 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 {curStep === 3 ? "Reject" : "Cancel"}
               </Button>
               <Button
+                opacity={
+                  curStep === 3
+                    ? isConfirmInValid
+                      ? 0.5
+                      : 1.0
+                    : isInvalid
+                    ? 0.5
+                    : 1.0
+                }
                 ml={4}
                 mr={4}
                 flex={1}
@@ -450,7 +564,13 @@ export const SendToDialog = ({ onClose, isOpen }) => {
                 borderRadius={32}
                 mb={4}
                 onClick={() => {
-                  setCurStep(3);
+                  if (curStep === 3) {
+                    if (isConfirmInValid) return;
+                    console.log("signing");
+                  } else {
+                    if (isInvalid) return;
+                    setCurStep(3);
+                  }
                 }}
               >
                 {curStep === 3 ? "Confirm" : "Next"}
