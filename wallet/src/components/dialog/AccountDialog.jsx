@@ -29,6 +29,7 @@ export const AccountDialog = ({
   curIdx,
   loadAccount,
   setCurIdx,
+  setAccount,
 }) => {
   const btnRef = useRef(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
@@ -133,6 +134,7 @@ export const AccountDialog = ({
               onMouseOut={() => setHoverIdx(-1)}
               onClick={() => {
                 setCurIdx(index);
+                setAccount(accounts[index]);
                 onClose();
               }}
             >

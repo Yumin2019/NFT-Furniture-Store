@@ -37,6 +37,7 @@ export const NetworkDialog = ({
   onClose,
   isOpen,
   networks,
+  setNetworkIdx,
   setCurNetwork,
   curNetwork,
   loadNetworks,
@@ -180,6 +181,7 @@ export const NetworkDialog = ({
           ) {
             printLog("network to ethereum mainnet");
             saveData("networkIdx", 0);
+            setNetworkIdx(0);
           }
 
           printLog(saveNetworks);
@@ -213,6 +215,7 @@ export const NetworkDialog = ({
                 onMouseOver={() => setHoverIdx(index)}
                 onMouseOut={() => setHoverIdx(-1)}
                 onClick={() => {
+                  setNetworkIdx(index);
                   setCurNetwork(rowNetworks[index]);
                   saveData("networkIdx", index);
                   onClose();

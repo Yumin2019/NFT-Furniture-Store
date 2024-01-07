@@ -47,6 +47,7 @@ import {
   removeData,
   saveData,
   truncate,
+  validateUrl,
 } from "../utils/Helper";
 import { RiShareBoxFill } from "react-icons/ri";
 import { TbReportSearch } from "react-icons/tb";
@@ -54,12 +55,15 @@ import { ContactDialog } from "../components/dialog/ContactDialog";
 import { BookmarkDialog } from "../components/dialog/BookmarkDialog";
 import { SendToDialog } from "../components/dialog/SendToDialog";
 import { defNetworkCnt, defNetworks } from "../utils/Network";
+import axios from "axios";
 
 export const MainPage = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [isAccountHover, setIsAccountHover] = useState(false);
   const [isMenuHover, setIsMenuHover] = useState(false);
   const toast = useToast();
+
+  const [balanceInfo, setBalanceInfo] = useState({ value: "0", usdValue: "0" });
   const [accountIdx, setAccountIdx] = useState(0);
   const [networkIdx, setNetworkIdx] = useState(0);
   const [accounts, setAccounts] = useState([]);
@@ -68,13 +72,12 @@ export const MainPage = () => {
   const [networks, setNetworks] = useState([]);
   const [curAccount, setCurAccount] = useState({});
   const [curNetwork, setCurNetwork] = useState({
-    name: "Ethereum Mainnet",
-    src: "/image/eth_logo.png",
-    rpcUrl:
-      "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv",
+    name: "",
+    src: "",
+    rpcUrl: "",
     chainId: 1,
-    currency: "ETH",
-    explorerUrl: "https://etherscan.io",
+    currency: "",
+    explorerUrl: "",
   });
 
   const handleCopyClipBoard = async (text) => {
@@ -96,14 +99,6 @@ export const MainPage = () => {
     printLog(`accountIdx = ${idx}`);
     printLog(accountsData);
     printLog(accountsData[idx]);
-
-    let rpcUrl =
-      "https://eth-mainnet.g.alchemy.com/v2/yZVCAfqWyhjsvCfmmV_gpiypONY0MwYv";
-    let httpProvider = new Web3.providers.HttpProvider(rpcUrl);
-    const web3 = new Web3(httpProvider);
-
-    let balance = await web3.eth.getBalance(accountsData[idx].address);
-    console.log("balance", balance);
   };
 
   const loadContacts = async () => {
@@ -134,6 +129,38 @@ export const MainPage = () => {
     printLog(networkData);
   };
 
+  const getBalance = async () => {
+    if (!curNetwork || !validateUrl(curNetwork.rpcUrl)) return;
+
+    let rpcUrl = curNetwork.rpcUrl;
+    let httpProvider = new Web3.providers.HttpProvider(rpcUrl);
+    const web3 = new Web3(httpProvider);
+
+    let address = curAccount.address;
+    let balance = await web3.eth.getBalance(address);
+    let currency = curNetwork.currency;
+    console.log("network: ", curNetwork.name);
+    console.log("address: ", address);
+    console.log("balance", balance);
+
+    let ether = parseFloat(web3.utils.fromWei(balance, "ether")).toFixed(4);
+    if (ether == 0) ether = 0;
+
+    // currency to usd
+    let res = await axios.get(
+      `https://min-api.cryptocompare.com/data/price?fsym=${currency}&tsyms=USD`
+    );
+
+    let usd = (ether * res.data.USD).toFixed(2);
+    console.log(currency, ether);
+    console.log("USD", usd);
+    setBalanceInfo({ value: ether, usdValue: usd });
+  };
+
+  useEffect(() => {
+    getBalance();
+  }, [curNetwork, curAccount]);
+
   useEffect(() => {
     loadAccounts();
     loadContacts();
@@ -141,12 +168,7 @@ export const MainPage = () => {
     loadNetworks();
   }, []);
 
-  useEffect(() => {
-    setCurAccount(accounts[accountIdx]);
-  }, [accountIdx]);
-
   const clickNetwork = () => {
-    console.log("tab");
     onNetworkOpen();
   };
 
@@ -191,18 +213,20 @@ export const MainPage = () => {
         onClose={onAccountClose}
         accounts={accounts}
         curIdx={accountIdx}
+        setCurIdx={setAccountIdx}
+        setAccount={setCurAccount}
         loadAccount={() => {
           loadAccounts();
         }}
-        setCurIdx={setAccountIdx}
       />
 
       <NetworkDialog
         isOpen={isNetworkOpen}
         onClose={onNetworkClose}
         networks={networks}
-        setCurNetwork={setCurNetwork}
         curNetwork={curNetwork}
+        setCurNetwork={setCurNetwork}
+        setNetworkIdx={setNetworkIdx}
         loadNetworks={() => {
           loadNetworks();
         }}
@@ -341,9 +365,9 @@ export const MainPage = () => {
         </Button>
       </Tooltip>
       <Text fontSize={32} mt={4}>
-        0.1807 {curNetwork?.currency}
+        {balanceInfo?.value} {curNetwork?.currency}
       </Text>
-      <Text fontSize={16}>$0.19 USD</Text>
+      <Text fontSize={16}>{`$${balanceInfo?.usdValue} USD`}</Text>
       <Center mt={6}>
         <Stack direction="row">
           <Box width="50px" ml="10px" mr="10px" onClick={onSendOpen}>
@@ -416,7 +440,14 @@ export const MainPage = () => {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <TokensTab curNetwork={curNetwork} />
+            <TokensTab
+              curNetwork={curNetwork}
+              balanceInfo={balanceInfo}
+              onRefresh={() => {
+                getBalance();
+                infoToast(toast, "Refreshed");
+              }}
+            />
           </TabPanel>
           <TabPanel>
             <ActivityTab curNetwork={curNetwork} />

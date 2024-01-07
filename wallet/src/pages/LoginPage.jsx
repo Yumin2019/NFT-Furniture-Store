@@ -10,7 +10,6 @@ import {
   Image,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { api } from "../utils/Axios";
 import { errorToast, loadData, successToast } from "../utils/Helper";
 import { useNavigate } from "react-router-dom";
 
