@@ -11,7 +11,6 @@ import {
   Spacer,
   Stack,
 } from "@chakra-ui/react";
-import { FaPlus } from "react-icons/fa6";
 import { useRef } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
@@ -180,13 +179,6 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
               </Text>
               <Text fontSize={14}>$0.00 USD</Text>
             </Box>
-          </Flex>
-
-          <Flex align="center">
-            <FaPlus size={18} />
-            <Text fontWeight="bold" fontSize={15} ml={2}>
-              Activity log
-            </Text>
           </Flex>
         </ModalBody>
       </ModalContent>

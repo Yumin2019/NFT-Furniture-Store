@@ -75,6 +75,7 @@ export const MainPage = () => {
   const [contacts, setContacts] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
   const [networks, setNetworks] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [curAccount, setCurAccount] = useState({});
   const [curNetwork, setCurNetwork] = useState({
     name: "",
@@ -141,6 +142,18 @@ export const MainPage = () => {
     printLog(networkData);
   };
 
+  const loadActivities = async () => {
+    try {
+      if (!curAccount || !curAccount.address) return;
+      let activities = (await loadData(`activity_${curAccount.address}`)) || [];
+
+      setActivities(activities);
+      printLog(activities);
+    } catch (e) {
+      printLog(e);
+    }
+  };
+
   const getBalance = async () => {
     try {
       if (!curNetwork || !validateUrl(curNetwork.rpcUrl)) return;
@@ -176,6 +189,7 @@ export const MainPage = () => {
 
   useEffect(() => {
     getBalance();
+    loadActivities();
   }, [curNetwork, curAccount]);
 
   useEffect(() => {
@@ -275,6 +289,8 @@ export const MainPage = () => {
         curNetwork={curNetwork}
         curAccount={curAccount}
         balanceInfo={balanceInfo}
+        activities={activities}
+        loadActivities={loadActivities}
       />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">
@@ -475,7 +491,11 @@ export const MainPage = () => {
             />
           </TabPanel>
           <TabPanel>
-            <ActivityTab curNetwork={curNetwork} />
+            <ActivityTab
+              curNetwork={curNetwork}
+              activities={activities}
+              balanceInfo={balanceInfo}
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>

@@ -29,6 +29,7 @@ import { IoArrowForwardCircleOutline } from "react-icons/io5";
 import {
   dialogMaxWidth,
   printLog,
+  saveData,
   truncate,
   validateEtherAddress,
 } from "../../utils/Helper";
@@ -42,6 +43,8 @@ export const SendToDialog = ({
   curNetwork,
   curAccount,
   balanceInfo,
+  activities,
+  loadActivities,
 }) => {
   const btnRef = useRef(null);
   const [hoverIdx, setHoverIdx] = useState(-1);
@@ -580,10 +583,10 @@ export const SendToDialog = ({
                   if (curStep === 3) {
                     if (isConfirmInValid) return;
 
+                    // 토큰 전송을 처리한다.
                     let sendAddress = curAccount.address;
                     let recvAddress = selectedAccount.address;
                     let value = web3.utils.toWei(amountText, "ether");
-
                     let tx = {
                       from: sendAddress,
                       to: recvAddress,
@@ -591,20 +594,25 @@ export const SendToDialog = ({
                     };
 
                     tx.gas = await web3.eth.estimateGas(tx);
-                    printLog(tx);
                     const receipt = await web3.eth.sendTransaction(tx);
-                    const transaction = await web3.eth.getTransaction(
-                      receipt.transactionHash
-                    );
-                    let blockInfo = await web3.eth.getBlock(
-                      receipt.blockNumber
-                    );
 
+                    printLog(tx);
                     printLog(receipt);
-                    printLog(blockInfo);
-                    printLog(transaction);
 
-                    // 계정별 정보 저장하기
+                    // Activity 정보를 계정별로 저장한다.
+                    let saveActivity = {
+                      name: "Send",
+                      txHash: receipt.transactionHash,
+                      blockNumber: Number(receipt.blockNumber),
+                      chainId: Number(curNetwork.chainId),
+                    };
+
+                    let newActivities = [saveActivity, ...activities];
+                    saveData(`activity_${curAccount.address}`, newActivities);
+                    printLog(saveActivity);
+
+                    loadActivities();
+                    onClose();
                   } else {
                     if (isInvalid) return;
                     setCurStep(3);
