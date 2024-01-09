@@ -38,6 +38,7 @@ import { NetworkDialog } from "../components/dialog/NetworkDialog";
 import { AccountDialog } from "../components/dialog/AccountDialog";
 import { Web3 } from "web3";
 import {
+  copyTextOnClipboard,
   errorToast,
   excludeHttp,
   infoToast,
@@ -85,15 +86,6 @@ export const MainPage = () => {
     currency: "",
     explorerUrl: "",
   });
-
-  const handleCopyClipBoard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(curAccount?.address || "");
-      infoToast(toast, "Copied");
-    } catch (e) {
-      errorToast(toast, "Failed to copy");
-    }
-  };
 
   const loadAccounts = async () => {
     let idx = (await loadData("accountIdx")) || 0;
@@ -400,7 +392,9 @@ export const MainPage = () => {
           size="sm"
           borderRadius={25}
           rightIcon={<FaClipboard />}
-          onClick={handleCopyClipBoard}
+          onClick={() => {
+            copyTextOnClipboard(curAccount?.address || "");
+          }}
         >
           {curAccount?.address && truncate(curAccount.address, 10)}
         </Button>

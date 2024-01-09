@@ -10,14 +10,21 @@ import {
   Text,
   Spacer,
   Stack,
+  useToast,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
-import { dialogMaxWidth } from "../../utils/Helper";
+import {
+  copyTextOnClipboard,
+  dialogMaxWidth,
+  openInNewTab,
+  truncate,
+} from "../../utils/Helper";
 
-export const ActivityDialog = ({ onClose, isOpen }) => {
+export const ActivityDialog = ({ onClose, isOpen, activity, curNetwork }) => {
   const btnRef = useRef(null);
+  const toast = useToast();
 
   return (
     <Modal
@@ -45,7 +52,18 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
               Status
             </Text>
             <Spacer />
-            <Text fontSize={14} textColor="#0f79cb" cursor="pointer">
+            <Text
+              fontSize={14}
+              textColor="#0f79cb"
+              cursor="pointer"
+              onClick={() => {
+                if (curNetwork?.explorerUrl && activity?.txHash) {
+                  openInNewTab(
+                    `${curNetwork.explorerUrl}/tx/${activity.txHash}`
+                  );
+                }
+              }}
+            >
               View on block explorer
             </Text>
           </Flex>
@@ -55,7 +73,16 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
               Confirmed
             </Text>
             <Spacer />
-            <Text fontSize={14} textColor="#0f79cb" cursor="pointer">
+            <Text
+              fontSize={14}
+              textColor="#0f79cb"
+              cursor="pointer"
+              onClick={() => {
+                if (activity?.txHash) {
+                  copyTextOnClipboard(toast, activity.txHash);
+                }
+              }}
+            >
               Copy Transaction ID
             </Text>
           </Flex>
@@ -73,15 +100,15 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
           <Stack direction="row" alignItems="center" mb={4}>
             <Flex flex={1}>
               <FaUserCircle size={28} color="#3082ce" />
-              <Text textAlign="center" fontSize={14} ml={3} mt="2px">
-                0x8aDd5..1......
+              <Text textAlign="center" fontSize={13} ml={3} mt="4px">
+                {truncate(activity?.from, 10)}
               </Text>
             </Flex>
             <IoArrowForwardCircleOutline size={40} color="#bbc0c4" />
             <Flex flex={1}>
               <FaUserCircle size={28} color="#3082ce" />
-              <Text textAlign="center" fontSize={14} ml={3} mt="2px">
-                0x8aDd5..1......
+              <Text textAlign="center" fontSize={13} ml={3} mt="4px">
+                {truncate(activity?.to, 10)}
               </Text>
             </Flex>
           </Stack>
@@ -96,7 +123,7 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
             </Text>
             <Spacer />
             <Text fontSize={14} textColor="#60676e">
-              45
+              {activity?.nounce}
             </Text>
           </Flex>
 
@@ -106,7 +133,7 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
             </Text>
             <Spacer />
             <Text fontSize={14} fontWeight="bold">
-              -0.001 MATIC
+              -{activity?.value} {curNetwork?.currency}
             </Text>
           </Flex>
 
@@ -116,7 +143,7 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
             </Text>
             <Spacer />
             <Text fontSize={14} textColor="#60676e">
-              125543
+              {activity?.gasLimit}
             </Text>
           </Flex>
 
@@ -126,7 +153,7 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
             </Text>
             <Spacer />
             <Text fontSize={14} textColor="#60676e">
-              125543
+              {activity?.gasUsed}
             </Text>
           </Flex>
 
@@ -135,7 +162,7 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
               Base fee (GWEI)
             </Text>
             <Spacer />
-            <Text fontSize={14}>0.00000000016</Text>
+            <Text fontSize={14}> {activity?.baseFee}</Text>
           </Flex>
 
           <Flex pt={2} pb={2}>
@@ -143,7 +170,7 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
               Priority fee (GWEI)
             </Text>
             <Spacer />
-            <Text fontSize={14}>2.5</Text>
+            <Text fontSize={14}>{activity?.priorityFee}</Text>
           </Flex>
 
           <Flex pt={2} pb={2}>
@@ -152,19 +179,23 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
             </Text>
             <Spacer />
             <Box textAlign="right">
-              <Text fontSize={14}>0.000266 MATIC</Text>
-              <Text fontSize={14}>$0.00 USD</Text>
+              <Text fontSize={14}>
+                {activity?.totalGasFee} {curNetwork?.currency}
+              </Text>
+              <Text fontSize={14}>${activity?.totalGasFeeUsd} USD</Text>
             </Box>
           </Flex>
 
           <Flex pt={2} pb={2}>
             <Text fontSize={14} textColor="#60676e">
-              Total gas fee
+              Max fee per gas
             </Text>
             <Spacer />
             <Box textAlign="right">
-              <Text fontSize={14}>0.000266 MATIC</Text>
-              <Text fontSize={14}>$0.00 USD</Text>
+              <Text fontSize={14}>
+                {activity?.maxFeePerGas} {curNetwork?.currency}
+              </Text>
+              <Text fontSize={14}>${activity?.maxFeePerGasUsd} USD</Text>
             </Box>
           </Flex>
 
@@ -175,9 +206,9 @@ export const ActivityDialog = ({ onClose, isOpen }) => {
             <Spacer />
             <Box textAlign="right">
               <Text fontSize={14} fontWeight="bold">
-                0.000266 MATIC
+                {activity?.total} {curNetwork?.currency}
               </Text>
-              <Text fontSize={14}>$0.00 USD</Text>
+              <Text fontSize={14}>${activity?.totalUsd} USD</Text>
             </Box>
           </Flex>
         </ModalBody>

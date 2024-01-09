@@ -14,54 +14,99 @@ import { printLog } from "../../utils/Helper";
 
 export const ActivityTab = ({ curNetwork, activities, balanceInfo }) => {
   const [convertActivities, setConvertActivities] = useState([]);
+  const [selectedActivity, setSelectedActivity] = useState({});
 
   const updateList = async () => {
-    // activities: 해당 계정의 모든 chainId에 대한 트랜잭션 정보
-    // chainId에 맞는 트랜잭션 정보만 처리해야 한다.
-    let list = [];
-    await Promise.all(
-      activities.map(async (v) => {
-        if (v.chainId !== curNetwork.chainId) return;
+    try {
+      // activities: 해당 계정의 모든 chainId에 대한 트랜잭션 정보
+      // chainId에 맞는 트랜잭션 정보만 처리해야 한다.
+      let list = [];
+      await Promise.all(
+        activities.map(async (v, index) => {
+          if (v.chainId !== curNetwork.chainId) return;
 
-        let transaction = await web3.eth.getTransaction(v.txHash);
-        let block = await web3.eth.getBlock(v.blockNumber);
-        let receipt = await web3.eth.getTransactionReceipt(v.txHash);
+          let transaction = await web3.eth.getTransaction(v.txHash);
+          let block = await web3.eth.getBlock(v.blockNumber);
+          let receipt = await web3.eth.getTransactionReceipt(v.txHash);
 
-        // Activity 탭에 필요한 정보를 만들어준다.
-        let date = new Date(Number(block.timestamp) * 1000);
-        let value = parseFloat(web3.utils.fromWei(transaction.value, "ether"));
-        let usdExchange = value * balanceInfo.usdRatio || 0;
-        let data = {
-          name: v.name,
-          confirmed: Number(receipt.status) === 1,
-          value: Number(value.toFixed(7)),
-          usdValue: usdExchange.toFixed(2),
-          date: date,
-          dateString: date.toLocaleDateString().replaceAll(" ", ""),
-        };
+          // Activity 탭에 필요한 정보를 만들어준다.
+          // 상세 항목에서 처리할 부분도 미리 계산한다.
+          let date = new Date(Number(block.timestamp) * 1000);
+          let value = parseFloat(
+            web3.utils.fromWei(transaction.value, "ether")
+          );
+          let usdExchange = value * balanceInfo.usdRatio || 0;
 
-        list.push(data);
+          let totalGasFee = web3.utils.fromWei(
+            receipt.gasUsed * transaction.gasPrice,
+            "ether"
+          );
+          totalGasFee = Number(parseFloat(totalGasFee).toFixed(9));
+          let totalGasFeeUsd = totalGasFee * balanceInfo.usdRatio || 0;
 
-        // printLog(transaction);
-        // printLog(block);
-        // printLog(receipt);
-        // printLog(data);
-      })
-    );
+          let maxFeePerGas = web3.utils.fromWei(
+            transaction.maxFeePerGas,
+            "ether"
+          );
+          maxFeePerGas = parseFloat(maxFeePerGas).toFixed(9);
+          let maxFeePerGasUsd = maxFeePerGas * balanceInfo.usdRatio || 0;
 
-    list = list.sort((a, b) => b.date - a.date);
-    setConvertActivities(list);
-    console.log(list);
+          let total = totalGasFee + value;
+          let totalUsd = total * balanceInfo.usdRatio || 0;
+
+          let data = {
+            name: v.name,
+            confirmed: Number(receipt.status) === 1,
+            value: Number(value.toFixed(7)),
+            usdValue: usdExchange.toFixed(2),
+            date: date,
+            dateString: date.toLocaleDateString().replaceAll(" ", ""),
+            txHash: v.txHash,
+
+            // from to
+            from: receipt.from,
+            to: receipt.to,
+
+            // nounce, gasLimit, gasUsed
+            nounce: Number(transaction.nonce),
+            gasLimit: Number(transaction.gas),
+            gasUsed: Number(receipt.gasUsed),
+
+            // baseFee, priorityFee
+            baseFee: web3.utils.fromWei(block.baseFeePerGas, "gwei"),
+            priorityFee: web3.utils.fromWei(
+              transaction.maxPriorityFeePerGas,
+              "gwei"
+            ),
+
+            // totalGasFee, totalGasFeeUsd
+            totalGasFee: totalGasFee,
+            totalGasFeeUsd: totalGasFeeUsd.toFixed(2),
+
+            // maxFeePerGas, maxFeePerGasUsd
+            maxFeePerGas: maxFeePerGas,
+            maxFeePerGasUsd: maxFeePerGasUsd.toFixed(2),
+
+            // total, totalUsd
+            total: Number(parseFloat(total).toFixed(8)),
+            totalUsd: totalUsd.toFixed(2),
+          };
+
+          list.push(data);
+        })
+      );
+
+      list = list.sort((a, b) => b.date - a.date);
+      setConvertActivities(list);
+      printLog(list);
+    } catch (e) {
+      printLog(e);
+    }
   };
 
   useEffect(() => {
     updateList();
   }, [activities]);
-
-  const clickActivity = () => {
-    console.log("tab");
-    onActivityOpen();
-  };
 
   const {
     isOpen: isActivityOpen,
@@ -75,6 +120,8 @@ export const ActivityTab = ({ curNetwork, activities, balanceInfo }) => {
         isOpen={isActivityOpen}
         onOpen={onActivityOpen}
         onClose={onActivityClose}
+        activity={selectedActivity}
+        curNetwork={curNetwork}
       />
 
       {convertActivities.length === 0 && (
@@ -95,7 +142,14 @@ export const ActivityTab = ({ curNetwork, activities, balanceInfo }) => {
           convertActivities[index - 1].dateString !==
             convertActivities[index].dateString;
         return (
-          <Box key={index} onClick={clickActivity} cursor="pointer">
+          <Box
+            key={index}
+            onClick={() => {
+              setSelectedActivity(v);
+              onActivityOpen();
+            }}
+            cursor="pointer"
+          >
             {showDate && (
               <Text
                 textAlign="left"

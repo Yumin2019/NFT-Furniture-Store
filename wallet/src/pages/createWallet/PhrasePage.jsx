@@ -13,6 +13,7 @@ import { ListItem, UnorderedList } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaEye } from "react-icons/fa";
 import {
+  copyTextOnClipboard,
   createEtherAccount,
   createMnemonic,
   errorToast,
@@ -37,20 +38,6 @@ export const PhasePage = ({ onNext }) => {
 
   const [confirmIndexs, setConfirmIndexes] = useState(new Set([]));
   const [isValid, setIsValid] = useState(true);
-
-  const handleCopyClipBoard = async (text) => {
-    try {
-      let text = "";
-      wordList.map((v) => {
-        text += `${v} `;
-      });
-      await navigator.clipboard.writeText(text);
-      infoToast(toast, "Copied");
-    } catch (e) {
-      console.log(e);
-      errorToast(toast, "Failed to copy");
-    }
-  };
 
   useEffect(() => {
     let mnemonic = createMnemonic();
@@ -182,7 +169,13 @@ export const PhasePage = ({ onNext }) => {
             variant="link"
             size="sm"
             borderRadius={25}
-            onClick={handleCopyClipBoard}
+            onClick={() => {
+              let text = "";
+              wordList.map((v) => {
+                text += `${v} `;
+              });
+              copyTextOnClipboard(text);
+            }}
           >
             <Box mr={1}>
               <IoCopy />

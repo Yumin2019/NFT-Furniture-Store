@@ -188,6 +188,7 @@ const openInNewTab = (url) => {
 };
 
 const truncate = (str, maxlength) => {
+  if (!str) return "";
   return str.length > maxlength ? str.slice(0, maxlength - 1) + "…" : str;
 };
 
@@ -198,6 +199,16 @@ const excludeHttp = (url) => {
     return url.substring("http://".length);
   }
   return url;
+};
+
+const copyTextOnClipboard = async (toast, text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    infoToast(toast, "Copied");
+  } catch (e) {
+    console.log(e);
+    errorToast(toast, "Failed to copy");
+  }
 };
 
 export {
@@ -224,4 +235,5 @@ export {
   truncate,
   excludeHttp,
   openInNewTab,
+  copyTextOnClipboard,
 };

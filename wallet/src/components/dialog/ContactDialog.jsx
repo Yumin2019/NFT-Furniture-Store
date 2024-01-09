@@ -24,6 +24,7 @@ import { MdDeleteForever } from "react-icons/md";
 import { EditContactDialog } from "./EditContactDialog";
 import { BasicDialog } from "./BasicDialog";
 import {
+  copyTextOnClipboard,
   dialogMaxWidth,
   errorToast,
   infoToast,
@@ -37,15 +38,6 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
   const toast = useToast();
   const [hoverIdx, setHoverIdx] = useState(-1);
   const [newAccountIdx, setNewAccountIdx] = useState(0);
-
-  const handleCopyClipBoard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      infoToast(toast, "Copied");
-    } catch (e) {
-      errorToast(toast, "Failed to copy");
-    }
-  };
 
   useEffect(() => {
     let list = contacts || [];
@@ -204,7 +196,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
                     <MenuItem
                       padding={3}
                       onClick={(e) => {
-                        handleCopyClipBoard(v.address);
+                        copyTextOnClipboard(v.address);
                       }}
                     >
                       <FaClipboard size={18} color="#3182ce" />
