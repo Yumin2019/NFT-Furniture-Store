@@ -9,19 +9,58 @@ import {
   useToast,
   Image,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { errorToast, loadData, successToast } from "../utils/Helper";
+import { useEffect, useState } from "react";
+import {
+  clearData,
+  errorToast,
+  loadData,
+  printLog,
+  saveData,
+  showTabOr,
+  successToast,
+} from "../utils/Helper";
 import { useNavigate } from "react-router-dom";
+import { useAtom } from "jotai";
+import { tabAtom } from "..";
 
 export const LoginPage = () => {
-  const [emailText, setEmailText] = useState("");
+  const [isTabAtom, setIsTabAtom] = useAtom(tabAtom);
   const [passwordText, setPasswordText] = useState("");
+  const [loadPassword, setLoadPassword] = useState("");
   const toast = useToast();
   const navigate = useNavigate();
 
+  const loadLoginInfo = async () => {
+    let password = (await loadData("password")) || "";
+    let accounts = (await loadData("accounts")) || [];
+
+    if (accounts.length === 0 || password === "") {
+      await clearData();
+      printLog("no information");
+      navigate("/intro");
+      return;
+    }
+
+    setLoadPassword(password);
+    let time = (await loadData("loginTime")) || 0;
+    let curTime = new Date().getTime();
+
+    // 최근 로그인 시간이 30분 미만인 경우, 메인 페이지로 이동한다.
+    if (curTime - time < 30 * 60 * 1000) {
+      printLog("auto login");
+      navigate("/main");
+    }
+  };
+
+  useEffect(() => {
+    loadLoginInfo();
+  }, []);
+
   const clickLogin = async () => {
-    let password = await loadData("password");
-    if (passwordText === password) {
+    if (passwordText === loadPassword) {
+      // 로그인 시간을 갱신한다.
+      let curTime = new Date().getTime();
+      await saveData("loginTime", curTime);
       navigate("/main");
     } else {
       errorToast(toast, `Login Failed`);
@@ -66,7 +105,18 @@ export const LoginPage = () => {
             Login
           </Button>
 
-          <Button size="sm" variant="link" colorScheme="blue" mb={4}>
+          <Button
+            size="sm"
+            variant="link"
+            colorScheme="blue"
+            mb={4}
+            onClick={() => {
+              showTabOr("importWallet", () => {
+                navigate("/importWallet");
+                setIsTabAtom(true);
+              });
+            }}
+          >
             Forgot password?
           </Button>
         </Box>

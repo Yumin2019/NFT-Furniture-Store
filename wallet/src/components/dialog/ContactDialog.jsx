@@ -80,7 +80,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
         title={dialogInfo.title}
         yesText={dialogInfo.yesText}
         noText="Cancel"
-        onClick={(nameText, addressText) => {
+        onClick={async (nameText, addressText) => {
           let name = nameText || "";
           let address = addressText || "";
           let idx = dialogInfo.idx;
@@ -107,7 +107,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
           printLog(idx);
           printLog(saveContacts);
 
-          saveData("contacts", saveContacts);
+          await saveData("contacts", saveContacts);
           loadContacts();
           onContactClose();
         }}
@@ -120,7 +120,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
         title={dialogInfo.title}
         yesText={dialogInfo.yesText}
         noText="Cancel"
-        onClick={() => {
+        onClick={async () => {
           let saveContacts = [...contacts];
           if (dialogInfo.yesText === "Delete") {
             for (let i = dialogInfo.idx + 1; i < saveContacts.length; ++i) {
@@ -130,7 +130,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
           }
 
           printLog(saveContacts);
-          saveData("contacts", saveContacts);
+          await saveData("contacts", saveContacts);
           loadContacts();
           onBasicClose();
         }}
@@ -196,7 +196,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
                     <MenuItem
                       padding={3}
                       onClick={(e) => {
-                        copyTextOnClipboard(v.address);
+                        copyTextOnClipboard(toast, v.address);
                       }}
                     >
                       <FaClipboard size={18} color="#3182ce" />

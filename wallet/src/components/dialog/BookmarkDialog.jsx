@@ -88,7 +88,7 @@ export const BookmarkDialog = ({
         noText="Cancel"
         placeHolder2="URL"
         rowText2="URL"
-        onClick={(nameText, urlText) => {
+        onClick={async (nameText, urlText) => {
           let name = nameText || "";
           let url = urlText || "";
           let idx = dialogInfo.idx;
@@ -115,7 +115,7 @@ export const BookmarkDialog = ({
           printLog(idx);
           printLog(saveBookmarks);
 
-          saveData("bookmarks", saveBookmarks);
+          await saveData("bookmarks", saveBookmarks);
           loadBookmarks();
           onContactClose();
         }}
@@ -128,7 +128,7 @@ export const BookmarkDialog = ({
         title={dialogInfo.title}
         yesText={dialogInfo.yesText}
         noText="Cancel"
-        onClick={() => {
+        onClick={async () => {
           let saveBookmarks = [...bookmarks];
           if (dialogInfo.yesText === "Delete") {
             for (let i = dialogInfo.idx + 1; i < saveBookmarks.length; ++i) {
@@ -138,7 +138,7 @@ export const BookmarkDialog = ({
           }
 
           printLog(saveBookmarks);
-          saveData("bookmarks", saveBookmarks);
+          await saveData("bookmarks", saveBookmarks);
           loadBookmarks();
           onBasicClose();
         }}

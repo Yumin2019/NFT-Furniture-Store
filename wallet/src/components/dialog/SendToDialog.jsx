@@ -608,7 +608,10 @@ export const SendToDialog = ({
                     };
 
                     let newActivities = [saveActivity, ...activities];
-                    saveData(`activity_${curAccount.address}`, newActivities);
+                    await saveData(
+                      `activity_${curAccount.address}`,
+                      newActivities
+                    );
                     printLog(saveActivity);
 
                     loadActivities();

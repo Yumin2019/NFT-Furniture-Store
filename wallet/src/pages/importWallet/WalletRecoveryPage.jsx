@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
+  clearData,
   createEtherAccount,
   errorToast,
   infoToast,
@@ -106,8 +107,9 @@ export const WalletRecoveryPage = ({ onNext }) => {
           onClick={async () => {
             if (isValid) {
               let accounts = await createEtherAccount(mnemonicText);
-              saveData("accounts", accounts);
-              saveData("accountIdx", 0);
+              await clearData();
+              await saveData("accounts", accounts);
+              await saveData("accountIdx", 0);
               onNext();
             }
           }}

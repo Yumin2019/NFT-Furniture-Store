@@ -94,7 +94,7 @@ export const NetworkDialog = ({
         yesText={dialogInfo.yesText}
         noText="Cancel"
         isEditMode={dialogInfo.isEditMode}
-        onClick={(
+        onClick={async (
           networkNameText,
           rpcUrlText,
           chainIdText,
@@ -148,7 +148,7 @@ export const NetworkDialog = ({
           }
 
           printLog(json);
-          saveData("networks", saveNetworks);
+          await saveData("networks", saveNetworks);
           loadNetworks();
           onEditClose();
         }}
@@ -161,7 +161,7 @@ export const NetworkDialog = ({
         title={dialogInfo.title}
         yesText={dialogInfo.yesText}
         noText="Cancel"
-        onClick={() => {
+        onClick={async () => {
           let saveNetworks = [...networks];
           if (dialogInfo.yesText === "Delete") {
             for (
@@ -180,12 +180,12 @@ export const NetworkDialog = ({
             curNetwork.chainId === rowNetworks[dialogInfo.idx].chainId
           ) {
             printLog("network to ethereum mainnet");
-            saveData("networkIdx", 0);
+            await saveData("networkIdx", 0);
             setNetworkIdx(0);
           }
 
           printLog(saveNetworks);
-          saveData("networks", saveNetworks);
+          await saveData("networks", saveNetworks);
           loadNetworks();
           onBasicClose();
         }}
@@ -214,10 +214,10 @@ export const NetworkDialog = ({
                 }
                 onMouseOver={() => setHoverIdx(index)}
                 onMouseOut={() => setHoverIdx(-1)}
-                onClick={() => {
+                onClick={async () => {
                   setNetworkIdx(index);
                   setCurNetwork(rowNetworks[index]);
-                  saveData("networkIdx", index);
+                  await saveData("networkIdx", index);
                   onClose();
                 }}
               >

@@ -21,8 +21,8 @@ export const CreatePasswordPage = ({ onNext, buttonText }) => {
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
-  const clickCreate = () => {
-    saveData("password", pwText);
+  const clickCreate = async () => {
+    await saveData("password", pwText);
     onNext();
   };
 

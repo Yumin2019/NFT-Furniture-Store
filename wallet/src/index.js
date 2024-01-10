@@ -14,11 +14,11 @@ export const tabAtom = atom(false);
 const router = createMemoryRouter([
   {
     path: "/",
-    element: <IntroPage />,
+    element: <LoginPage />,
   },
   {
-    path: "/login",
-    element: <LoginPage />,
+    path: "/intro",
+    element: <IntroPage />,
   },
   {
     path: "/main",

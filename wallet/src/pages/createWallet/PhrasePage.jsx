@@ -174,7 +174,7 @@ export const PhasePage = ({ onNext }) => {
               wordList.map((v) => {
                 text += `${v} `;
               });
-              copyTextOnClipboard(text);
+              copyTextOnClipboard(toast, text);
             }}
           >
             <Box mr={1}>
@@ -219,8 +219,8 @@ export const PhasePage = ({ onNext }) => {
               setConfirmIndexes(set);
             } else if (isValid) {
               let accounts = await createEtherAccount(mnemonicText);
-              saveData("accounts", accounts);
-              saveData("accountIdx", 0);
+              await saveData("accounts", accounts);
+              await saveData("accountIdx", 0);
               navigate("/main");
               successToast(toast, "Account created");
             }

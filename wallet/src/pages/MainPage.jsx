@@ -21,7 +21,7 @@ import {
   MenuItem,
   Image,
 } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaClipboard, FaBookmark } from "react-icons/fa";
 import {
   IoIosSend,
@@ -68,6 +68,7 @@ export const MainPage = () => {
   const [isAccountHover, setIsAccountHover] = useState(false);
   const [isMenuHover, setIsMenuHover] = useState(false);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [balanceInfo, setBalanceInfo] = useState({ value: "0", usdValue: "0" });
   const [accountIdx, setAccountIdx] = useState(0);
@@ -393,7 +394,7 @@ export const MainPage = () => {
           borderRadius={25}
           rightIcon={<FaClipboard />}
           onClick={() => {
-            copyTextOnClipboard(curAccount?.address || "");
+            copyTextOnClipboard(toast, curAccount?.address || "");
           }}
         >
           {curAccount?.address && truncate(curAccount.address, 10)}
@@ -444,19 +445,25 @@ export const MainPage = () => {
             </Text>
           </Box>
 
-          <Link to={"/login"}>
-            <Box width="50px" ml="10px" mr="10px">
-              <IconButton
-                isRound={true}
-                colorScheme="blue"
-                fontSize={28}
-                icon={<IoMdLogOut />}
-              />
-              <Text fontSize={14} mt={1}>
-                Logout
-              </Text>
-            </Box>
-          </Link>
+          <Box
+            width="50px"
+            ml="10px"
+            mr="10px"
+            onClick={async () => {
+              await saveData("loginTime", 0);
+              navigate("/");
+            }}
+          >
+            <IconButton
+              isRound={true}
+              colorScheme="blue"
+              fontSize={28}
+              icon={<IoMdLogOut />}
+            />
+            <Text fontSize={14} mt={1}>
+              Logout
+            </Text>
+          </Box>
         </Stack>
       </Center>
       <Tabs

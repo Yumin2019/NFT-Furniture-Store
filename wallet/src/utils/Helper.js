@@ -88,7 +88,7 @@ const showTabOr = (hash, pageCallback) => {
 
 // ex: key: password value: 1234 => password: {password: 1234} (Page) chrome extension => password: 1234
 // array를 저장하는 경우에는 자체 규격을 사용하는 것이 아닌 json으로 처리하는 것이 나은데, 처리가 복잡해지는 것 같아 항상 json으로 저장한다.
-const saveData = (key, value) => {
+const saveData = async (key, value) => {
   printLog(`setItem key: ${key}`);
   printLog(value);
   let json = {};
@@ -96,9 +96,8 @@ const saveData = (key, value) => {
 
   try {
     if (isExtension()) {
-      chrome.storage.local.set(json).then(() => {
-        printLog({ data: json, msg: "saved" });
-      });
+      await chrome.storage.local.set(json);
+      printLog({ data: json, msg: "saved" });
     } else {
       let str = JSON.stringify(json);
       localStorage.setItem(key, str);
@@ -108,15 +107,26 @@ const saveData = (key, value) => {
   }
 };
 
-const removeData = (key) => {
+const removeData = async (key) => {
   printLog(`removeItem key: ${key}`);
   try {
     if (isExtension()) {
-      chrome.storage.local.remove(key).then(() => {
-        printLog(`key: ${key} removed`);
-      });
+      await chrome.storage.local.remove(key);
     } else {
       localStorage.removeItem(key);
+    }
+  } catch (e) {
+    printLog(e);
+  }
+};
+
+const clearData = async () => {
+  printLog(`clearData`);
+  try {
+    if (isExtension()) {
+      await chrome.storage.local.clear();
+    } else {
+      localStorage.clear();
     }
   } catch (e) {
     printLog(e);
@@ -226,6 +236,7 @@ export {
   showTabOr,
   saveData,
   removeData,
+  clearData,
   loadData,
   createEtherAccount,
   createMnemonic,

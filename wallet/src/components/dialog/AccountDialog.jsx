@@ -92,7 +92,7 @@ export const AccountDialog = ({
         yesText={dialogInfo.yesText}
         noText="Cancel"
         placeHolder1={dialogInfo.placeHolder}
-        onClick={(text) => {
+        onClick={async (text) => {
           let saveAccounts = [...accounts];
           let name = text || dialogInfo.placeHolder;
           let idx = dialogInfo.idx;
@@ -103,7 +103,7 @@ export const AccountDialog = ({
           printLog(idx);
           printLog(name);
 
-          saveData("accounts", saveAccounts);
+          await saveData("accounts", saveAccounts);
           onAccountClose();
           loadAccount();
           convertAccount();
