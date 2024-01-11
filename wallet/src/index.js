@@ -42,7 +42,7 @@ const Root = () => {
       <ChakraProvider>
         <Box
           w={!isTabAtom ? "375px" : "600px"}
-          h={!isTabAtom ? "500px" : "800px"}
+          h={!isTabAtom ? "575px" : "800px"}
         >
           <RouterProvider router={router} />
         </Box>

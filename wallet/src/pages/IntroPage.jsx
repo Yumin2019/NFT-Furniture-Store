@@ -9,13 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  isExtension,
-  printLog,
-  removeData,
-  sendWorkerEvent,
-  showTabOr,
-} from "../utils/Helper";
+import { showTabOr } from "../utils/Helper";
 import { useAtom } from "jotai";
 import { tabAtom } from "..";
 
@@ -38,19 +32,6 @@ export const IntroPage = () => {
     });
   };
 
-  useEffect(() => {
-    if (isExtension()) {
-      printLog(`${window.location.hash} hash on react`);
-      if (window.location.hash === "#createWallet") {
-        setIsTabAtom(true);
-        navigate("/createWallet");
-      } else if (window.location.hash === "#importWallet") {
-        setIsTabAtom(true);
-        navigate("/importWallet");
-      }
-    }
-  }, []);
-
   return (
     <Center>
       <Box textAlign="center" ml={2} mr={2}>
@@ -61,12 +42,7 @@ export const IntroPage = () => {
           Use your Furniture Wallet to login to decentralized apps - no signup
           needed.
         </Text>
-        <Center
-          margin={8}
-          onClick={() => {
-            navigate("/main"); // 개발용
-          }}
-        >
+        <Center margin={8}>
           <Image width={128} src="/image/icon-128.png" />
         </Center>
 

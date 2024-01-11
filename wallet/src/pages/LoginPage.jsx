@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import {
   clearData,
   errorToast,
+  isExtension,
   loadData,
   printLog,
   saveData,
@@ -54,6 +55,19 @@ export const LoginPage = () => {
 
   useEffect(() => {
     loadLoginInfo();
+  }, []);
+
+  useEffect(() => {
+    if (isExtension()) {
+      printLog(`${window.location.hash} hash on react`);
+      if (window.location.hash === "#createWallet") {
+        setIsTabAtom(true);
+        navigate("/createWallet");
+      } else if (window.location.hash === "#importWallet") {
+        setIsTabAtom(true);
+        navigate("/importWallet");
+      }
+    }
   }, []);
 
   const clickLogin = async () => {

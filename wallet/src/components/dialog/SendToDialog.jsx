@@ -34,6 +34,8 @@ import {
   validateEtherAddress,
 } from "../../utils/Helper";
 import { web3 } from "../../pages/MainPage";
+import loading from "../../assets/loading.json";
+import Lottie from "lottie-react";
 
 export const SendToDialog = ({
   onClose,
@@ -47,6 +49,9 @@ export const SendToDialog = ({
   loadActivities,
 }) => {
   const btnRef = useRef(null);
+  const lottieRef = useRef();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [hoverIdx, setHoverIdx] = useState(-1);
   const [curStep, setCurStep] = useState(1);
   const [isInvalid, setIsInvalid] = useState(false);
@@ -93,10 +98,10 @@ export const SendToDialog = ({
       printLog(usdExchange);
       printLog(isInvalid);
 
-      setEstimatedGasText(gasPrice);
+      setEstimatedGasText(Number(gasPrice));
       setUsdExchangeGasText(usdExchange);
       setUsdExchangeTotalGasText(usdExchangeTotal.toFixed(2));
-      setTotalGasText(totalPrice.toFixed(12));
+      setTotalGasText(Number(totalPrice.toFixed(12)));
       setIsConfirmInvalid(isInvalid);
     });
   }, [curStep]);
@@ -135,6 +140,18 @@ export const SendToDialog = ({
     >
       <ModalOverlay />
       <ModalContent maxW={dialogMaxWidth}>
+        {isLoading && (
+          <Box top="15%" left="15%" w="70%" position="absolute">
+            <ModalOverlay />
+            <Lottie
+              lottieRef={lottieRef}
+              animationData={loading}
+              loop={true}
+              autoplay={true}
+            />
+          </Box>
+        )}
+
         {curStep !== 3 && (
           <ModalHeader fontSize={16} mt={4} fontWeight="bold" align="center">
             {curStep === 1 ? "Send to" : "Send"}
@@ -167,7 +184,7 @@ export const SendToDialog = ({
                 </Text>
 
                 {accounts.map((v, index) => {
-                  return (
+                  return v.isVisible ? (
                     <Box key={index}>
                       <AccountRow
                         hoverIdx={hoverIdx}
@@ -181,6 +198,8 @@ export const SendToDialog = ({
                         }}
                       />
                     </Box>
+                  ) : (
+                    <Box key={index + 200} />
                   );
                 })}
 
@@ -191,7 +210,7 @@ export const SendToDialog = ({
                 </Text>
                 {contacts.map((v, index) => {
                   return (
-                    <Box key={index}>
+                    <Box key={index + 100}>
                       <AccountRow
                         hoverIdx={hoverIdx}
                         index={index + accounts.length}
@@ -584,6 +603,7 @@ export const SendToDialog = ({
                     if (isConfirmInValid) return;
 
                     // 토큰 전송을 처리한다.
+                    setIsLoading(true);
                     let sendAddress = curAccount.address;
                     let recvAddress = selectedAccount.address;
                     let value = web3.utils.toWei(amountText, "ether");
@@ -612,8 +632,9 @@ export const SendToDialog = ({
                       `activity_${curAccount.address}`,
                       newActivities
                     );
-                    printLog(saveActivity);
 
+                    printLog(saveActivity);
+                    setIsLoading(false);
                     loadActivities();
                     onClose();
                   } else {

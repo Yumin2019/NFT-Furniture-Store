@@ -39,13 +39,11 @@ import { AccountDialog } from "../components/dialog/AccountDialog";
 import { Web3 } from "web3";
 import {
   copyTextOnClipboard,
-  errorToast,
   excludeHttp,
   infoToast,
   loadData,
   openInNewTab,
   printLog,
-  removeData,
   saveData,
   truncate,
   validateUrl,
@@ -91,6 +89,7 @@ export const MainPage = () => {
   const loadAccounts = async () => {
     let idx = (await loadData("accountIdx")) || 0;
     let accountsData = (await loadData("accounts")) || [];
+
     setAccountIdx(idx);
     setAccounts(accountsData);
     setCurAccount(accountsData[idx]);
