@@ -174,7 +174,7 @@ export const NetworkDialog = ({
             saveNetworks.pop();
           }
 
-          // 현재 네트워크를 설정하려고 하는 경우, 네트워크를 디어리움 메인넷으로 교체한다.
+          // 현재 네트워크를 설정하려고 하는 경우, 네트워크를 이더리움 메인넷으로 교체한다.
           if (
             curNetwork.name === rowNetworks[dialogInfo.idx].name &&
             curNetwork.chainId === rowNetworks[dialogInfo.idx].chainId

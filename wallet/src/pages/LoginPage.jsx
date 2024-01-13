@@ -17,8 +17,8 @@ import {
   loadData,
   printLog,
   saveData,
+  sendWorkerEvent,
   showTabOr,
-  successToast,
 } from "../utils/Helper";
 import { useNavigate } from "react-router-dom";
 import { useAtom } from "jotai";
@@ -54,11 +54,13 @@ export const LoginPage = () => {
   };
 
   useEffect(() => {
+    // 기존에 창이 떠 있는 경우에 창을 닫는다.
+    sendWorkerEvent("closeWindow", {});
     loadLoginInfo();
   }, []);
 
   useEffect(() => {
-    if (isExtension()) {
+    if (isExtension() && window.location.hash) {
       printLog(`${window.location.hash} hash on react`);
       if (window.location.hash === "#createWallet") {
         setIsTabAtom(true);

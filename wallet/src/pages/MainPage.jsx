@@ -55,6 +55,7 @@ import { BookmarkDialog } from "../components/dialog/BookmarkDialog";
 import { SendToDialog } from "../components/dialog/SendToDialog";
 import { defNetworkCnt, defNetworks } from "../utils/Network";
 import axios from "axios";
+import { TxDialog } from "../components/dialog/TxDialog";
 
 export const web3 = new Web3(
   new Web3.providers.HttpProvider(
@@ -76,6 +77,7 @@ export const MainPage = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [networks, setNetworks] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [txList, setTxList] = useState([]);
   const [curAccount, setCurAccount] = useState({});
   const [curNetwork, setCurNetwork] = useState({
     name: "",
@@ -179,6 +181,15 @@ export const MainPage = () => {
     }
   };
 
+  const loadTransactions = async () => {
+    let transactions = (await loadData("transactions")) || [];
+    setTxList(transactions);
+
+    if (transactions.length > 0) {
+      onTxOpen();
+    }
+  };
+
   useEffect(() => {
     getBalance();
     loadActivities();
@@ -189,6 +200,7 @@ export const MainPage = () => {
     loadContacts();
     loadBookmarks();
     loadNetworks();
+    loadTransactions();
   }, []);
 
   const clickNetwork = () => {
@@ -221,6 +233,12 @@ export const MainPage = () => {
     isOpen: isSendOpen,
     onOpen: onSendOpen,
     onClose: onSendClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isTxOpen,
+    onOpen: onTxOpen,
+    onClose: onTxClose,
   } = useDisclosure();
 
   const {
@@ -283,6 +301,19 @@ export const MainPage = () => {
         balanceInfo={balanceInfo}
         activities={activities}
         loadActivities={loadActivities}
+      />
+
+      <TxDialog
+        isOpen={isTxOpen}
+        onClose={onTxClose}
+        accounts={accounts}
+        contacts={contacts}
+        curNetwork={curNetwork}
+        curAccount={curAccount}
+        balanceInfo={balanceInfo}
+        activities={activities}
+        loadActivities={loadActivities}
+        txList={txList}
       />
 
       <Flex alignItems="center" pt={2} pb={2} shadow="lg">

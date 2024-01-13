@@ -11,13 +11,18 @@
     "128": "image/icon-128.png"
   },
   "action": {
-    "default_title": "tooltip",
+    "default_title": "Furniture Wallet",
     "default_popup": "index.html"
+  },
+  "externally_connectable": {
+    "matches": ["file://*/*", "http://*/*", "https://*/*"]
   },
   "content_scripts": [
     {
       "js": ["content-script.js"],
-      "matches": ["*://*/*"]
+      "matches": ["*://*/*"],
+      "run_at": "document_start",
+      "all_frames": true
     }
   ],
   "background": {

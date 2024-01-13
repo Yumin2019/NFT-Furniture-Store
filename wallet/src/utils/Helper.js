@@ -48,7 +48,7 @@ const getRandomInt = (min, max) => {
 };
 
 const isExtension = () => {
-  return false;
+  return process.env.REACT_APP_IS_EXTENSION === "true";
 };
 
 const dialogMaxWidth = "500px";
