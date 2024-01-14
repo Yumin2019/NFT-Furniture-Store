@@ -43,7 +43,7 @@ export const ActivityDialog = ({ onClose, isOpen, activity, curNetwork }) => {
         mb={6}
       >
         <ModalHeader fontSize={16} mt={4} fontWeight="bold">
-          Buy Token
+          {activity.name}
         </ModalHeader>
         <ModalCloseButton size={32} mr={4} mt={4} />
         <ModalBody>

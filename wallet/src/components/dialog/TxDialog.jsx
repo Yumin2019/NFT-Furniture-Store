@@ -13,16 +13,18 @@ import {
   AlertIcon,
   Stack,
   Image,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { FaInfoCircle, FaUserCircle, FaQuestionCircle } from "react-icons/fa";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
+import { IoIosWarning } from "react-icons/io";
 import {
   dialogMaxWidth,
   printLog,
   saveData,
+  sendWorkerEvent,
+  setBadgeText,
   truncate,
-  validateEtherAddress,
 } from "../../utils/Helper";
 import { web3 } from "../../pages/MainPage";
 import loading from "../../assets/loading.json";
@@ -30,6 +32,9 @@ import Lottie from "lottie-react";
 import {
   FaRegArrowAltCircleLeft,
   FaRegArrowAltCircleRight,
+  FaInfoCircle,
+  FaUserCircle,
+  FaQuestionCircle,
 } from "react-icons/fa";
 
 export const TxDialog = ({
@@ -47,50 +52,84 @@ export const TxDialog = ({
   const btnRef = useRef(null);
   const lottieRef = useRef();
   const [isLoading, setIsLoading] = useState(false);
-
   const [isConfirmInValid, setIsConfirmInvalid] = useState(false);
+
   const [amountText, setAmountText] = useState("0");
-  const [destAddress, setDestAddress] = useState(
-    "0x8aDd53b91f178832620ac4e83b29f94bfD716bda"
-  );
+  const [usdAmountText, setUsdAmountText] = useState("0");
 
-  const [methodName, setMethodName] = useState("Mint Token");
-  const [url, setUrl] = useState("http://localhost:4000");
+  // from, to
+  const [srcAddress, setSrcAddress] = useState("");
+  const [destAddress, setDestAddress] = useState("");
+  const [methodName, setMethodName] = useState("");
+  const [url, setUrl] = useState("");
+  const [isSameSrc, setIsSameSrc] = useState(true);
+
+  // current page, pages, curTx
   const [curPage, setCurPage] = useState(1);
-  const [pages, setPages] = useState(3);
+  const [pages, setPages] = useState(1);
+  const [curTx, setCurTx] = useState({});
 
-  const [usdExchangeText, setUsdExchangeText] = useState("0");
+  // dest에 대한 displayText, srcDisplay는 현재 계정으로 처리
+  const [destDisplayText, setDestDisplayText] = useState("");
+
   const [usdExchangeGasText, setUsdExchangeGasText] = useState("0");
   const [usdExchangeTotalGasText, setUsdExchangeTotalGasText] = useState("0");
   const [estimatedGasText, setEstimatedGasText] = useState("0");
   const [totalGasText, setTotalGasText] = useState("0");
-  const [selectedAccount, setSelectedAccount] = useState({});
-  const [addressText, setAddressText] = useState("");
 
-  useEffect(() => {
-    setAmountText("0");
-    setAddressText("");
+  const setCurData = async () => {
+    let idx = curPage - 1;
+    if (!txList || idx >= txList.length || !curAccount || !balanceInfo) return;
 
-    printLog(curAccount);
-    printLog(curNetwork);
-    printLog(balanceInfo);
-    printLog(txList);
-  }, [isOpen]);
+    let from = curAccount.address;
+    let to = txList[idx].to || "";
+    let method = txList[idx].method || "method";
+    let url = txList[idx].url || "http://localhost:4000";
+    let tx = txList[idx];
+    let value = Number(txList[idx].value || 0);
+    value = Number(parseFloat(web3.utils.fromWei(value, "ether"))); // wei to ether
 
-  useEffect(() => {
-    console.log(curPage);
-  }, [curPage]);
+    // amountText값에 따라 usd 정보 갱신
+    let usdAmount = parseFloat(value) * balanceInfo.usdRatio || 0;
+    setUsdAmountText(usdAmount.toFixed(2));
+    printLog(usdAmount.toFixed(2));
 
-  useEffect(() => {
-    web3.eth.getGasPrice().then(async (result) => {
-      let tx = {
-        from: curAccount.address,
-        to: curAccount.address,
-      };
+    setSrcAddress(from);
+    setDestAddress(to);
+    setMethodName(method);
+    setUrl(url);
+    tx.from = from;
 
-      // fee = gasPrice * gasLimit
-      let gasLimit = await web3.eth.estimateGas(tx);
-      let gasPrice = parseFloat(web3.utils.fromWei(result * gasLimit, "ether"));
+    printLog(from);
+    printLog(to);
+    printLog(method);
+    printLog(url);
+
+    setPages(txList.length);
+    setAmountText(value);
+    setCurTx(tx);
+
+    // display name을 처리한다.
+    let destDisplay;
+    for (let i = 0; i < contacts.length; ++i)
+      if (contacts[i] === txList[idx].to) destDisplay = contacts[i].name;
+    for (let i = 0; i < accounts.length; ++i)
+      if (accounts[i] === txList[idx].to) destDisplay = accounts[i].name;
+
+    // tx의 sender와 현재 계정이 동일함.
+    setIsSameSrc(txList[idx].from === curAccount.address);
+    setDestDisplayText(destDisplay);
+
+    updateGasInfo();
+  };
+
+  const updateGasInfo = () => {
+    // fee = gasPrice * gasLimit
+    web3.eth.getGasPrice().then(async (gasPriceResult) => {
+      let gasLimit = await web3.eth.estimateGas(txList[curPage - 1]);
+      let gasPrice = parseFloat(
+        web3.utils.fromWei(gasPriceResult * gasLimit, "ether")
+      );
       let usdExchange = gasPrice * balanceInfo.usdRatio || 0;
       let totalPrice = parseFloat(amountText) + gasPrice;
       let usdExchangeTotal = totalPrice * balanceInfo.usdRatio;
@@ -109,29 +148,12 @@ export const TxDialog = ({
       setTotalGasText(Number(totalPrice.toFixed(12)));
       setIsConfirmInvalid(isInvalid);
     });
-  }, []);
+  };
 
   useEffect(() => {
-    if (!balanceInfo || !curAccount || !curNetwork) return;
-
-    let usdExchange = parseFloat(amountText) * balanceInfo.usdRatio || 0;
-    let isInvalid = parseFloat(amountText) > balanceInfo.value;
-
-    printLog(usdExchange.toFixed(2));
-    printLog(`isInvalid = ${isInvalid}`);
-
-    setUsdExchangeText(usdExchange.toFixed(2));
-  }, [amountText]);
-
-  useEffect(() => {
-    let isValid = validateEtherAddress(addressText);
-    printLog(`isAddressValid = ${isValid}`);
-
-    if (isValid) {
-      setSelectedAccount({ name: addressText, address: addressText });
-      //   setCurStep(2);
-    }
-  }, [addressText]);
+    setCurData();
+    printLog(`curPage = ${curPage}`);
+  }, [isOpen, curPage, balanceInfo]);
 
   return (
     <Modal
@@ -210,7 +232,13 @@ export const TxDialog = ({
                 <Image w={4} src={curNetwork.src} borderRadius="full" />
               )}
 
-              <Text fontSize={12} fontWeight={500}>
+              <Text
+                fontSize={12}
+                fontWeight={500}
+                onClick={() => {
+                  printLog(txList);
+                }}
+              >
                 {curNetwork?.name}
               </Text>
             </Stack>
@@ -222,12 +250,24 @@ export const TxDialog = ({
                 <Text textAlign="center" fontSize={14} ml={3} mt="2px">
                   {curAccount?.name}
                 </Text>
+
+                {!isSameSrc && (
+                  <Tooltip
+                    label="address is different to current account"
+                    placement="bottom"
+                    fontSize={12}
+                  >
+                    <Box mt="2px" ml={1}>
+                      <IoIosWarning size={20} color="orange" />
+                    </Box>
+                  </Tooltip>
+                )}
               </Flex>
               <IoArrowForwardCircleOutline size={40} color="#bbc0c5" />
               <Flex flex={1}>
                 <FaUserCircle size={28} color="#3082ce" />
                 <Text textAlign="center" fontSize={14} ml={3} mt="2px">
-                  {truncate(destAddress, 12)}
+                  {destDisplayText || truncate(destAddress, 12)}
                 </Text>
               </Flex>
             </Stack>
@@ -255,7 +295,7 @@ export const TxDialog = ({
             </Text>
 
             <Text ml={4} fontSize={14}>
-              ${usdExchangeText}
+              ${usdAmountText}
             </Text>
           </Box>
           {/* Page 3 White */}
@@ -371,18 +411,9 @@ export const TxDialog = ({
               onClick={async () => {
                 if (isConfirmInValid) return;
 
-                // 토큰 전송을 처리한다.
                 setIsLoading(true);
-                let sendAddress = curAccount.address;
-                let recvAddress = selectedAccount.address;
-                let value = web3.utils.toWei(amountText, "ether");
-                let tx = {
-                  from: sendAddress,
-                  to: recvAddress,
-                  value: value,
-                };
-
-                tx.gas = await web3.eth.estimateGas(tx);
+                let tx = { ...curTx };
+                tx.gas = await web3.eth.estimateGas(curTx);
                 const receipt = await web3.eth.sendTransaction(tx);
 
                 printLog(tx);
@@ -399,6 +430,24 @@ export const TxDialog = ({
                 let newActivities = [saveActivity, ...activities];
                 await saveData(`activity_${curAccount.address}`, newActivities);
 
+                // 해당하는 트랜잭션 정보를 삭제하고, 뱃지 텍스트를 처리한다.
+                let newTxList = [...txList];
+                for (let i = curPage; i < newTxList.length; ++i) {
+                  newTxList[i - 1] = newTxList[i];
+                }
+                newTxList.pop();
+
+                await saveData("transactions", newTxList);
+                setBadgeText(
+                  newTxList.length > 0 ? newTxList.length.toString() : ""
+                );
+
+                // 백그라운드 -> 컨텐츠 스크립트 -> 클라이언트 순으로 메시지를 전달한다.
+                sendWorkerEvent("txRes", {
+                  ...curTx,
+                });
+
+                printLog(newTxList);
                 printLog(saveActivity);
                 setIsLoading(false);
                 loadActivities();

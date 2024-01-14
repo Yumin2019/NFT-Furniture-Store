@@ -77,6 +77,7 @@ export const SendToDialog = ({
   }, [isOpen]);
 
   useEffect(() => {
+    if (!balanceInfo) return;
     web3.eth.getGasPrice().then(async (result) => {
       let tx = {
         from: curAccount.address,
@@ -104,7 +105,7 @@ export const SendToDialog = ({
       setTotalGasText(Number(totalPrice.toFixed(12)));
       setIsConfirmInvalid(isInvalid);
     });
-  }, [curStep]);
+  }, [curStep, balanceInfo]);
 
   useEffect(() => {
     if (!balanceInfo || !curAccount || !curNetwork) return;
@@ -117,7 +118,7 @@ export const SendToDialog = ({
 
     setUsdExchangeText(usdExchange.toFixed(2));
     setIsInvalid(isInvalid);
-  }, [amountText]);
+  }, [amountText, balanceInfo]);
 
   useEffect(() => {
     let isValid = validateEtherAddress(addressText);

@@ -2,6 +2,9 @@ console.log("background");
 chrome.action.setBadgeBackgroundColor({ color: "#5fffcc" });
 
 let tabId;
+let windowId = -1;
+
+// 익스텐션과 컨텐츠 스크립트에서 온 메시지를 처리한다.
 chrome.runtime.onMessage.addListener(async function (
   request,
   sender,
@@ -15,6 +18,9 @@ chrome.runtime.onMessage.addListener(async function (
 
   if (request.type === "logger") {
     console.log(request.data);
+  } else if (request.type === "txRes") {
+    // 익스텐션에서 보낸 데이터 전달
+    sendDataToContent(tabId, request);
   } else if (request.type === "closeWindow" && !sender.tab) {
     // 익스텐션을 킨 경우에 기존 팝업을 없앤다.
     let existsWindow = await isWindow();
@@ -24,61 +30,21 @@ chrome.runtime.onMessage.addListener(async function (
       console.log("removed");
     }
   } else if (request.type === "sendTx") {
+    // 컨텐츠 스크립트에서 받은 메시지를 처리한다.
     tabId = sender.tab.id;
-    sendResponse(true);
     saveSendTx(request, sender);
   }
 
-  // else if (request.type === "test") {
-  //   // send data to client
-  //   console.log("코드에서 보낸 메시지");
-  //   // sendResponse(true);
-  //   console.log(tabId);
-  //   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-  //     chrome.tabs.sendMessage(
-  //       tabId,
-  //       { type: "test2", response: request.data },
-  //       function (response) {
-  //         console.log(response);
-  //       }
-  //     );
-  //   });
-  // }
-
-  // chrome.tabs.sendMessage(
-  //   sender.tab.id,
-  //   request.data,
-  //   function (response) {}
-  // );
-
-  // sendResponse(true);
-  // prepareSendTxnStorage2(request, sender);
-
-  // content-script로 메시지를 보낸다.
-  // chrome.tabs.sendMessage(sender.tab.id, request.data, function (response) {});
-
-  // code to content and then
-  // var data = request.data;
-  // var valueString = JSON.stringify(data);
-
-  // else if (request.type === "getAccount") {
-  //   sendResponse(true);
-  //   prepareGetAccountStorage(request, sender);
-  // } else if (request.type === "getTx") {
-  //   sendResponse(true);
-  //   prepareGetTxStorage(request, sender);
-  // }
   return true;
 });
 
-let windowId = -1;
 const saveSendTx = async (request, sender) => {
   let tx = request.data;
   console.log(tx);
 
   // transaction 정보를 저장하고 팝업을 띄운다.
   let transactions = (await loadData("transactions")) || [];
-  let list = [tx]; //  ...transactions
+  let list = [tx, ...transactions];
   await saveData("transactions", list);
 
   // 익스텐션 뱃지 텍스트 처리
@@ -91,7 +57,6 @@ const saveSendTx = async (request, sender) => {
       type: "popup",
       width: 375,
       height: 575,
-      focused: true,
     });
 
     console.log(window);
@@ -103,6 +68,7 @@ const saveSendTx = async (request, sender) => {
   }
 };
 
+// windowId 값에 따른 윈도우 존재 여부
 const isWindow = async () => {
   let getAll = await chrome.windows.getAll();
   console.log(getAll);
@@ -115,8 +81,13 @@ const isWindow = async () => {
 };
 
 // content-script로 메시지를 보낸다.
-// chrome.tabs.sendMessage(sender.tab.id, request.data, function (response) {});
+const sendDataToContent = (tabId, request) => {
+  console.log("sendDataToContent");
+  console.log(request);
+  chrome.tabs.sendMessage(tabId, { type: request.type, data: request.data });
+};
 
+// background 전용 local storage 접근용 함수
 const saveData = async (key, value) => {
   console.log(`setItem key: ${key}`);
   console.log(value);
@@ -143,38 +114,3 @@ const loadData = async (key) => {
     }
   });
 };
-
-// const prepareGetAccountStorage = (request, sender) => {
-//   var data = request.data;
-//   var domainName = data.domain;
-//   var valueString = JSON.stringify({
-//     domain: domainName,
-//     tabId: sender.tab.id,
-//   });
-//   chrome.storage.local.set({ getAccount: valueString }, function () {
-//     chrome.windows.create({
-//       url: "index.html",
-//       type: "popup",
-//       height: 600,
-//       width: 375,
-//     });
-//   });
-// };
-// const prepareGetTxStorage = (request, sender) => {
-//   var data = request.data;
-//   var domainName = data.domain;
-//   var address = data.address;
-//   var valueString = JSON.stringify({
-//     domain: domainName,
-//     tabId: sender.tab.id,
-//     address: address,
-//   });
-//   chrome.storage.local.set({ getTx: valueString }, function () {
-//     chrome.windows.create({
-//       url: "index.html",
-//       type: "popup",
-//       height: 600,
-//       width: 375,
-//     });
-//   });
-// };

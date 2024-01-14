@@ -17,6 +17,8 @@ export const ActivityTab = ({ curNetwork, activities, balanceInfo }) => {
   const [selectedActivity, setSelectedActivity] = useState({});
 
   const updateList = async () => {
+    if (!balanceInfo) return;
+
     try {
       // activities: 해당 계정의 모든 chainId에 대한 트랜잭션 정보
       // chainId에 맞는 트랜잭션 정보만 처리해야 한다.
@@ -106,7 +108,7 @@ export const ActivityTab = ({ curNetwork, activities, balanceInfo }) => {
 
   useEffect(() => {
     updateList();
-  }, [activities]);
+  }, [activities, balanceInfo]);
 
   const {
     isOpen: isActivityOpen,

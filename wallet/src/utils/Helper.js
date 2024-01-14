@@ -61,15 +61,15 @@ const printLog = (msg) => {
   }
 };
 
-const sendWorkerEvent = (type, data, callback) => {
+const sendWorkerEvent = (type, data) => {
   if (isExtension()) {
     try {
-      chrome.runtime.sendMessage({ type: type, data: data }, callback);
+      chrome.runtime.sendMessage({ type: type, data: data });
     } catch (e) {
       printLog(e);
     }
   } else {
-    printLog(`sendWorkerEvent(${type}, ${data}, ${callback})`);
+    printLog(`sendWorkerEvent(${type}, ${data})`);
   }
 };
 
@@ -197,6 +197,13 @@ const openInNewTab = (url) => {
   window.open(url, "_blank");
 };
 
+const setBadgeText = (text) => {
+  printLog(`setBadgeText ${text}`);
+  if (isExtension()) {
+    chrome.action.setBadgeText({ text: text });
+  }
+};
+
 const truncate = (str, maxlength) => {
   if (!str) return "";
   return str.length > maxlength ? str.slice(0, maxlength - 1) + "…" : str;
@@ -247,4 +254,5 @@ export {
   excludeHttp,
   openInNewTab,
   copyTextOnClipboard,
+  setBadgeText,
 };

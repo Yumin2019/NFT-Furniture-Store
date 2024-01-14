@@ -69,7 +69,7 @@ export const MainPage = () => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [balanceInfo, setBalanceInfo] = useState({ value: "0", usdValue: "0" });
+  const [balanceInfo, setBalanceInfo] = useState();
   const [accountIdx, setAccountIdx] = useState(0);
   const [networkIdx, setNetworkIdx] = useState(0);
   const [accounts, setAccounts] = useState([]);
