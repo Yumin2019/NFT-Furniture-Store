@@ -51,6 +51,14 @@ const isExtension = () => {
   return process.env.REACT_APP_IS_EXTENSION === "true";
 };
 
+const removeElement = (list, initIdx) => {
+  for (let i = initIdx; i < list.length; ++i) {
+    list[i - 1] = list[i];
+  }
+  list.pop();
+  return list;
+};
+
 const dialogMaxWidth = "500px";
 
 const printLog = (msg) => {
@@ -83,6 +91,13 @@ const showTabOr = (hash, pageCallback) => {
   } else {
     console.log(`showTab(${hash})`);
     pageCallback();
+  }
+};
+
+const addStorageListener = (callback) => {
+  printLog("addStorageListener");
+  if (isExtension()) {
+    chrome.storage.onChanged.addListener(callback);
   }
 };
 
@@ -255,4 +270,6 @@ export {
   openInNewTab,
   copyTextOnClipboard,
   setBadgeText,
+  addStorageListener,
+  removeElement,
 };

@@ -14,13 +14,17 @@ import {
   Stack,
   Image,
   Tooltip,
+  useToast,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
 import { IoIosWarning } from "react-icons/io";
 import {
   dialogMaxWidth,
+  errorToast,
+  infoToast,
   printLog,
+  removeElement,
   saveData,
   sendWorkerEvent,
   setBadgeText,
@@ -51,6 +55,7 @@ export const TxDialog = ({
 }) => {
   const btnRef = useRef(null);
   const lottieRef = useRef();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirmInValid, setIsConfirmInvalid] = useState(false);
 
@@ -153,7 +158,7 @@ export const TxDialog = ({
   useEffect(() => {
     setCurData();
     printLog(`curPage = ${curPage}`);
-  }, [isOpen, curPage, balanceInfo]);
+  }, [isOpen, curPage, balanceInfo, txList]);
 
   return (
     <Modal
@@ -180,7 +185,6 @@ export const TxDialog = ({
         <Box>
           <Flex alignItems="center" mt={1} mb={1}>
             {/* 여러 트랜잭션 정보가 있는 경우 좌우 이동 */}
-
             {pages > 1 && (
               <Flex ml={2} alignItems="center">
                 <Box opacity={curPage > 1 ? 1.0 : 0.4}>
@@ -272,7 +276,7 @@ export const TxDialog = ({
               </Flex>
             </Stack>
           </Box>
-          {/* Page 3 Grey  */}
+          {/*  Grey  */}
           <Box background="#f2f4f6" pt={4} pb={4}>
             <Text ml={4} mb={2} fontSize={14} fontWeight={500}>
               {url}
@@ -298,7 +302,7 @@ export const TxDialog = ({
               ${usdAmountText}
             </Text>
           </Box>
-          {/* Page 3 White */}
+          {/* White */}
           <Box background="white" pb={4} pl={4} pr={4}>
             <Box mt={1} borderRadius={4} pl={2} pt={2} pr={2} pb={8}>
               <Flex>
@@ -393,8 +397,24 @@ export const TxDialog = ({
               size="md"
               borderRadius={32}
               mb={4}
-              onClick={() => {
-                onClose();
+              onClick={async () => {
+                // 해당하는 트랜잭션 정보를 삭제하고, 뱃지 텍스트를 처리한다.
+                let newTxList = removeElement([...txList], curPage);
+                await saveData("transactions", newTxList);
+                printLog(newTxList);
+
+                setBadgeText(
+                  newTxList.length > 0 ? newTxList.length.toString() : ""
+                );
+
+                infoToast(toast, "Rejected");
+
+                if (newTxList.length > 0 && curPage - 1 >= newTxList.length) {
+                  setCurPage(newTxList.length);
+                }
+                if (newTxList.length === 0) {
+                  onClose();
+                }
               }}
             >
               Reject
@@ -412,46 +432,59 @@ export const TxDialog = ({
                 if (isConfirmInValid) return;
 
                 setIsLoading(true);
-                let tx = { ...curTx };
-                tx.gas = await web3.eth.estimateGas(curTx);
-                const receipt = await web3.eth.sendTransaction(tx);
+                try {
+                  let tx = { ...curTx };
+                  tx.gas = await web3.eth.estimateGas(curTx);
+                  const receipt = await web3.eth.sendTransaction(tx);
 
-                printLog(tx);
-                printLog(receipt);
+                  // Activity 정보를 계정별로 저장한다.
+                  let saveActivity = {
+                    name: methodName,
+                    txHash: receipt.transactionHash,
+                    blockNumber: Number(receipt.blockNumber),
+                    chainId: Number(curNetwork.chainId),
+                  };
 
-                // Activity 정보를 계정별로 저장한다.
-                let saveActivity = {
-                  name: methodName,
-                  txHash: receipt.transactionHash,
-                  blockNumber: Number(receipt.blockNumber),
-                  chainId: Number(curNetwork.chainId),
-                };
+                  let newActivities = [saveActivity, ...activities];
+                  await saveData(
+                    `activity_${curAccount.address}`,
+                    newActivities
+                  );
 
-                let newActivities = [saveActivity, ...activities];
-                await saveData(`activity_${curAccount.address}`, newActivities);
+                  // 해당하는 트랜잭션 정보를 삭제하고, 뱃지 텍스트를 처리한다.
+                  let newTxList = removeElement([...txList], curPage);
+                  await saveData("transactions", newTxList);
 
-                // 해당하는 트랜잭션 정보를 삭제하고, 뱃지 텍스트를 처리한다.
-                let newTxList = [...txList];
-                for (let i = curPage; i < newTxList.length; ++i) {
-                  newTxList[i - 1] = newTxList[i];
+                  setBadgeText(
+                    newTxList.length > 0 ? newTxList.length.toString() : ""
+                  );
+
+                  // 백그라운드 -> 컨텐츠 스크립트 -> 클라이언트 순으로 메시지를 전달한다.
+                  sendWorkerEvent("txRes", {
+                    ...curTx,
+                  });
+
+                  printLog(tx);
+                  printLog(receipt);
+                  printLog(newTxList);
+                  printLog(saveActivity);
+
+                  loadActivities();
+                  infoToast(toast, "Confirmed");
+
+                  // 마지막 요소라면, 인덱스 설정
+                  if (newTxList.length > 0 && curPage - 1 >= newTxList.length) {
+                    setCurPage(newTxList.length);
+                  }
+                  if (newTxList.length === 0) {
+                    onClose();
+                  }
+                } catch (e) {
+                  printLog(e);
+                  errorToast(toast, "Failed to confirm");
                 }
-                newTxList.pop();
 
-                await saveData("transactions", newTxList);
-                setBadgeText(
-                  newTxList.length > 0 ? newTxList.length.toString() : ""
-                );
-
-                // 백그라운드 -> 컨텐츠 스크립트 -> 클라이언트 순으로 메시지를 전달한다.
-                sendWorkerEvent("txRes", {
-                  ...curTx,
-                });
-
-                printLog(newTxList);
-                printLog(saveActivity);
                 setIsLoading(false);
-                loadActivities();
-                onClose();
               }}
             >
               Confirm

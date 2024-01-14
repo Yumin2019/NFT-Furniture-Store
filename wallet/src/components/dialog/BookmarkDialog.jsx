@@ -29,6 +29,7 @@ import {
   errorToast,
   openInNewTab,
   printLog,
+  removeElement,
   saveData,
   validateUrl,
 } from "../../utils/Helper";
@@ -131,10 +132,7 @@ export const BookmarkDialog = ({
         onClick={async () => {
           let saveBookmarks = [...bookmarks];
           if (dialogInfo.yesText === "Delete") {
-            for (let i = dialogInfo.idx + 1; i < saveBookmarks.length; ++i) {
-              saveBookmarks[i - 1] = saveBookmarks[i];
-            }
-            saveBookmarks.pop();
+            saveBookmarks = removeElement(saveBookmarks, dialogInfo.idx + 1);
           }
 
           printLog(saveBookmarks);

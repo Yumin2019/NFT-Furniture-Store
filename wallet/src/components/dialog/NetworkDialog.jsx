@@ -28,6 +28,7 @@ import {
   dialogMaxWidth,
   errorToast,
   printLog,
+  removeElement,
   saveData,
   validateUrl,
 } from "../../utils/Helper";
@@ -164,14 +165,10 @@ export const NetworkDialog = ({
         onClick={async () => {
           let saveNetworks = [...networks];
           if (dialogInfo.yesText === "Delete") {
-            for (
-              let i = dialogInfo.idx + 1 - defNetworkCnt;
-              i < saveNetworks.length;
-              ++i
-            ) {
-              saveNetworks[i - 1] = saveNetworks[i];
-            }
-            saveNetworks.pop();
+            saveNetworks = removeElement(
+              saveNetworks,
+              dialogInfo.idx + 1 - defNetworkCnt
+            );
           }
 
           // 현재 네트워크를 설정하려고 하는 경우, 네트워크를 이더리움 메인넷으로 교체한다.

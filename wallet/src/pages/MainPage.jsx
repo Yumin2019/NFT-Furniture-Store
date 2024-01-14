@@ -38,6 +38,7 @@ import { NetworkDialog } from "../components/dialog/NetworkDialog";
 import { AccountDialog } from "../components/dialog/AccountDialog";
 import { Web3 } from "web3";
 import {
+  addStorageListener,
   copyTextOnClipboard,
   excludeHttp,
   infoToast,
@@ -185,7 +186,19 @@ export const MainPage = () => {
     let transactions = (await loadData("transactions")) || [];
     setTxList(transactions);
 
-    if (transactions.length > 0) {
+    if (transactions.length > 0 && !isTxOpen) {
+      onTxOpen();
+    }
+  };
+
+  const storageChanged = (changes, namespace) => {
+    if (namespace !== "local") return;
+
+    let newTxList = changes.transactions?.newValue || [];
+    setTxList(newTxList);
+    printLog(newTxList);
+
+    if (newTxList.length > 0 && !isTxOpen) {
       onTxOpen();
     }
   };
@@ -201,6 +214,7 @@ export const MainPage = () => {
     loadBookmarks();
     loadNetworks();
     loadTransactions();
+    addStorageListener(storageChanged);
   }, []);
 
   const clickNetwork = () => {

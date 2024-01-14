@@ -29,6 +29,7 @@ import {
   errorToast,
   infoToast,
   printLog,
+  removeElement,
   saveData,
   validateEtherAddress,
 } from "../../utils/Helper";
@@ -123,10 +124,7 @@ export const ContactDialog = ({ onClose, isOpen, contacts, loadContacts }) => {
         onClick={async () => {
           let saveContacts = [...contacts];
           if (dialogInfo.yesText === "Delete") {
-            for (let i = dialogInfo.idx + 1; i < saveContacts.length; ++i) {
-              saveContacts[i - 1] = saveContacts[i];
-            }
-            saveContacts.pop();
+            saveContacts = removeElement(saveContacts, dialogInfo.idx + 1);
           }
 
           printLog(saveContacts);

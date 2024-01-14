@@ -19,6 +19,7 @@ import {
   MenuList,
   MenuItem,
   Image,
+  useToast,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { IoMdClose, IoMdArrowDropdown, IoIosArrowBack } from "react-icons/io";
@@ -28,6 +29,8 @@ import { AccountRow } from "../AccountRow";
 import { IoArrowForwardCircleOutline } from "react-icons/io5";
 import {
   dialogMaxWidth,
+  errorToast,
+  infoToast,
   printLog,
   saveData,
   truncate,
@@ -50,6 +53,7 @@ export const SendToDialog = ({
 }) => {
   const btnRef = useRef(null);
   const lottieRef = useRef();
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const [hoverIdx, setHoverIdx] = useState(-1);
@@ -605,39 +609,46 @@ export const SendToDialog = ({
 
                     // 토큰 전송을 처리한다.
                     setIsLoading(true);
-                    let sendAddress = curAccount.address;
-                    let recvAddress = selectedAccount.address;
-                    let value = web3.utils.toWei(amountText, "ether");
-                    let tx = {
-                      from: sendAddress,
-                      to: recvAddress,
-                      value: value,
-                    };
+                    try {
+                      let sendAddress = curAccount.address;
+                      let recvAddress = selectedAccount.address;
+                      let value = web3.utils.toWei(amountText, "ether");
+                      let tx = {
+                        from: sendAddress,
+                        to: recvAddress,
+                        value: value,
+                      };
 
-                    tx.gas = await web3.eth.estimateGas(tx);
-                    const receipt = await web3.eth.sendTransaction(tx);
+                      tx.gas = await web3.eth.estimateGas(tx);
+                      const receipt = await web3.eth.sendTransaction(tx);
 
-                    printLog(tx);
-                    printLog(receipt);
+                      // Activity 정보를 계정별로 저장한다.
+                      let saveActivity = {
+                        name: "Send",
+                        txHash: receipt.transactionHash,
+                        blockNumber: Number(receipt.blockNumber),
+                        chainId: Number(curNetwork.chainId),
+                      };
 
-                    // Activity 정보를 계정별로 저장한다.
-                    let saveActivity = {
-                      name: "Send",
-                      txHash: receipt.transactionHash,
-                      blockNumber: Number(receipt.blockNumber),
-                      chainId: Number(curNetwork.chainId),
-                    };
+                      let newActivities = [saveActivity, ...activities];
+                      await saveData(
+                        `activity_${curAccount.address}`,
+                        newActivities
+                      );
 
-                    let newActivities = [saveActivity, ...activities];
-                    await saveData(
-                      `activity_${curAccount.address}`,
-                      newActivities
-                    );
+                      printLog(tx);
+                      printLog(receipt);
+                      printLog(saveActivity);
+                      loadActivities();
 
-                    printLog(saveActivity);
+                      onClose();
+                      infoToast(toast, "Confirmed");
+                    } catch (e) {
+                      errorToast(toast, "Failed to confirm");
+                      printLog(e);
+                    }
+
                     setIsLoading(false);
-                    loadActivities();
-                    onClose();
                   } else {
                     if (isInvalid) return;
                     setCurStep(3);
