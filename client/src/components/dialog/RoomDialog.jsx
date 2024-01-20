@@ -23,6 +23,7 @@ export const RoomDialog = ({ isOpen, onClose }) => {
   const [myRoom, setMyRoom] = useState({});
 
   const getWorldList = async () => {
+    if (!loginInfo.id) return;
     try {
       let res = await api.get("/getWorldList");
       console.log(res.data.rooms);
