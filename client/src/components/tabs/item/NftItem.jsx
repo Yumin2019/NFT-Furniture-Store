@@ -45,7 +45,7 @@ export const NftItem = ({
         <Text fontSize={14} color="teal.400">
           type: furniture
         </Text>
-        {loginInfo?.id && isMyNft && !isSelling && (
+        {loginInfo?.walletAddress && isMyNft && !isSelling && (
           <Button
             mt={6}
             width={100}
@@ -73,7 +73,7 @@ export const NftItem = ({
       <Spacer />
 
       <Stack direction="column" alignItems="center" height={100}>
-        {loginInfo?.id && isMyNft && (
+        {loginInfo?.walletAddress && isMyNft && (
           <Button
             position="absolute"
             colorScheme="teal"
@@ -101,7 +101,7 @@ export const NftItem = ({
           </Button>
         )}
 
-        {loginInfo?.id && !isMyNft && token?.isSelling && (
+        {loginInfo?.walletAddress && !isMyNft && token?.isSelling && (
           <Button
             position="absolute"
             colorScheme="teal"

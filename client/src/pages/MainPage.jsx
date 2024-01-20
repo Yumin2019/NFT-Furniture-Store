@@ -328,7 +328,7 @@ export const MainPage = () => {
                   key={index}
                   token={v}
                   info={nftInfoList[v.nftItemId]}
-                  owner={userList[v.userId].name}
+                  owner={userList[v.userId]?.name}
                   onBasicOpen={onBasicOpen}
                   onSellOpen={onSellOpen}
                   onItemClick={(e) => {

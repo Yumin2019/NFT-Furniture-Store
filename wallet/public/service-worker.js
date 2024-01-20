@@ -18,8 +18,10 @@ chrome.runtime.onMessage.addListener(async function (
 
   if (request.type === "logger") {
     console.log(request.data);
-  } else if (request.type === "txRes") {
-    // 익스텐션에서 보낸 데이터 전달
+  } else if (request.type === "registerTabId") {
+    tabId = sender.tab.id;
+  } else if (request.type === "txRes" || request.type === "accountChanged") {
+    // 익스텐션에서 발생시킨 이벤트를 컨텐츠로 넘긴다.
     sendDataToContent(tabId, request);
   } else if (request.type === "closeWindow" && !sender.tab) {
     // 익스텐션을 킨 경우에 기존 팝업을 없앤다.
@@ -31,7 +33,6 @@ chrome.runtime.onMessage.addListener(async function (
     }
   } else if (request.type === "sendTx") {
     // 컨텐츠 스크립트에서 받은 메시지를 처리한다.
-    tabId = sender.tab.id;
     saveSendTx(request, sender);
   }
 

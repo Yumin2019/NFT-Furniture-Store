@@ -88,7 +88,7 @@ export const NftDetailDialog = ({
               )}
 
               <Spacer />
-              {loginInfo?.id && isMyNft && !isSelling && (
+              {loginInfo?.walletAddress && isMyNft && !isSelling && (
                 <Button
                   mt={2}
                   colorScheme="teal"
@@ -109,7 +109,7 @@ export const NftDetailDialog = ({
                   Consume
                 </Button>
               )}
-              {loginInfo?.id && isMyNft && (
+              {loginInfo?.walletAddress && isMyNft && (
                 <Button
                   colorScheme="teal"
                   mt={2}
@@ -134,7 +134,7 @@ export const NftDetailDialog = ({
                 </Button>
               )}
 
-              {loginInfo?.id && !isMyNft && isSelling && (
+              {loginInfo?.walletAddress && !isMyNft && isSelling && (
                 <Button
                   colorScheme="teal"
                   mt={2}

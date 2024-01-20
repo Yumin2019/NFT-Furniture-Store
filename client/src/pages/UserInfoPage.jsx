@@ -39,7 +39,7 @@ import {
   getRandomInt,
   successToast,
 } from "../utils/Helper";
-import { tokenContract } from "../contracts/contract";
+import { furnitureTokenAddress, tokenContract } from "../contracts/contract";
 import { accountAtom } from "../App";
 
 const ColItem = ({ name, count, onClick }) => {
@@ -69,7 +69,6 @@ const NFT_ITEM_LENGTH = 3;
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
-  const [account, setAccount] = useAtom(accountAtom);
 
   // 현재 유저 Following 여부
   const [isFollowing, setIsFollowing] = useState(false);
@@ -241,22 +240,20 @@ export const UserInfoPage = () => {
   const clickConnect = async () => {
     try {
       let userId = loginInfo.id;
-      let res = await tokenContract.methods
+      let bytecode = tokenContract.methods
         .registerAccount(Number(userId))
-        .send({ from: account });
-      console.log(res);
+        .encodeABI();
+      console.log(bytecode);
 
-      if (Number(res.status) === 1) {
-        // User 정보에 account를 등록한다.
-        res = await api.post("/registerAccount", { address: account });
-        if (res.status === 200) {
-          successToast(toast, "Account is registered");
-        } else {
-          errorToast(toast, "Failed to register");
-        }
-      } else {
-        errorToast(toast, "Failed to register");
-      }
+      let tx = {
+        from: loginInfo.walletAddress,
+        to: furnitureTokenAddress,
+        data: bytecode,
+        method: "registerAccount",
+      };
+
+      let data = { type: "sendTx", tx: tx };
+      window.postMessage(data);
     } catch (e) {
       errorToast(toast, "Failed to register");
       console.log(e);
@@ -264,11 +261,12 @@ export const UserInfoPage = () => {
   };
 
   const checkLogin = async () => {
+    if (loginInfo.id) return;
+
     try {
       let res = await api.get("/loginStatus");
       console.log(res.data);
       setLoginInfo(res.data);
-      setAccount(res.data.walletAddress);
     } catch (e) {
       console.log(e);
     }
@@ -306,7 +304,6 @@ export const UserInfoPage = () => {
   }, [tabIndex]);
 
   let isMyInfoOnLogin = loginInfo?.id && isMyInfo;
-
   return (
     <>
       <EditProfileDialog
@@ -420,7 +417,7 @@ export const UserInfoPage = () => {
               </Button>
             )}
 
-            {isMyInfoOnLogin && (
+            {isMyInfoOnLogin && loginInfo.walletAddress && (
               <Button
                 colorScheme="blue"
                 size="sm"
@@ -433,7 +430,7 @@ export const UserInfoPage = () => {
               </Button>
             )}
 
-            {isMyInfoOnLogin && (
+            {isMyInfoOnLogin && !loginInfo.walletAddress && (
               <Button
                 colorScheme="pink"
                 size="sm"

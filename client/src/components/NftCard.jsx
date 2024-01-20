@@ -62,7 +62,7 @@ export const NftCard = ({
           <Divider marginTop={2} marginBottom={2} />
           <Flex>
             <Spacer />
-            {loginInfo?.id && isMyNft && (
+            {loginInfo?.walletAddress && isMyNft && (
               <Button
                 colorScheme="teal"
                 mt={2}
@@ -84,7 +84,7 @@ export const NftCard = ({
               </Button>
             )}
 
-            {loginInfo?.id && !isMyNft && (
+            {loginInfo?.walletAddress && !isMyNft && (
               <Button
                 mt={2}
                 colorScheme="teal"

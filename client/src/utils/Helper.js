@@ -32,6 +32,10 @@ const getQueryParam = () => {
   return window.location.pathname.split("/")[2];
 };
 
+const isMainPage = () => {
+  return window.location.pathname === "/";
+};
+
 const dateToString = (str) => {
   return new Date(str).toLocaleString();
 };
@@ -50,4 +54,5 @@ export {
   infoToast,
   errorToast,
   successToast,
+  isMainPage,
 };

@@ -18,6 +18,7 @@ import {
   dialogMaxWidth,
   printLog,
   saveData,
+  sendWorkerEvent,
   truncate,
 } from "../../utils/Helper";
 import { EditAccountDialog } from "./EditAccountDialog";
@@ -132,9 +133,15 @@ export const AccountDialog = ({
               borderBottomRightRadius={index === 9 ? 10 : 0}
               onMouseOver={() => setHoverIdx(index)}
               onMouseOut={() => setHoverIdx(-1)}
-              onClick={() => {
+              onClick={async () => {
+                await saveData("accountIdx", index);
                 setCurIdx(index);
                 setAccount(accounts[index]);
+
+                // dapp으로 이벤트를 전달한다.
+                sendWorkerEvent("accountChanged", {
+                  account: accounts[index].address,
+                });
                 onClose();
               }}
             >

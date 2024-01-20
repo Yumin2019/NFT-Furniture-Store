@@ -10,8 +10,10 @@ chrome.runtime.onMessage.addListener(function (response, sender, sendResponse) {
       JSON.stringify(sender)
   );
 
+  // 백그라운드에서 처리한 메시지를 클라에게 전송한다.
   if (response.type === "txRes") {
-    // 백그라운드에서 처리한 메시지를 클라에게 전송한다.
+    sendDataToClient(response.type, response);
+  } else if (response.type === "accountChanged") {
     sendDataToClient(response.type, response);
   }
 
@@ -83,3 +85,6 @@ const loadData = async (key) => {
     }
   });
 };
+
+// 서비스 실행시 tab id를 등록한다. (백그라운드랑 통신하기 위함)
+sendDataToBackground("registerTabId", {});

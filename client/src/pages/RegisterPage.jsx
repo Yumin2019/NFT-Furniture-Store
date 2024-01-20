@@ -18,10 +18,13 @@ import {
   validateEmail,
 } from "../utils/Helper";
 import { api } from "../utils/Axios";
+import { useAtom } from "jotai";
+import { loginAtom } from "./MainPage";
 
 export const RegisterPage = () => {
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
+  const [loginInfo, setLoginInfo] = useAtom(loginAtom);
 
   const [allowTerms, setAllowTerms] = useState(false);
   const [nameText, setNameText] = useState("");
@@ -70,6 +73,7 @@ export const RegisterPage = () => {
 
       if (res.status === 200) {
         successToast(toast, `Registered`);
+        setLoginInfo({});
         navigate("/");
       } else {
         errorToast(toast, "Registration Failed");
@@ -142,7 +146,6 @@ export const RegisterPage = () => {
             onChange={(e) => {
               setAllowTerms(e.target.checked);
             }}
-            onChan
           >
             I do accept the Terms and conditions of your site.
           </Checkbox>

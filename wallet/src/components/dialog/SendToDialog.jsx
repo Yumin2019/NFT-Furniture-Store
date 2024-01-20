@@ -648,7 +648,7 @@ export const SendToDialog = ({
                       onClose();
                       infoToast(toast, "Confirmed");
                     } catch (e) {
-                      errorToast(toast, "Failed to confirm");
+                      errorToast(toast, e?.message || "Failed to confirm");
                       printLog(e);
                     }
 

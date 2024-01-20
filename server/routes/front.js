@@ -195,6 +195,32 @@ router.post("/login", passport.authenticate("local"), (req, res) => {
   res.send(200);
 });
 
+// 계정 주소와 매칭되는 정보가 있다면, 해당 정보로 로그인한다. (local 전략을 수행하여 처리한다 )
+// 해당 부부은 보안적으로 고려된 부부은 아니며, 애초에 DB와 Wallet간 커플링을 풀어야 한다. (설계 미스)
+router.post("/loginWithAddress", async (req, res) => {
+  try {
+    let sql =
+      "SELECT `email`, `password` from `user` where `walletAddress` = ?";
+    let params = [req.body.address];
+    let [rows, fields] = await db.query(sql, params);
+
+    // 중복된 이메일을 확인한다.
+    if (rows.length === 0) {
+      res.status(400).send({ msg: "invalid user" });
+      return;
+    }
+
+    let email = rows[0]["email"];
+    let password = rows[0]["password"];
+
+    // 클라에게 이메일, 패스워드 정보를 제공한다. (다시 요청 보내서 로그인 처리에 사용)
+    res.status(200).send({ email, password });
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
 router.post("/logout", (req, res) => {
   if (!req.user) {
     res.status(400).send({ msg: "you're logged in" });

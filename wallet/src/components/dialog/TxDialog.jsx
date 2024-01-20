@@ -485,7 +485,7 @@ export const TxDialog = ({
                   }
                 } catch (e) {
                   printLog(e);
-                  errorToast(toast, "Failed to confirm");
+                  errorToast(toast, e?.message || "Failed to confirm");
                 }
 
                 setIsLoading(false);
