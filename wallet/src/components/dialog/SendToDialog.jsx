@@ -631,6 +631,10 @@ export const SendToDialog = ({
                       };
 
                       let newActivities = [saveActivity, ...activities];
+                      if (newActivities.length > 10) {
+                        newActivities = newActivities.slice(0, 10);
+                      }
+
                       await saveData(
                         `activity_${curAccount.address}`,
                         newActivities
