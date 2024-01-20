@@ -16,7 +16,6 @@ const { Server } = require("socket.io");
 // Router
 const frontRouter = require("./routes/front");
 const userRouter = require("./routes/user");
-const nftRouter = require("./routes/nft");
 const worldRouter = require("./routes/world");
 
 app.use(express.json());
@@ -59,7 +58,6 @@ app.use((req, res, next) => {
 
 // other router
 app.use(userRouter);
-app.use(nftRouter);
 app.use(worldRouter);
 
 app.listen(process.env.PORT, () =>

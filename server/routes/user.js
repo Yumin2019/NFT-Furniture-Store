@@ -235,9 +235,9 @@ router.post("/consumeToken", async (req, res) => {
     );
 
     let [results] = await db.query(
-      rows.length === 1
-        ? "UPDATE `furniture_count` SET `count` = `count` + 1 WHERE `userId` = ? AND `furnitureId` = ?"
-        : "INSERT INTO `furniture_count` (`userId`, `furnitureId`, `count`) VALUES (?, ?, 1)",
+      rows.length === 0
+        ? "INSERT INTO `furniture_count` (`userId`, `furnitureId`, `count`) VALUES (?, ?, 1)"
+        : "UPDATE `furniture_count` SET `count` = `count` + 1 WHERE `userId` = ? AND `furnitureId` = ?",
       [userId, furnitureId]
     );
 

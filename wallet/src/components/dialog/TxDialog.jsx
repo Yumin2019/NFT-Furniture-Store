@@ -125,10 +125,10 @@ export const TxDialog = ({
     setIsSameSrc(txList[idx].from === curAccount.address);
     setDestDisplayText(destDisplay);
 
-    updateGasInfo();
+    updateGasInfo(value);
   };
 
-  const updateGasInfo = () => {
+  const updateGasInfo = (amountText) => {
     // fee = gasPrice * gasLimit
     web3.eth.getGasPrice().then(async (gasPriceResult) => {
       let gasLimit = await web3.eth.estimateGas(txList[curPage - 1]);

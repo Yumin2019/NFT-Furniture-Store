@@ -9,6 +9,7 @@ export const nftDialogTextAtom = atom({
   nftDialogText: "",
   nftDialogTitle: "",
   nftDialogYesText: "",
+  info: {},
 });
 
 export const NftItem = ({

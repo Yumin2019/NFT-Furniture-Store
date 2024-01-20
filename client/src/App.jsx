@@ -12,31 +12,29 @@ import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { UserInfoPage } from "./pages/UserInfoPage";
 import { useEffect, useState } from "react";
 import { atom, useAtom } from "jotai";
-import { useToast } from "@chakra-ui/react";
 import { api } from "./utils/Axios";
 import { useNavigate } from "react-router-dom";
-import { errorToast, isMainPage, successToast } from "./utils/Helper";
+import { isMainPage } from "./utils/Helper";
 
 export const accountAtom = atom("");
+export const txHandlerAtom = atom({
+  handler: async (tx) => {
+    console.log("handler");
+  },
+});
+
+export const setTxHandler = (handler) => {
+  txHandler = handler;
+};
+
+let txHandler = async (tx) => {
+  console.log("handler");
+};
 
 function App() {
-  const toast = useToast();
   const navigate = useNavigate();
   const [account, setAccount] = useAtom(accountAtom);
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
-
-  const txHandler = async (tx) => {
-    if (tx.method === "registerAccount") {
-      // User 정보에 account를 등록한다.
-      let res = await api.post("/registerAccount", { address: tx.from });
-      if (res.status === 200) {
-        successToast(toast, "Account is registered");
-        navigate(0);
-      } else {
-        errorToast(toast, "Failed to register");
-      }
-    }
-  };
 
   useEffect(() => {
     window.addEventListener("message", async (event) => {

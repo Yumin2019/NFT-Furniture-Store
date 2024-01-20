@@ -57,19 +57,19 @@ const getAccounts = async () => {
 // background에 데이터를 전송한다.
 const sendDataToBackground = (type, data) => {
   let msg = { type: type, data: data };
-  chrome.runtime.sendMessage(msg);
-
   console.log("sendDataToBackground");
   console.log(msg);
+
+  chrome.runtime.sendMessage(msg);
 };
 
 // 클라이언트에 데이터를 전송한다.
 const sendDataToClient = (type, res) => {
   let msg = { type, ...res };
-  window.postMessage(msg, window.location.origin);
-
   console.log("sendDataToClient");
   console.log(msg);
+
+  window.postMessage(msg, window.location.origin);
 };
 
 // content-script는 익스텐션 스토리지 영역을 같이 사용한다.

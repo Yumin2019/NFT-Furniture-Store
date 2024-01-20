@@ -20,8 +20,8 @@ import { api } from "../utils/Axios";
 import { useEffect, useState } from "react";
 import { useAtom, atom } from "jotai";
 import { errorToast, successToast } from "../utils/Helper";
-import { accountAtom } from "../App";
-import { tokenContract } from "../contracts/contract";
+import { accountAtom, setTxHandler } from "../App";
+import { furnitureTokenAddress, tokenContract } from "../contracts/contract";
 
 export const loginAtom = atom({});
 
@@ -98,6 +98,19 @@ export const MainPage = () => {
     getSalesToken();
     getNftInfoList();
     getUserList();
+
+    // 트랜잭션 처리 callback 등록
+    setTxHandler(async (tx) => {
+      if (tx.method === "cancelTokenSales") {
+        successToast(toast, "Your nft is not on sale.");
+        getSalesToken();
+        if (isDetailOpen) onDetailClose();
+      } else if (tx.method === "buyToken") {
+        successToast(toast, "You bought NFT");
+        getSalesToken();
+        if (isDetailOpen) onDetailClose();
+      }
+    });
   }, []);
 
   // NFT 이전 정보를 DB에서 가져왔다고 가정한다.
@@ -136,18 +149,21 @@ export const MainPage = () => {
   const cancelSales = async () => {
     try {
       let token = dialogTextAtom.token;
-      let res = await tokenContract.methods
+      let bytecode = tokenContract.methods
         .cancelTokenSales(token.tokenId)
-        .send({ from: account });
-      console.log(res);
+        .encodeABI();
+      console.log(bytecode);
 
-      if (Number(res.status) === 1) {
-        successToast(toast, "Your nft is not on sale.");
-        getSalesToken();
-        if (isDetailOpen) onDetailClose();
-      } else {
-        errorToast(toast, "Failed to transact");
-      }
+      let tx = {
+        from: loginInfo.walletAddress,
+        to: furnitureTokenAddress,
+        data: bytecode,
+        url: `${window.location.protocol}//${window.location.host}`,
+        method: "cancelTokenSales",
+      };
+
+      let data = { type: "sendTx", tx: tx };
+      window.postMessage(data);
     } catch (e) {
       errorToast(toast, "Failed to transact");
       console.log(e);
@@ -157,18 +173,20 @@ export const MainPage = () => {
   const buyToken = async () => {
     try {
       let token = dialogTextAtom.token;
-      let res = await tokenContract.methods
-        .buyToken(token.tokenId)
-        .send({ from: account, value: token.price });
-      console.log(res);
+      let bytecode = tokenContract.methods.buyToken(token.tokenId).encodeABI();
+      console.log(bytecode);
 
-      if (Number(res.status) === 1) {
-        successToast(toast, "You bought NFT");
-        getSalesToken();
-        if (isDetailOpen) onDetailClose();
-      } else {
-        errorToast(toast, "Failed to buy NFT");
-      }
+      let tx = {
+        from: loginInfo.walletAddress,
+        to: furnitureTokenAddress,
+        data: bytecode,
+        value: Number(token.price),
+        url: `${window.location.protocol}//${window.location.host}`,
+        method: "buyToken",
+      };
+
+      let data = { type: "sendTx", tx: tx };
+      window.postMessage(data);
     } catch (e) {
       errorToast(toast, "Failed to buy NFT");
       console.log(e);

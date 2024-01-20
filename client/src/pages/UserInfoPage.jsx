@@ -40,7 +40,12 @@ import {
   successToast,
 } from "../utils/Helper";
 import { furnitureTokenAddress, tokenContract } from "../contracts/contract";
-import { accountAtom } from "../App";
+import { setTxHandler } from "../App";
+
+let nftTabHandler = {};
+export const setNftTabHandlers = (obj) => {
+  nftTabHandler = obj;
+};
 
 const ColItem = ({ name, count, onClick }) => {
   return (
@@ -219,18 +224,19 @@ export const UserInfoPage = () => {
   const clickMint = async () => {
     try {
       let itemIdx = getRandomInt(1, NFT_ITEM_LENGTH + 1);
-      let res = await tokenContract.methods
-        .mintToken(itemIdx)
-        .send({ from: account });
-      console.log(res);
+      let bytecode = tokenContract.methods.mintToken(itemIdx).encodeABI();
+      console.log(bytecode);
 
-      if (Number(res.status) === 1) {
-        successToast(toast, "NFT Mint Success");
-        getUserNFT();
-        // 다이얼로그로 ~가 나왔습니다. 혹은 Gif 처리를 하면 좋을 듯
-      } else {
-        errorToast(toast, "Failed to mint NFT");
-      }
+      let tx = {
+        from: loginInfo.walletAddress,
+        to: furnitureTokenAddress,
+        data: bytecode,
+        url: `${window.location.protocol}//${window.location.host}`,
+        method: "mintToken",
+      };
+
+      let data = { type: "sendTx", tx: tx };
+      window.postMessage(data);
     } catch (e) {
       errorToast(toast, "Failed to mint NFT");
       console.log(e);
@@ -249,6 +255,7 @@ export const UserInfoPage = () => {
         from: loginInfo.walletAddress,
         to: furnitureTokenAddress,
         data: bytecode,
+        url: `${window.location.protocol}//${window.location.host}`,
         method: "registerAccount",
       };
 
@@ -261,8 +268,6 @@ export const UserInfoPage = () => {
   };
 
   const checkLogin = async () => {
-    if (loginInfo.id) return;
-
     try {
       let res = await api.get("/loginStatus");
       console.log(res.data);
@@ -281,6 +286,31 @@ export const UserInfoPage = () => {
 
   useEffect(() => {
     init();
+
+    // 트랜잭션 처리 callback 등록
+    setTxHandler(async (tx) => {
+      if (tx.method === "mintToken") {
+        successToast(toast, "NFT Mint Success");
+        getUserNFT();
+      } else if (tx.method === "registerAccount") {
+        // User 정보에 account를 등록한다.
+        let res = await api.post("/registerAccount", { address: tx.from });
+        if (res.status === 200) {
+          successToast(toast, "Account is registered");
+          navigate(0);
+        } else {
+          errorToast(toast, "Failed to register");
+        }
+      } else if (tx.method === "deleteToken") {
+        nftTabHandler.deleteToken(tx);
+      } else if (tx.method === "sellToken") {
+        nftTabHandler.sellToken(tx);
+      } else if (tx.method === "cancelTokenSales") {
+        nftTabHandler.cancelTokenSales(tx);
+      } else if (tx.method === "buyToken") {
+        nftTabHandler.buyToken(tx);
+      }
+    });
   }, []);
 
   useEffect(() => {
