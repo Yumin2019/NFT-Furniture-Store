@@ -141,7 +141,7 @@ router.get("/getUserInfo/:userId", async (req, res) => {
 
     // 유저와 월드 정보를 가져온다.
     let sql =
-      "SELECT `user`.`id`, `user`.`name`, `user`.`email`, `user`.`image`, `user`.`desc`, `room`.`name` as `worldName`, `room`.`desc` as `worldDesc`, `room`.`online` FROM `user` JOIN `room` ON `user`.`id` = `room`.`id` WHERE `user`.`id` = ?";
+      "SELECT `user`.`id`, `user`.`name`, `user`.`email`, `user`.`image`, `user`.`desc`, `room`.`name` as `worldName`, `room`.`desc` as `worldDesc`, `room`.`online` FROM `user` LEFT JOIN `room` ON `user`.`id` = `room`.`id` WHERE `user`.`id` = ?";
     let [userRows] = await db.query(sql, [userId]);
 
     res.send({
@@ -264,8 +264,14 @@ router.post("/register", async (req, res) => {
     params = [name, email, password];
     let [result] = await db.query(sql, params);
 
+    // room을 생성한다.
+    sql = "INSERT INTO `room` (`name`, `desc`) VALUES (?, ?)";
+    params = [name, email, password];
+    let [roomResult] = await db.query(sql, params);
+
     console.log(result);
-    if (result.affectedRows) {
+    console.log(roomResult);
+    if (result.affectedRows && roomResult.affectedRows) {
       res.send(200);
     }
   } catch (e) {
