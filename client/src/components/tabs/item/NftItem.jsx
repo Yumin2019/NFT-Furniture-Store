@@ -4,6 +4,7 @@ import { FaMoneyBill } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { loginAtom } from "../../../pages/MainPage";
 import { web3 } from "../../../contracts/contract";
+import { useEffect, useState } from "react";
 
 export const nftDialogTextAtom = atom({
   nftDialogText: "",
@@ -22,8 +23,13 @@ export const NftItem = ({
 }) => {
   const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
   const [loginInfo] = useAtom(loginAtom);
-  let isSelling = token?.isSelling || false;
-  let isMyNft = loginInfo?.id === Number(token.userId);
+  const [isSelling, setIsSelling] = useState(false);
+  const [isMyNft, setIsMyNft] = useState(false);
+
+  useEffect(() => {
+    setIsSelling(token?.isSelling || false);
+    setIsMyNft(loginInfo?.id === Number(token.userId));
+  }, [token, loginInfo, info]);
 
   return (
     <Flex width="100%" alignItems="center" onClick={onItemClick}>

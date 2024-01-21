@@ -32,12 +32,13 @@ import { nftDialogTextAtom } from "../tabs/item/NftItem";
 import { loginAtom } from "../../pages/MainPage";
 import { FaMoneyBill } from "react-icons/fa";
 import { web3 } from "../../contracts/contract";
+import { useEffect, useState } from "react";
+import { api } from "../../utils/Axios";
 
 export const NftDetailDialog = ({
   token,
   info,
   owner,
-  transferInfoList,
   isOpen,
   onClose,
   onBasicOpen,
@@ -45,8 +46,26 @@ export const NftDetailDialog = ({
 }) => {
   const [dialogTextAtom, setDialogTextAtom] = useAtom(nftDialogTextAtom);
   const [loginInfo] = useAtom(loginAtom);
+  const [transfers, setTransfers] = useState([]);
   let isSelling = token?.isSelling || false;
   let isMyNft = loginInfo?.id === Number(token?.userId);
+
+  const getNftTransfers = async () => {
+    if (!token) return;
+    let tokenId = Number(token.tokenId);
+
+    try {
+      let res = await api.get(`/getNftTransfers/${tokenId}`);
+      console.log(res.data.transfers);
+      setTransfers(res.data.transfers);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getNftTransfers();
+  }, [isOpen]);
 
   return (
     <>
@@ -183,13 +202,13 @@ export const NftDetailDialog = ({
                         </Tr>
                       </Thead>
                       <Tbody>
-                        {transferInfoList.map((v, index) => {
+                        {transfers.map((v, index) => {
                           return (
                             <Tr key={index}>
-                              <Td>{v.from}</Td>
-                              <Td>{v.to}</Td>
+                              <Td>{v.fromName}</Td>
+                              <Td>{v.toName}</Td>
                               <Td isNumeric>{v.price}</Td>
-                              <Td>{v.date}</Td>
+                              <Td>{new Date(v.date).toLocaleString()}</Td>
                             </Tr>
                           );
                         })}

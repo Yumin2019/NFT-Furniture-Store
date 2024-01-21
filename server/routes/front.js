@@ -189,6 +189,43 @@ router.get("/getAllNftItems", async (req, res) => {
   }
 });
 
+// 특정 nft의 전송 정보를 가져온다.
+router.get("/getNftTransfers/:nftId", async (req, res) => {
+  try {
+    let sql =
+      "SELECT `nft_transfer`.*, `user1`.`name` as `fromName`, `user2`.`name` as `toName` FROM `nft_transfer` LEFT JOIN `user` as `user1` ON `nft_transfer`.`fromUserId` = `user1`.`id` LEFT JOIN `user` as `user2` ON `nft_transfer`.`toUserId` = `user2`.`id`WHERE `nft_transfer`.`nftId` = ?";
+    let nftId = req.params["nftId"];
+    let [rows, fields] = await db.query(sql, [nftId]);
+    res.send({ transfers: rows, count: rows.length });
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
+// NFT 전송 정보를 추가한다. 주로 NFT를 구매하는 경우에 호출한다.
+router.post("/addNftTransfer", async (req, res) => {
+  try {
+    let { nftId, fromUserId, toUserId, price } = req.body;
+    if (!nftId || !fromUserId || !toUserId || !price) {
+      res.status(400).send({ msg: "input values are invalid" });
+      return;
+    }
+
+    let sql =
+      "INSERT INTO `nft_transfer` (`nftId`, `fromUserId`, `toUserId`, `date`, `price`) VALUES (?, ?, ?, NOW(), ?)";
+    let [result] = await db.query(sql, [nftId, fromUserId, toUserId, price]);
+
+    console.log(result);
+    if (result.affectedRows) {
+      res.send(200);
+    }
+  } catch (e) {
+    console.log(e);
+    res.send(500);
+  }
+});
+
 // ======================== AUTH API ========================
 router.post("/login", passport.authenticate("local"), (req, res) => {
   console.log("logged in");

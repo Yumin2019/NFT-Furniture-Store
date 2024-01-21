@@ -113,39 +113,6 @@ export const MainPage = () => {
     });
   }, []);
 
-  // NFT 이전 정보를 DB에서 가져왔다고 가정한다.
-  // transferInfoList[nftId]
-  let transferInfoList = {
-    1: [
-      {
-        from: "A",
-        to: "B",
-        date: "2023-12-15 11:00:00",
-        price: 5,
-      },
-      {
-        from: "B",
-        to: "kym",
-        date: "2023-12-15 12:00:00",
-        price: 1,
-      },
-    ],
-    2: [
-      {
-        from: "A",
-        to: "B",
-        date: "2023-12-15 11:00:00",
-        price: 5,
-      },
-      {
-        from: "B",
-        to: "kym",
-        date: "2023-12-15 12:00:00",
-        price: 1,
-      },
-    ],
-  };
-
   const cancelSales = async () => {
     try {
       let token = dialogTextAtom.token;
@@ -245,7 +212,6 @@ export const MainPage = () => {
         onClose={onDetailClose}
         onBasicOpen={onBasicOpen}
         onSellOpen={onSellOpen}
-        transferInfoList={transferInfoList[1]}
         token={selectedInfo?.token}
         info={selectedInfo?.info}
         owner={(userList && userList[selectedInfo?.token?.userId]?.name) || ""}

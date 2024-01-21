@@ -21,36 +21,6 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
   const [account] = useAtom(accountAtom);
   const toast = useToast();
   const [loginInfo] = useAtom(loginAtom);
-  let transferInfoList = {
-    1: [
-      {
-        from: "A",
-        to: "B",
-        date: "2023-12-15 11:00:00",
-        price: 5,
-      },
-      {
-        from: "B",
-        to: "kym",
-        date: "2023-12-15 12:00:00",
-        price: 1,
-      },
-    ],
-    2: [
-      {
-        from: "A",
-        to: "B",
-        date: "2023-12-15 11:00:00",
-        price: 5,
-      },
-      {
-        from: "B",
-        to: "kym",
-        date: "2023-12-15 12:00:00",
-        price: 1,
-      },
-    ],
-  };
 
   useEffect(() => {
     // 다이얼로그에서 트랜잭션 콜백을 처리한다.
@@ -78,7 +48,15 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
         onLoad();
         if (isDetailOpen) onDetailClose();
       },
-      buyToken: (tx) => {
+      buyToken: async (tx) => {
+        let res = await api.post("/addNftTransfer", {
+          nftId: tx.nftId,
+          fromUserId: tx.fromUserId,
+          toUserId: tx.toUserId,
+          price: Number(web3.utils.fromWei(tx.value, "ether")),
+        });
+
+        console.log(res);
         successToast(toast, "You bought NFT");
         onLoad();
         if (isDetailOpen) onDetailClose();
@@ -149,6 +127,9 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
         value: Number(token.price),
         url: `${window.location.protocol}//${window.location.host}`,
         method: "buyToken",
+        fromUserId: Number(token.userId),
+        toUserId: loginInfo.id,
+        nftId: Number(token.tokenId),
       };
 
       console.log(tx);
@@ -248,7 +229,6 @@ export const NftTab = ({ nftList, nftInfoList, userInfo, onLoad }) => {
         onClose={onDetailClose}
         onBasicOpen={onBasicOpen}
         onSellOpen={onSellOpen}
-        transferInfoList={transferInfoList[1]}
         token={selectedInfo?.token}
         info={selectedInfo?.info}
         owner={userInfo?.name || ""}

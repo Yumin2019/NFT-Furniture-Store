@@ -523,6 +523,7 @@ export const UserInfoPage = () => {
                     nftInfoList={nftInfoList}
                     userInfo={userInfo?.info || {}}
                     onLoad={() => {
+                      // 블록체인 컨트랜트의 상태가 변경되는데 시간이 꽤 걸려서 제대로 처리되지 않을 때가 있음.
                       getUserNFT();
                     }}
                   />
