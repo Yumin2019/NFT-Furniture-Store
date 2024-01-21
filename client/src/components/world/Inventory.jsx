@@ -4,12 +4,11 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, useScroll } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
-import { useGrid } from "../hooks/useGrid";
+import { useGrid } from "../../hooks/useGrid";
 
-const ShopItem = ({ item, ...props }) => {
+const InventoryItem = ({ item, ...props }) => {
   const { name, size } = item;
   const { scene } = useGLTF(`/models/items/${name}.glb`);
-  // Skinned meshes cannot be re-used in threejs without cloning them
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { gridToVector3 } = useGrid();
 
@@ -21,24 +20,30 @@ const ShopItem = ({ item, ...props }) => {
     </group>
   );
 };
-export const Shop = ({ onItemSelected }) => {
+
+export const Inventory = ({ onItemSelected }) => {
   const [items] = useAtom(itemsAtom);
   const [map] = useAtom(mapAtom);
-
+  const shopContainer = useRef();
+  const scrollData = useScroll();
   const maxX = useRef(0);
-  const shopItems = useMemo(() => {
+
+  // 아이템을 배치한다.
+  const InventoryItems = useMemo(() => {
     let x = 0;
     return Object.values(items).map((item, index) => {
       const xPos = x;
       x += item.size[0] / map.gridDivision + 1;
       maxX.current = x; // width
+
       return (
-        <ShopItem
+        <InventoryItem
           key={index}
           position-x={xPos}
           item={item}
           onClick={(e) => {
-            e.stopPropagation(); // Prevents the onPlaneClicked from firing just after we pick up an item
+            // Prevents the onPlaneClicked from firing just after we pick up an item
+            e.stopPropagation();
             onItemSelected(item);
           }}
         />
@@ -46,11 +51,9 @@ export const Shop = ({ onItemSelected }) => {
     });
   }, [items]);
 
-  const shopContainer = useRef();
-  const scrollData = useScroll();
   useFrame(() => {
     shopContainer.current.position.x = -scrollData.offset * maxX.current;
   });
 
-  return <group ref={shopContainer}>{shopItems}</group>;
+  return <group ref={shopContainer}>{InventoryItems}</group>;
 };

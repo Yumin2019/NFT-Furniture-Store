@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { mapAtom } from "../components/SocketManager";
+import { mapAtom } from "../components/world/SocketManager";
 
 import * as THREE from "three";
 

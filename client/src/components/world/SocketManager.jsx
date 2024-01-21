@@ -13,6 +13,7 @@ export const SocketManager = () => {
   const [_map, setMap] = useAtom(mapAtom);
   const [_user, setUser] = useAtom(userAtom);
   const [_items, setItems] = useAtom(itemsAtom);
+
   useEffect(() => {
     function onConnect() {
       console.log("connected");
@@ -26,7 +27,7 @@ export const SocketManager = () => {
       setMap(data.map);
       setUser(data.id);
       setItems(data.items);
-      setCharacters(data.characters); // value(json) 넣어도 돌아가는게 신기하네;; 이게 왜;;
+      setCharacters(data.characters);
     }
 
     function onCharacters(characters) {

@@ -3,9 +3,9 @@ import { Environment, Grid, OrbitControls, useCursor } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
-import { useGrid } from "../hooks/useGrid";
-import { AnimatedWoman } from "./AnimatedWoman";
-import { Item } from "./Item";
+import { useGrid } from "../../hooks/useGrid";
+import { Rabbit } from "./Rabbit";
+import { FurnitureItem } from "./FurnitureItem";
 import { charactersAtom, mapAtom, socket, userAtom } from "./SocketManager";
 import {
   buildModeAtom,
@@ -13,10 +13,12 @@ import {
   draggedItemRotationAtom,
   shopModeAtom,
 } from "./UI";
-import { Shop } from "./Shop";
-export const Experience = () => {
+import { Inventory } from "./Inventory";
+
+export const Room = () => {
+  // 상점 여부, 빌드 모드 여부에 따라 처리를 진행한다.
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
-  const [shopMode, setShopMode] = useAtom(shopModeAtom);
+  const [inventoryMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
   const [items, setItems] = useState(map.items);
@@ -29,16 +31,23 @@ export const Experience = () => {
 
   const onPlaneClick = (e) => {
     if (!buildMode) {
+      // 유저가 클릭한 좌표를 구해서 서버로 넘긴다.
       const character = scene.getObjectByName(`character-${user}`);
       if (!character) {
         return;
       }
+
+      const myCharacter = characters.find(
+        (character) => character.id === socket.id
+      );
+
       socket.emit(
         "move",
         vector3ToGrid(character.position),
         vector3ToGrid(e.point)
       );
     } else {
+      // 아이템 드래그를 놓았을 때에 대한 처리를 진행한다.
       if (draggedItem !== null) {
         if (canDrop) {
           setItems((prev) => {
@@ -59,10 +68,12 @@ export const Experience = () => {
   const [draggedItemRotation, setDraggedItemRotation] = useAtom(
     draggedItemRotationAtom
   );
+
   const [dragPosition, setDragPosition] = useState([0, 0]);
   const [canDrop, setCanDrop] = useState(false);
 
   useEffect(() => {
+    // draggedItem이 변한 경우, tmp 파일을 날린다.
     if (draggedItem === null) {
       setItems((prev) => prev.filter((item) => !item.tmp));
     }
@@ -72,6 +83,7 @@ export const Experience = () => {
     if (draggedItem === null) {
       return;
     }
+
     const item = items[draggedItem];
     const width =
       draggedItemRotation === 1 || draggedItemRotation === 3
@@ -84,20 +96,22 @@ export const Experience = () => {
 
     let droppable = true;
 
-    // check if item is in bounds
+    // check if item is in bounds (맵을 넘어가는지)
     if (
       dragPosition[0] < 0 ||
       dragPosition[0] + width > map.size[0] * map.gridDivision
     ) {
       droppable = false;
     }
+
     if (
       dragPosition[1] < 0 ||
       dragPosition[1] + height > map.size[1] * map.gridDivision
     ) {
       droppable = false;
     }
-    // check if item is not colliding with other items
+
+    // check if item is not colliding with other items (충돌 처리 할 수 있는 가구만 처리)
     if (!item.walkable && !item.wall) {
       items.forEach((otherItem, idx) => {
         // ignore self
@@ -154,18 +168,17 @@ export const Experience = () => {
   }, [buildMode]);
 
   useEffect(() => {
-    if (shopMode) {
+    if (inventoryMode) {
       state.camera.position.set(0, 4, 8);
       controls.current.target.set(0, 0, 0);
     } else {
       state.camera.position.set(8, 8, 8);
       controls.current.target.set(0, 0, 0);
     }
-  }, [shopMode]);
+  }, [inventoryMode]);
 
+  // 인벤토리에서 아이템을 선택한 경우
   const onItemSelected = (item) => {
-    console.log("adsfads");
-    setShopMode(false);
     setItems((prev) => [
       ...prev,
       {
@@ -174,8 +187,10 @@ export const Experience = () => {
         tmp: true,
       },
     ]);
+
     setDraggedItem(items.length);
     setDraggedItemRotation(0);
+    setShopMode(false);
   };
 
   return (
@@ -194,6 +209,7 @@ export const Experience = () => {
           far={map.size[0] + map.size[1]}
         />
       </directionalLight>
+
       {/* 카메라 공전을 위한 컴포넌트 */}
       <OrbitControls
         ref={controls}
@@ -202,13 +218,13 @@ export const Experience = () => {
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
         screenSpacePanning={false}
-        enableZoom={!shopMode}
+        enableZoom={!inventoryMode}
       />
 
-      {shopMode && <Shop onItemSelected={onItemSelected} />}
-      {!shopMode &&
+      {inventoryMode && <Inventory onItemSelected={onItemSelected} />}
+      {!inventoryMode &&
         (buildMode ? items : map.items).map((item, idx) => (
-          <Item
+          <FurnitureItem
             key={`${item.name}-${idx}`}
             item={item}
             onClick={() => {
@@ -225,7 +241,8 @@ export const Experience = () => {
           />
         ))}
 
-      {!shopMode && (
+      {/* 하단 메시(바닥)를 처리한다. */}
+      {!inventoryMode && (
         <mesh
           rotation-x={-Math.PI / 2}
           position-y={-0.002}
@@ -237,7 +254,7 @@ export const Experience = () => {
               return;
             }
 
-            // 값이 변는 경우 업데이트를 해준다.
+            // 값이 변하는 경우 업데이트 해준다.
             const newPosition = vector3ToGrid(e.point);
             if (
               !dragPosition ||
@@ -255,19 +272,20 @@ export const Experience = () => {
           <meshStandardMaterial color="#f0f0f0" />
         </mesh>
       )}
-      {buildMode && !shopMode && (
+
+      {/* 가구 보기 모드 */}
+      {buildMode && !inventoryMode && (
         <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
       )}
+
       {!buildMode &&
         characters.map((character) => (
-          <AnimatedWoman
+          <Rabbit
             key={character.id}
             id={character.id}
             path={character.path}
             position={gridToVector3(character.position)}
             hairColor={character.hairColor}
-            topColor={character.topColor}
-            bottomColor={character.bottomColor}
           />
         ))}
     </>

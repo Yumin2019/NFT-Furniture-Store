@@ -1,8 +1,3 @@
-import { Canvas } from "@react-three/fiber";
-import { Experience } from "./components/Experience";
-import { SocketManager } from "./components/SocketManager";
-import { UI } from "./components/UI";
-import { ScrollControls } from "@react-three/drei";
 import { MainPage, loginAtom } from "./pages/MainPage";
 import { LoginPage } from "./pages/LoginPage";
 import { Route, Routes } from "react-router-dom";
@@ -15,6 +10,7 @@ import { atom, useAtom } from "jotai";
 import { api } from "./utils/Axios";
 import { useNavigate } from "react-router-dom";
 import { isMainPage } from "./utils/Helper";
+import { FurnitureWorldPage } from "./pages/FurnitureWorldPage";
 
 export const accountAtom = atom("");
 export const txHandlerAtom = atom({
@@ -126,15 +122,11 @@ function App() {
         <Route path="/findPassword" element={<FindPasswordPage />} />
         <Route path="/resetPassword/:token" element={<ResetPasswordPage />} />
         <Route path="/userInfo/:userId" element={<UserInfoPage />} />
+        <Route
+          path="/furnitureWorld/:userId"
+          element={<FurnitureWorldPage />}
+        />
       </Routes>
-      {/* <SocketManager />
-      <Canvas shadows camera={{ position: [8, 8, 8], fov: 30 }}>
-        <color attach="background" args={["#ececec"]} />
-        <ScrollControls pages={4}>
-          <Experience />
-        </ScrollControls>
-      </Canvas>
-      <UI /> */}
     </>
   );
 }

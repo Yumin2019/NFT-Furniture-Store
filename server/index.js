@@ -480,6 +480,7 @@ const grid = new pathfinding.Grid(
   map.size[0] * map.gridDivision,
   map.size[1] * map.gridDivision
 );
+
 const finder = new pathfinding.AStarFinder({
   allowDiagonal: true,
   dontCrossCorners: true,
@@ -488,6 +489,7 @@ const finder = new pathfinding.AStarFinder({
 const findPath = (start, end) => {
   const gridClone = grid.clone();
   const path = finder.findPath(start[0], start[1], end[0], end[1], gridClone);
+  console.log(path);
   return path;
 };
 
@@ -498,13 +500,13 @@ const updateGrid = () => {
       grid.setWalkableAt(x, y, true);
     }
   }
+
   map.items.forEach((item) => {
     // 카펫이거나 벽걸이의 경우 넘어간다.
     if (item.walkable || item.wall) {
       return;
     }
 
-    // 모든 물체는 한 쪽 방향으로 바라본다.
     const width =
       item.rotation === 1 || item.rotation === 3 ? item.size[1] : item.size[0];
     const height =
@@ -545,8 +547,7 @@ io.on("connection", (socket) => {
     id: socket.id,
     position: generateRandomPosition(),
     hairColor: generatedRandomHexColor(),
-    topColor: generatedRandomHexColor(),
-    bottomColor: generatedRandomHexColor(),
+    clickTime: new Date(2020, 1),
   });
 
   socket.emit("hello", {
@@ -562,8 +563,9 @@ io.on("connection", (socket) => {
     const character = characters.find(
       (character) => character.id === socket.id
     );
+
     const path = findPath(from, to);
-    if (!path) {
+    if (!path || path.length === 0) {
       return;
     }
 
@@ -578,6 +580,7 @@ io.on("connection", (socket) => {
       character.path = [];
       character.position = generateRandomPosition();
     });
+
     updateGrid();
     io.emit("mapUpdate", { map, characters });
   });
