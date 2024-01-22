@@ -4,14 +4,14 @@ const { comparePassword } = require("../utils/helpers");
 const db = require("../utils/mysql");
 
 passport.serializeUser((user, done) => {
-  console.log("Serializing User...");
-  console.log(user);
+  // console.log("Serializing User...");
+  // console.log(user);
   done(null, user);
 });
 
 passport.deserializeUser(async (user, done) => {
-  console.log("Deserializing User");
-  console.log(user);
+  // console.log("Deserializing User");
+  // console.log(user);
 
   try {
     let sql =
@@ -34,9 +34,9 @@ passport.use(
       usernameField: "email",
     },
     async (email, password, done) => {
-      console.log("strategy");
-      console.log(email);
-      console.log(password);
+      // console.log("strategy");
+      // console.log(email);
+      // console.log(password);
 
       try {
         if (!email || !password) throw new Error("Missing Credentials");

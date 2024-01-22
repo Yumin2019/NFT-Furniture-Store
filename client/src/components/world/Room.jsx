@@ -14,6 +14,8 @@ import {
   shopModeAtom,
 } from "./UI";
 import { Inventory } from "./Inventory";
+import { Box } from "@chakra-ui/react";
+import { getQueryParam } from "../../utils/Helper";
 
 export const Room = () => {
   // 상점 여부, 빌드 모드 여부에 따라 처리를 진행한다.
@@ -21,7 +23,7 @@ export const Room = () => {
   const [inventoryMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
-  const [items, setItems] = useState(map.items);
+  const [items, setItems] = useState([map.items]);
   const [onFloor, setOnFloor] = useState(false);
   useCursor(onFloor);
   const { vector3ToGrid, gridToVector3 } = useGrid();
@@ -37,14 +39,11 @@ export const Room = () => {
         return;
       }
 
-      const myCharacter = characters.find(
-        (character) => character.id === socket.id
-      );
-
       socket.emit(
         "move",
         vector3ToGrid(character.position),
-        vector3ToGrid(e.point)
+        vector3ToGrid(e.point),
+        getQueryParam()
       );
     } else {
       // 아이템 드래그를 놓았을 때에 대한 처리를 진행한다.
@@ -193,6 +192,8 @@ export const Room = () => {
     setShopMode(false);
   };
 
+  console.log("map.items", map.items);
+
   return (
     <>
       <Environment preset="sunset" />
@@ -222,24 +223,28 @@ export const Room = () => {
       />
 
       {inventoryMode && <Inventory onItemSelected={onItemSelected} />}
+
       {!inventoryMode &&
-        (buildMode ? items : map.items).map((item, idx) => (
-          <FurnitureItem
-            key={`${item.name}-${idx}`}
-            item={item}
-            onClick={() => {
-              if (!buildMode) {
-                return;
-              }
-              setDraggedItem(idx);
-              setDraggedItemRotation(item.rotation || 0);
-            }}
-            isDragging={draggedItem === idx}
-            dragPosition={dragPosition}
-            dragRotation={draggedItemRotation}
-            canDrop={canDrop}
-          />
-        ))}
+        (buildMode ? items : map.items).map((v) => {
+          //  (buildMode ? items : map.items)
+          return (
+            <FurnitureItem
+              key={`${v.name}-${idx}`}
+              item={v}
+              onClick={() => {
+                if (!buildMode) {
+                  return;
+                }
+                setDraggedItem(idx);
+                setDraggedItemRotation(v.rotation || 0);
+              }}
+              isDragging={draggedItem === idx}
+              dragPosition={dragPosition}
+              dragRotation={draggedItemRotation}
+              canDrop={canDrop}
+            />
+          );
+        })}
 
       {/* 하단 메시(바닥)를 처리한다. */}
       {!inventoryMode && (
@@ -279,6 +284,7 @@ export const Room = () => {
       )}
 
       {!buildMode &&
+        characters &&
         characters.map((character) => (
           <Rabbit
             key={character.id}

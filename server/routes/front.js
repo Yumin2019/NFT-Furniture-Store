@@ -9,6 +9,7 @@ const {
   comparePassword,
   randomGenerator,
 } = require("../utils/helpers");
+const { addNewRoom } = require("..");
 
 // ======================== GET API ========================
 router.get("/loginStatus", async (req, res) => {
@@ -308,7 +309,10 @@ router.post("/register", async (req, res) => {
 
     console.log(result);
     console.log(roomResult);
+
     if (result.affectedRows && roomResult.affectedRows) {
+      // 새로운 룸 정보를 인메모리 맵에 추가한다.
+      addNewRoom(roomResult.insertId);
       res.send(200);
     }
   } catch (e) {
@@ -346,6 +350,7 @@ router.post("/resetPassword", async (req, res) => {
       "UPDATE `user` SET `password` = ? WHERE `resetToken` = ?",
       [password, token]
     );
+
     if (results.affectedRows > 0) {
       res.send(200);
     } else {

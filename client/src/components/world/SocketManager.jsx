@@ -3,10 +3,10 @@ import { io } from "socket.io-client";
 import { atom, useAtom } from "jotai";
 
 export const socket = io("http://localhost:3001");
-export const charactersAtom = atom([]);
+export const charactersAtom = atom(null);
 export const mapAtom = atom(null);
 export const userAtom = atom(null);
-export const itemsAtom = atom(null);
+export const itemsAtom = atom([]);
 
 export const SocketManager = () => {
   const [_characters, setCharacters] = useAtom(charactersAtom);
@@ -23,7 +23,9 @@ export const SocketManager = () => {
       console.log("disconnected");
     }
 
-    function onHello(data) {
+    function onJoinRes(data) {
+      console.log("onJoinRes");
+      console.log(data.map);
       setMap(data.map);
       setUser(data.id);
       setItems(data.items);
@@ -53,7 +55,7 @@ export const SocketManager = () => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on("hello", onHello);
+    socket.on("joinRes", onJoinRes);
     socket.on("characters", onCharacters);
     socket.on("playerMove", onPlayerMove);
     socket.on("mapUpdate", onMapUpdate);
@@ -61,7 +63,7 @@ export const SocketManager = () => {
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off("hello", onHello);
+      socket.off("joinRes", onJoinRes);
       socket.off("characters", onCharacters);
       socket.off("playerMove", onPlayerMove);
       socket.off("mapUpdate", onMapUpdate);
