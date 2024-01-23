@@ -48,9 +48,9 @@ export const SocketManager = () => {
       });
     }
 
-    function onMapUpdate(value) {
-      setMap(value.map);
-      setCharacters(value.characters);
+    function onMapUpdate(data) {
+      setMap(data.map);
+      setCharacters(data.characters);
     }
 
     socket.on("connect", onConnect);

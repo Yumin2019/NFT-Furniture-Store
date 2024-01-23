@@ -33,7 +33,7 @@ function App() {
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);
 
   useEffect(() => {
-    window.addEventListener("message", async (event) => {
+    const onMessage = async (event) => {
       if (event.data.type === "getAccountsRes") {
         let curAccount = event.data.list[event.data.accountIdx];
         console.log("curAccount", curAccount);
@@ -47,7 +47,13 @@ function App() {
         console.log("txRes on page");
         txHandler(event.data.data);
       }
-    });
+    };
+
+    window.addEventListener("message", onMessage);
+
+    return () => {
+      window.removeEventListener("message", onMessage);
+    };
   }, []);
 
   useEffect(() => {

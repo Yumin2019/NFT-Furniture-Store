@@ -23,44 +23,27 @@ export const Room = () => {
   const [inventoryMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
-  const [items, setItems] = useState([map.items]);
-  const [onFloor, setOnFloor] = useState(false);
-  useCursor(onFloor);
+  const [items, setItems] = useState(map.items);
   const { vector3ToGrid, gridToVector3 } = useGrid();
 
   const scene = useThree((state) => state.scene);
   const [user] = useAtom(userAtom);
 
   const onPlaneClick = (e) => {
-    if (!buildMode) {
-      // 유저가 클릭한 좌표를 구해서 서버로 넘긴다.
-      const character = scene.getObjectByName(`character-${user}`);
-      if (!character) {
-        return;
-      }
+    if (!buildMode || draggedItem === null) return;
 
-      socket.emit(
-        "move",
-        vector3ToGrid(character.position),
-        vector3ToGrid(e.point),
-        getQueryParam()
-      );
-    } else {
-      // 아이템 드래그를 놓았을 때에 대한 처리를 진행한다.
-      if (draggedItem !== null) {
-        if (canDrop) {
-          setItems((prev) => {
-            const newItems = [...prev];
-            delete newItems[draggedItem].tmp;
-            newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
-            newItems[draggedItem].rotation = draggedItemRotation;
-            return newItems;
-          });
-        }
-
-        setDraggedItem(null);
-      }
+    // 아이템 드래그를 놓았을 때에 대한 처리를 진행한다.
+    if (canDrop) {
+      setItems((prev) => {
+        const newItems = [...prev];
+        delete newItems[draggedItem].tmp;
+        newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
+        newItems[draggedItem].rotation = draggedItemRotation;
+        return newItems;
+      });
     }
+
+    setDraggedItem(null);
   };
 
   const [draggedItem, setDraggedItem] = useAtom(draggedItemAtom);
@@ -225,8 +208,7 @@ export const Room = () => {
       {inventoryMode && <Inventory onItemSelected={onItemSelected} />}
 
       {!inventoryMode &&
-        (buildMode ? items : map.items).map((v) => {
-          //  (buildMode ? items : map.items)
+        (buildMode ? items : map.items).map((v, idx) => {
           return (
             <FurnitureItem
               key={`${v.name}-${idx}`}
@@ -252,8 +234,6 @@ export const Room = () => {
           rotation-x={-Math.PI / 2}
           position-y={-0.002}
           onClick={onPlaneClick}
-          onPointerEnter={() => setOnFloor(true)}
-          onPointerLeave={() => setOnFloor(false)}
           onPointerMove={(e) => {
             if (!buildMode) {
               return;

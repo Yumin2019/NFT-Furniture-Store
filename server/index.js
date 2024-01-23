@@ -69,7 +69,7 @@ const {
   generatedRandomHexColor,
   getWorldData,
   generateRandomPosition,
-  findPath,
+  updateOnlines,
 } = require("./utils/roomHelper");
 
 const io = new Server({
@@ -97,7 +97,7 @@ const init = async () => {
       map: defaultMap,
       grid: defaultGrid,
     };
-    maps[v.id].map.items = JSON.parse("[]"); // v.items
+    maps[v.id].map.items = JSON.parse(v.items) || [];
     characters.rooms[v.id] = [];
   });
 
@@ -115,7 +115,7 @@ const addNewRoom = async (id) => {
     map: defaultMap,
     grid: defaultGrid,
   };
-  maps[world.id].map.items = JSON.parse(world.items);
+  maps[world.id].map.items = JSON.parse(world.items) || [];
   characters.rooms[world.id] = [];
 
   // console.log(world);
@@ -149,32 +149,10 @@ io.on("connection", (socket) => {
     // 방에 참가한다.
     socket.join(roomId);
     console.log(characters);
-  });
 
-  socket.on("move", (from, to, roomId) => {
-    const character = characters.rooms[roomId].find(
-      (character) => character.id === socket.id
-    );
-
-    const path = findPath(from, to, maps[roomId].grid);
-    if (!path || path.length === 0) {
-      return;
-    }
-
-    character.position = from;
-    character.path = path;
-    io.to(roomId).emit("playerMove", character);
-  });
-
-  socket.on("itemsUpdate", (items) => {
-    // console.log("잡았다 요놈");
-    // map.items = items;
-    // characters.forEach((character) => {
-    //   character.path = [];
-    //   character.position = generateRandomPosition();
-    // });
-    // updateGrid();
-    // io.emit("mapUpdate", { map, characters });
+    // 룸에서 online 수치를 업데이트한다.
+    let online = characters.rooms[roomId]?.length || 0;
+    updateOnlines(roomId, online);
   });
 
   socket.on("disconnect", () => {
@@ -192,6 +170,39 @@ io.on("connection", (socket) => {
     // 내부 인원에게 알린다.
     io.to(roomId).emit("characters", characters.rooms[roomId]);
     console.log(characters);
+
+    // 룸에서 online 수치를 업데이트한다.
+    let online = characters.rooms[roomId]?.length || 0;
+    updateOnlines(roomId, online);
+  });
+
+  // 유저가 길찾기 요청을 보내는 경우, 처리한다.
+  socket.on("move", (from, to, roomId) => {
+    // const character = characters.rooms[roomId].find(
+    //   (character) => character.id === socket.id
+    // );
+    // io.to(roomId).emit("playerMove", character);
+  });
+
+  // 아이템 리스트가 변경된 경우, 해당 방의 모든 플레이어의 위치 정보를 다시 설정하고 가구 정보를 업데이트 한다.
+  socket.on("itemsUpdate", (items) => {
+    let roomId = characters.list[socket.id];
+    let roomCharacters = characters.rooms[roomId];
+    let map = maps[roomId].map;
+
+    console.log("items", items);
+
+    map.items = items;
+    roomCharacters.forEach((character) => {
+      character.path = [];
+      character.position = generateRandomPosition(maps[roomId]);
+    });
+    // 가구 정보에 따라 grid 업데이트(패스 파인딩)
+    // updateGrid();
+    // DB에 변경된 내용을 저장한다.
+    // 개수별로 처리는 어떻게? 가구 수 증가 감소는?
+
+    io.to(roomId).emit("mapUpdate", { map: map, characters: roomCharacters });
   });
 });
 

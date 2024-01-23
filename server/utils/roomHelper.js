@@ -15,16 +15,16 @@ const getWorldData = async (id) => {
   return [];
 };
 
-const finder = new pathfinding.AStarFinder({
-  allowDiagonal: true,
-  dontCrossCorners: true,
-});
-
-// 넣어준 grid를 바탕으로 에이스타 길찾기 이후 결과를 반환한다.
-const findPath = (start, end, grid) => {
-  const gridClone = grid.clone();
-  const path = finder.findPath(start[0], start[1], end[0], end[1], gridClone);
-  return path;
+const updateOnlines = async (id, value) => {
+  try {
+    let [results] = await db.query(
+      "UPDATE `room` SET `online` = ? WHERE `id` = ?",
+      [value, id]
+    );
+    return results;
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const generatedRandomHexColor = () => {
@@ -83,8 +83,8 @@ const generateRandomPosition = (roomMap) => {
 
 module.exports = {
   getWorldData,
-  findPath,
   generatedRandomHexColor,
   updateGrid,
   generateRandomPosition,
+  updateOnlines,
 };
