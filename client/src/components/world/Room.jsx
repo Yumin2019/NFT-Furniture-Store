@@ -1,4 +1,4 @@
-import { Environment, Grid, OrbitControls, useCursor } from "@react-three/drei";
+import { Environment, Grid, OrbitControls } from "@react-three/drei";
 
 import { useThree } from "@react-three/fiber";
 import { useAtom } from "jotai";
@@ -14,8 +14,6 @@ import {
   shopModeAtom,
 } from "./UI";
 import { Inventory } from "./Inventory";
-import { Box } from "@chakra-ui/react";
-import { getQueryParam } from "../../utils/Helper";
 
 export const Room = () => {
   // 상점 여부, 빌드 모드 여부에 따라 처리를 진행한다.
@@ -23,7 +21,7 @@ export const Room = () => {
   const [inventoryMode, setShopMode] = useAtom(shopModeAtom);
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
-  const [items, setItems] = useState(map.items);
+  const [items, setItems] = useState(map?.items);
   const { vector3ToGrid, gridToVector3 } = useGrid();
 
   const scene = useThree((state) => state.scene);
@@ -175,7 +173,7 @@ export const Room = () => {
     setShopMode(false);
   };
 
-  console.log("map.items", map.items);
+  console.log(characters);
 
   return (
     <>
@@ -265,12 +263,13 @@ export const Room = () => {
 
       {!buildMode &&
         characters &&
-        characters.map((character) => (
+        Object.values(characters).map((character) => (
           <Rabbit
             key={character.id}
             id={character.id}
-            path={character.path}
-            position={gridToVector3(character.position)}
+            position={character.position}
+            rotation={character.rotation}
+            curAnim={character.curAnim}
             hairColor={character.hairColor}
           />
         ))}

@@ -66,6 +66,13 @@ const updateGrid = (roomMap) => {
   });
 };
 
+const gridToVector3 = (gridPosition, map, width = 1, height = 1) => {
+  return [
+    width / map.gridDivision / 2 + gridPosition[0] / map.gridDivision,
+    height / map.gridDivision / 2 + gridPosition[1] / map.gridDivision,
+  ];
+};
+
 // 넘겨준 grid에서 생성 좌표 뽑기(랜덤))
 const generateRandomPosition = (roomMap) => {
   let map = roomMap.map;
@@ -76,7 +83,7 @@ const generateRandomPosition = (roomMap) => {
     const y = Math.floor(Math.random() * map.size[1] * map.gridDivision);
 
     if (grid.isWalkableAt(x, y)) {
-      return [x, y];
+      return gridToVector3([x, y], map);
     }
   }
 };

@@ -33,17 +33,19 @@ export const SocketManager = () => {
     }
 
     function onCharacters(characters) {
+      console.log(characters);
       setCharacters(characters);
     }
 
-    function onPlayerMove(character) {
-      console.log("playerMove");
+    function onCharacter(socketId, character) {
+      console.log(character);
       setCharacters((prev) => {
-        return prev.map((_character) => {
-          if (_character.id === character.id) {
+        let keys = Object.keys(prev);
+        return keys.map((key) => {
+          if (socketId === key) {
             return character;
           }
-          return _character;
+          return prev[key];
         });
       });
     }
@@ -57,7 +59,7 @@ export const SocketManager = () => {
     socket.on("disconnect", onDisconnect);
     socket.on("joinRes", onJoinRes);
     socket.on("characters", onCharacters);
-    socket.on("playerMove", onPlayerMove);
+    socket.on("character", onCharacter);
     socket.on("mapUpdate", onMapUpdate);
 
     return () => {
@@ -65,7 +67,7 @@ export const SocketManager = () => {
       socket.off("disconnect", onDisconnect);
       socket.off("joinRes", onJoinRes);
       socket.off("characters", onCharacters);
-      socket.off("playerMove", onPlayerMove);
+      socket.off("character", onCharacter);
       socket.off("mapUpdate", onMapUpdate);
     };
   }, []);

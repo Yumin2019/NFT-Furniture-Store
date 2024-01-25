@@ -3,8 +3,7 @@ import { useGLTF, useAnimations } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useFrame, useGraph } from "@react-three/fiber";
 import { useAtom } from "jotai";
-import { userAtom } from "./SocketManager";
-import { useGrid } from "../../hooks/useGrid";
+import { socket, userAtom } from "./SocketManager";
 import { usePersonControls } from "../../hooks/usePersonControls";
 import { Clock, Vector3 } from "three";
 
@@ -14,22 +13,44 @@ const getAnimName = (name) => {
 
 const clock = new Clock();
 
-export function Rabbit({ hairColor = "green", id, ...props }) {
-  const { gridToVector3 } = useGrid();
+export function Rabbit({
+  hairColor = "green",
+  id,
+  curAnim,
+  position,
+  rotation,
+  ...props
+}) {
   const group = useRef();
   const { scene, materials, animations } = useGLTF("/models/Rabbit.glb");
   const { actions } = useAnimations(animations, group);
   const [animation, setAnimation] = useState(getAnimName("Idle"));
   const [user] = useAtom(userAtom);
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
-
-  // useGraph creates two flat object collections for nodes and materials
   const { nodes } = useGraph(clone);
 
   useEffect(() => {
-    actions[animation].reset().fadeIn(0.32).play();
+    if (actions[animation]) {
+      actions[animation].reset().fadeIn(0.32).play();
+
+      // 내 애니메이션이 변경된 경우 서버에 이벤트를 전달한다.
+      if (id === user) {
+        socket.emit("changeAnim", animation);
+      }
+    }
     return () => actions[animation]?.fadeOut(0.32);
   }, [animation]);
+
+  // 유저의 움직임이나 애니메이션을 동기화한다.
+  useEffect(() => {
+    group.current.position.x = position[0];
+    group.current.position.z = position[1];
+    group.current.rotation.y = rotation;
+  }, [position, rotation]);
+
+  useEffect(() => {
+    setAnimation(curAnim);
+  }, [curAnim]);
 
   // Movement Logic
   const { forward, backward, left, right } = usePersonControls(id === user);
@@ -41,14 +62,14 @@ export function Rabbit({ hairColor = "green", id, ...props }) {
       let velocity = 3;
       let delta = clock.getDelta();
 
-      if (forward) {
-        let frontVec = new Vector3(0, 0, 1).applyQuaternion(
+      if (forward || backward) {
+        let vector = new Vector3(0, 0, forward ? 1 : -1).applyQuaternion(
           group.current.quaternion
         );
 
         let pos = group.current.position;
-        let moveX = frontVec.x * velocity * delta;
-        let moveZ = frontVec.z * velocity * delta;
+        let moveX = vector.x * velocity * delta;
+        let moveZ = vector.z * velocity * delta;
 
         pos.x += moveX;
         pos.z += moveZ;
@@ -68,6 +89,11 @@ export function Rabbit({ hairColor = "green", id, ...props }) {
 
       if (isMoved) {
         setAnimation(getAnimName("Run"));
+        socket.emit(
+          "move",
+          [group.current.position.x, group.current.position.z],
+          group.current.rotation.y
+        );
       } else {
         setAnimation(getAnimName("Idle"));
       }

@@ -81,7 +81,7 @@ const io = new Server({
 io.listen(3001);
 
 // 모든 유저 리스트와 방별 유저 리스트
-// list: {id: -1}, rooms: {1: [], 2: [], ...}
+// list: {socket.id: roomName, ...}, rooms: {1: {}, 2: {}, ...}
 const characters = { list: {}, rooms: {} };
 
 // 모든 방에 대한 map 정보와 grid 정보
@@ -98,7 +98,7 @@ const init = async () => {
       grid: defaultGrid,
     };
     maps[v.id].map.items = JSON.parse(v.items) || [];
-    characters.rooms[v.id] = [];
+    characters.rooms[v.id] = {};
   });
 
   // console.log(list);
@@ -116,7 +116,7 @@ const addNewRoom = async (id) => {
     grid: defaultGrid,
   };
   maps[world.id].map.items = JSON.parse(world.items) || [];
-  characters.rooms[world.id] = [];
+  characters.rooms[world.id] = {};
 
   // console.log(world);
   // console.log(maps[world.id]);
@@ -130,11 +130,13 @@ io.on("connection", (socket) => {
   socket.on("join", (roomId) => {
     // room에 자기 정보를 넣고 정보를 전달한다.
     characters.list[socket.id] = roomId;
-    characters.rooms[roomId].push({
+    characters.rooms[roomId][socket.id] = {
       id: socket.id,
       position: generateRandomPosition(maps[roomId]),
       hairColor: generatedRandomHexColor(),
-    });
+      curAnim: "Idle",
+      rotation: 0,
+    };
 
     socket.emit("joinRes", {
       map: maps[roomId].map,
@@ -144,7 +146,7 @@ io.on("connection", (socket) => {
     });
 
     // 방에 있던 다른 유저에게도 정보를 갱신한다.
-    io.to(roomId).emit("characters", characters.rooms[roomId]);
+    socket.to(roomId).emit("characters", characters.rooms[roomId]);
 
     // 방에 참가한다.
     socket.join(roomId);
@@ -162,10 +164,9 @@ io.on("connection", (socket) => {
     let roomId = characters.list[socket.id];
     delete characters.list[socket.id];
 
-    characters.rooms[roomId]?.splice(
-      characters.rooms[roomId].findIndex((element) => element.id === socket.id),
-      1
-    );
+    if (characters.rooms[roomId]) {
+      delete characters.rooms[roomId][socket.id];
+    }
 
     // 내부 인원에게 알린다.
     io.to(roomId).emit("characters", characters.rooms[roomId]);
@@ -176,33 +177,41 @@ io.on("connection", (socket) => {
     updateOnlines(roomId, online);
   });
 
-  // 유저가 길찾기 요청을 보내는 경우, 처리한다.
-  socket.on("move", (from, to, roomId) => {
-    // const character = characters.rooms[roomId].find(
-    //   (character) => character.id === socket.id
-    // );
-    // io.to(roomId).emit("playerMove", character);
+  // 유저가 움직인 경우에 처리한다.
+  socket.on("move", (positionList, rotationY) => {
+    let roomId = characters.list[socket.id];
+    let rooms = characters.rooms[roomId];
+    if (rooms) {
+      // onCharacter의 경우 변경사항 인식이 안 되어서 onCharacters로 처리
+      rooms[socket.id].position = positionList;
+      rooms[socket.id].rotation = rotationY;
+      socket.to(roomId).emit("characters", rooms);
+    }
+  });
+
+  // 애니메이션이 변경된 경우, 다른 유저에게 해당 정보를 전달
+  socket.on("changeAnim", (animation) => {
+    let roomId = characters.list[socket.id];
+    let rooms = characters.rooms[roomId];
+    if (rooms) {
+      rooms[socket.id].curAnim = animation;
+      socket.to(roomId).emit("character", socket.id, rooms[socket.id]);
+    }
   });
 
   // 아이템 리스트가 변경된 경우, 해당 방의 모든 플레이어의 위치 정보를 다시 설정하고 가구 정보를 업데이트 한다.
   socket.on("itemsUpdate", (items) => {
-    let roomId = characters.list[socket.id];
-    let roomCharacters = characters.rooms[roomId];
-    let map = maps[roomId].map;
-
-    console.log("items", items);
-
-    map.items = items;
-    roomCharacters.forEach((character) => {
-      character.path = [];
-      character.position = generateRandomPosition(maps[roomId]);
-    });
-    // 가구 정보에 따라 grid 업데이트(패스 파인딩)
-    // updateGrid();
-    // DB에 변경된 내용을 저장한다.
-    // 개수별로 처리는 어떻게? 가구 수 증가 감소는?
-
-    io.to(roomId).emit("mapUpdate", { map: map, characters: roomCharacters });
+    // let roomId = characters.list[socket.id];
+    // let roomCharacters = characters.rooms[roomId];
+    // let map = maps[roomId]?.map;
+    // console.log("items", items);
+    // map.items = items;
+    // Object.values(roomCharacters).map((character) => {
+    //   character.position = generateRandomPosition(maps[roomId]);
+    // });
+    // // DB에 변경된 내용을 저장한다.
+    // // 개수별로 처리는 어떻게? 가구 수 증가 감소는?
+    // io.to(roomId).emit("mapUpdate", { map: map, characters: roomCharacters });
   });
 });
 
