@@ -27,7 +27,7 @@ export const FurnitureDetailDialog = ({ furniture, isOpen, onClose }) => {
                 border="0.5px solid grey"
                 src={
                   furniture?.image
-                    ? `/image/furniture/${furniture.image}.png`
+                    ? `/image/furnitures/${furniture.image}.png`
                     : "/image/furniture_icon.svg"
                 }
               />

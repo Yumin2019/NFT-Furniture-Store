@@ -70,7 +70,7 @@ const ColItem = ({ name, count, onClick }) => {
   );
 };
 
-const NFT_ITEM_LENGTH = 3;
+const NFT_ITEM_LENGTH = 63;
 export const HeartAnimContext = createContext(null);
 export const UserInfoPage = () => {
   const [loginInfo, setLoginInfo] = useAtom(loginAtom);

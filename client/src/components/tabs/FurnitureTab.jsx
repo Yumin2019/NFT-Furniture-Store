@@ -33,7 +33,7 @@ export const FurnitureTab = ({ furnitures }) => {
               <FurnitureItem
                 image={
                   v?.image
-                    ? `/image/furniture/${v.image}.png`
+                    ? `/image/furnitures/${v.image}.png`
                     : "/image/furniture_icon.svg"
                 }
                 name={v.name}

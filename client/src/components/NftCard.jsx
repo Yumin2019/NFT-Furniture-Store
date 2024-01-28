@@ -37,7 +37,7 @@ export const NftCard = ({
             <Image
               src={
                 info?.image
-                  ? `/image/furniture/${info.image}.png`
+                  ? `/image/furnitures/${info.image}.png`
                   : "/image/furniture_icon.svg"
               }
               width={150}

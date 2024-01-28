@@ -1,6 +1,9 @@
 import { Box, Button, Text, Flex, Spacer } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 
 export const RoomItem = ({ room, right, width }) => {
+  const navigate = useNavigate();
+
   return (
     <>
       <Box
@@ -19,7 +22,17 @@ export const RoomItem = ({ room, right, width }) => {
         </Text>
         <Flex>
           <Spacer />
-          <Button alignItems="center" colorScheme="teal" size="sm">
+          <Button
+            alignItems="center"
+            colorScheme="teal"
+            size="sm"
+            onClick={() => {
+              console.log(room);
+              let id = room.id;
+              if (id === undefined) id = window.location.pathname.split("/")[2];
+              navigate(`/furnitureWorld/${id}`);
+            }}
+          >
             Join
           </Button>
         </Flex>

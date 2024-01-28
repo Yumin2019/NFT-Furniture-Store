@@ -84,7 +84,7 @@ export const NftDetailDialog = ({
                 border="0.5px solid grey"
                 src={
                   info?.image
-                    ? `/image/furniture/${info.image}.png`
+                    ? `/image/furnitures/${info.image}.png`
                     : "/image/furniture_icon.svg"
                 }
               />

@@ -38,7 +38,7 @@ export const NftItem = ({
         border="0.5px solid grey"
         src={
           info?.image !== null
-            ? `/image/furniture/${info.image}.png`
+            ? `/image/furnitures/${info.image}.png`
             : "/image/furniture_icon.svg"
         }
       />
