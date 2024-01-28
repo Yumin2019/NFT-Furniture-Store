@@ -86,6 +86,9 @@ export const Room = () => {
 
     return () => {
       window.removeEventListener("message", onMessage);
+
+      // 방을 나가는 경우를 처리한다.
+      socket.emit("exit");
     };
   }, []);
 

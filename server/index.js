@@ -125,6 +125,8 @@ io.on("connection", (socket) => {
   console.log("someone connected");
 
   socket.on("join", (roomId) => {
+    console.log(`user joined roomId = ${roomId}`);
+
     // room에 자기 정보를 넣고 정보를 전달한다.
     characters.list[socket.id] = roomId;
     characters.rooms[roomId][socket.id] = {
@@ -155,12 +157,14 @@ io.on("connection", (socket) => {
     updateOnlines(roomId, online);
   });
 
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-
+  const exitRoom = () => {
     // list에서 삭제하고 room에서 삭제한다.
     let roomId = characters.list[socket.id];
-    delete characters.list[socket.id];
+    console.log(`user exited roomId = ${roomId}`);
+
+    if (characters.list[socket.id]) {
+      delete characters.list[socket.id];
+    }
 
     if (characters.rooms[roomId]) {
       delete characters.rooms[roomId][socket.id];
@@ -171,8 +175,19 @@ io.on("connection", (socket) => {
     console.log(characters);
 
     // 룸에서 online 수치를 업데이트한다.
-    let online = characters.rooms[roomId]?.length || 0;
+    let online = characters.rooms[roomId]
+      ? Object.keys(characters.rooms[roomId]).length
+      : 0;
     updateOnlines(roomId, online);
+  };
+
+  socket.on("exit", () => {
+    exitRoom();
+  });
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+    exitRoom();
   });
 
   // 유저가 움직인 경우에 처리한다.
