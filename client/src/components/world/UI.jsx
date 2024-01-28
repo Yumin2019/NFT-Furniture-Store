@@ -159,7 +159,7 @@ export const UI = () => {
               border="0.5px solid black"
               icon={<MdCancel size={30} />}
               onClick={() => {
-                setDraggedItem(null);
+                window.postMessage({ type: "deleteItem", idx: draggedItem });
               }}
             />
           )}

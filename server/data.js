@@ -1,5 +1,3 @@
-const pathfinding = require("pathfinding");
-
 // 가구 기본 정보
 const furnitures = {
   washer: {
@@ -286,11 +284,6 @@ const getDefaultMap = () => {
   };
 };
 
-const getDefaultGrid = () => {
-  // size * gridDivision
-  return new pathfinding.Grid(10 * 2, 10 * 2);
-};
-
 const defItems = [
   {
     ...furnitures.showerRound,
@@ -428,6 +421,5 @@ const defItems = [
 
 module.exports = {
   furnitures,
-  getDefaultGrid,
   getDefaultMap,
 };

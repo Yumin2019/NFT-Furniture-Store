@@ -15,7 +15,6 @@ const { Server } = require("socket.io");
 // Router
 const frontRouter = require("./routes/front");
 const userRouter = require("./routes/user");
-const worldRouter = require("./routes/world");
 
 app.use(express.json());
 
@@ -57,19 +56,19 @@ app.use((req, res, next) => {
 
 // other router
 app.use(userRouter);
-app.use(worldRouter);
 
 app.listen(process.env.PORT, () =>
   console.log(`running express server on port ${process.env.PORT}`)
 );
 
 // ================== Game Logic ==================
-const { furnitures, getDefaultMap, getDefaultGrid } = require("./data");
+const { furnitures, getDefaultMap } = require("./data");
 const {
   generatedRandomHexColor,
   getWorldData,
   generateRandomPosition,
   updateOnlines,
+  updateRoom,
 } = require("./utils/roomHelper");
 
 const io = new Server({
@@ -85,7 +84,7 @@ io.listen(3001);
 const characters = { list: {}, rooms: {} };
 
 // 모든 방에 대한 map 정보와 grid 정보
-// {1: {map: defaultMap, grid: defaultGrid}, ... }
+// {1: {map: defaultMap, ... }
 const maps = {};
 
 // 룸 정보를 바탕으로 초기화한다.
@@ -95,7 +94,6 @@ const init = async () => {
   list.map((v, i) => {
     maps[v.id] = {
       map: getDefaultMap(),
-      grid: getDefaultGrid(),
     };
     maps[v.id].map.items = JSON.parse(v.items) || [];
     characters.rooms[v.id] = {};
@@ -113,7 +111,6 @@ const addNewRoom = async (id) => {
   let world = list[0];
   maps[world.id] = {
     map: getDefaultMap(),
-    grid: getDefaultGrid(),
   };
   maps[world.id].map.items = JSON.parse(world.items) || [];
   characters.rooms[world.id] = {};
@@ -153,7 +150,8 @@ io.on("connection", (socket) => {
     console.log(roomId, maps[roomId].map);
 
     // 룸에서 online 수치를 업데이트한다.
-    let online = characters.rooms[roomId]?.length || 0;
+    let online = Object.keys(characters.rooms[roomId]).length;
+    console.log("online", online);
     updateOnlines(roomId, online);
   });
 
@@ -209,7 +207,9 @@ io.on("connection", (socket) => {
     console.log("items", map.items);
 
     // DB에 변경된 내용을 저장한다.
-    // 개수별로 처리는 어떻게? 가구 수 증가 감소는?
+    updateRoom(roomId, JSON.stringify(map.items));
+
+    // 방 내부에 존재하는 유저에게 맵 정보 전달
     io.to(roomId).emit("mapUpdate", map);
   });
 });

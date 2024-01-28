@@ -15,6 +15,7 @@ const getWorldData = async (id) => {
   return [];
 };
 
+// 현재 접속자 정보 처리
 const updateOnlines = async (id, value) => {
   try {
     let [results] = await db.query(
@@ -27,43 +28,21 @@ const updateOnlines = async (id, value) => {
   }
 };
 
-const generatedRandomHexColor = () => {
-  return "#" + Math.floor(Math.random() * 16777215).toString(16);
+// 내부에서 사용하는 룸 정보 관리, 방 주인만 호출한다.
+const updateRoom = async (id, value) => {
+  try {
+    let [results] = await db.query(
+      "UPDATE `room` SET `items` = ? WHERE `id` = ?",
+      [value, id]
+    );
+    return results;
+  } catch (e) {
+    console.log(e);
+  }
 };
 
-// 맵에서 움직일 수 없는 영역을 설정한다. maps[roomName]을 인자로 넣어서 처리
-const updateGrid = (roomMap) => {
-  let map = roomMap.map;
-  let grid = roomMap.grid;
-
-  // reset grid
-  for (let x = 0; x < map.size[0] * map.gridDivision; ++x) {
-    for (let y = 0; y < map.size[1] * map.gridDivision; ++y) {
-      grid.setWalkableAt(x, y, true);
-    }
-  }
-
-  map.items.forEach((item) => {
-    // 카펫이거나 벽걸이의 경우 넘어간다.
-    if (item.walkable || item.wall) {
-      return;
-    }
-
-    const width =
-      item.rotation === 1 || item.rotation === 3 ? item.size[1] : item.size[0];
-    const height =
-      item.rotation === 1 || item.rotation === 3 ? item.size[0] : item.size[1];
-
-    for (let x = 0; x < width; ++x) {
-      for (let y = 0; y < height; ++y) {
-        grid.setWalkableAt(
-          item.gridPosition[0] + x,
-          item.gridPosition[1] + y,
-          false
-        );
-      }
-    }
-  });
+const generatedRandomHexColor = () => {
+  return "#" + Math.floor(Math.random() * 16777215).toString(16);
 };
 
 const gridToVector3 = (gridPosition, map, width = 1, height = 1) => {
@@ -73,25 +52,19 @@ const gridToVector3 = (gridPosition, map, width = 1, height = 1) => {
   ];
 };
 
-// 넘겨준 grid에서 생성 좌표 뽑기(랜덤))
+// 생성 좌표 뽑기(랜덤))
 const generateRandomPosition = (roomMap) => {
   let map = roomMap.map;
-  let grid = roomMap.grid;
+  const x = Math.floor(Math.random() * map.size[0] * map.gridDivision);
+  const y = Math.floor(Math.random() * map.size[1] * map.gridDivision);
 
-  while (true) {
-    const x = Math.floor(Math.random() * map.size[0] * map.gridDivision);
-    const y = Math.floor(Math.random() * map.size[1] * map.gridDivision);
-
-    if (grid.isWalkableAt(x, y)) {
-      return gridToVector3([x, y], map);
-    }
-  }
+  return gridToVector3([x, y], map);
 };
 
 module.exports = {
   getWorldData,
   generatedRandomHexColor,
-  updateGrid,
   generateRandomPosition,
   updateOnlines,
+  updateRoom,
 };

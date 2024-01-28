@@ -13,11 +13,14 @@ import {
   draggedItemRotationAtom,
   shopModeAtom,
 } from "./UI";
-import { Inventory } from "./Inventory";
 import { loginAtom } from "../../pages/MainPage";
+import { Inventory } from "./Inventory";
 
 export const Room = () => {
-  // 상점 여부, 빌드 모드 여부에 따라 처리를 진행한다.
+  const { vector3ToGrid, gridToVector3 } = useGrid();
+  const [loginInfo] = useAtom(loginAtom);
+
+  // 상점 여부, 빌드 모드 여부, 가구 목록
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
   const [shopMode, setShopMode] = useAtom(shopModeAtom);
 
@@ -26,8 +29,15 @@ export const Room = () => {
   const [map] = useAtom(mapAtom);
   const [items, setItems] = useState(map?.items);
 
-  const { vector3ToGrid, gridToVector3 } = useGrid();
-  const [loginInfo] = useAtom(loginAtom);
+  // 드래그 아이템, 로테이션, 드래그 포지션 정보
+  const [draggedItem, setDraggedItem] = useAtom(draggedItemAtom);
+  const [draggedItemRotation, setDraggedItemRotation] = useAtom(
+    draggedItemRotationAtom
+  );
+
+  const [deleteIdx, setDeleteIdx] = useState(-1);
+  const [dragPosition, setDragPosition] = useState([0, 0]);
+  const [canDrop, setCanDrop] = useState(false);
 
   const onPlaneClick = (e) => {
     if (!buildMode || draggedItem === null) return;
@@ -48,20 +58,36 @@ export const Room = () => {
     setDraggedItem(null);
   };
 
-  const [draggedItem, setDraggedItem] = useAtom(draggedItemAtom);
-  const [draggedItemRotation, setDraggedItemRotation] = useAtom(
-    draggedItemRotationAtom
-  );
-
-  const [dragPosition, setDragPosition] = useState([0, 0]);
-  const [canDrop, setCanDrop] = useState(false);
-
   useEffect(() => {
-    // draggedItem이 변한 경우, tmp 파일을 날린다.
     if (draggedItem === null) {
-      setItems((prev) => prev.filter((item) => !item.tmp));
+      // 드래깅에 사용한 tmp가 있거나, deleteIdx와 매칭되는 경우 삭제한다.
+      // deleteIdx를 사용한 이후에 -1로 바꿔서 다시 처리되지 않도록 한다.
+      setItems((prev) =>
+        prev.filter((item, index) => !item.tmp && index !== deleteIdx)
+      );
+
+      setDeleteIdx(-1);
     }
   }, [draggedItem]);
+
+  // 빌드 모드에서 특정 가구를 삭제하는 이벤트를 처리한다. (draggedItem으로 잘 안 되서 useState 사용)
+  useEffect(() => {
+    const onMessage = async (event) => {
+      if (event.data.type === "deleteItem") {
+        // 삭제할 인덱스를 설정한다.
+        let deleteIdx = event.data.idx;
+        setDeleteIdx(deleteIdx);
+        setDraggedItem(null);
+
+        console.log("deleteIdx", deleteIdx);
+      }
+    };
+    window.addEventListener("message", onMessage);
+
+    return () => {
+      window.removeEventListener("message", onMessage);
+    };
+  }, []);
 
   useEffect(() => {
     if (draggedItem === null) {
@@ -140,6 +166,7 @@ export const Room = () => {
   const controls = useRef();
   const state = useThree((state) => state);
 
+  // 아이템을 수정한 다음에 buildMode가 풀리면 호출된다.
   useEffect(() => {
     let hasGrant =
       loginInfo.id === Number(window.location.pathname.split("/")[2]);
@@ -208,7 +235,9 @@ export const Room = () => {
         enableZoom={!shopMode}
       />
 
-      {shopMode && <Inventory onItemSelected={onItemSelected} />}
+      {shopMode && (
+        <Inventory onItemSelected={onItemSelected} buildItems={items} />
+      )}
 
       {!shopMode &&
         (buildMode ? items : map.items).map((v, idx) => {
@@ -223,6 +252,8 @@ export const Room = () => {
 
                 setDraggedItem(idx);
                 setDraggedItemRotation(v.rotation || 0);
+
+                console.log("draggedItem", idx);
               }}
               isDragging={draggedItem === idx}
               dragPosition={dragPosition}
