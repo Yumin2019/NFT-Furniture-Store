@@ -25,7 +25,11 @@ export const FurnitureDetailDialog = ({ furniture, isOpen, onClose }) => {
               <Image
                 boxSize="100%"
                 border="0.5px solid grey"
-                src={furniture?.image || "/image/furniture_icon.svg"}
+                src={
+                  furniture?.image
+                    ? `/image/furniture/${furniture.image}.png`
+                    : "/image/furniture_icon.svg"
+                }
               />
             </Box>
             <Text color="grey" fontSize={18}>

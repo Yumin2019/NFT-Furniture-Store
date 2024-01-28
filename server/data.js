@@ -263,6 +263,20 @@ const furnitures = {
   },
 };
 
+// let query = "INSERT INTO `furniture` (`name`, `desc`, `image`) VALUES ";
+// let query2 =
+//   "INSERT INTO `nft_item` (`furnitureId`, `name`, `desc`, `image`) VALUES ";
+
+// Object.values(furnitures).map((v, index) => {
+//   query += `('${v.name}', '${v.name} desc', '${v.name}'), `;
+//   query2 += `(${index + 1}, '${v.name} coupon', '${v.name} coupon desc', '${
+//     v.name
+//   }'), `;
+// });
+
+// console.log(query);
+// console.log(query2);
+
 // 초기 맵 정보와 초기 grid 정보
 const getDefaultMap = () => {
   return {

@@ -36,7 +36,11 @@ export const NftItem = ({
       <Image
         boxSize="65px"
         border="0.5px solid grey"
-        src={info?.image || "/image/furniture_icon.svg"}
+        src={
+          info?.image !== null
+            ? `/image/furniture/${info.image}.png`
+            : "/image/furniture_icon.svg"
+        }
       />
 
       <Flex direction="column" ml={4}>
