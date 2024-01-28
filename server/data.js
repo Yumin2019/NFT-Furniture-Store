@@ -1,6 +1,6 @@
 const pathfinding = require("pathfinding");
 
-// 가구 사이즈 정보
+// 가구 기본 정보
 const furnitures = {
   washer: {
     name: "washer",
@@ -264,152 +264,156 @@ const furnitures = {
 };
 
 // 초기 맵 정보와 초기 grid 정보
-const defaultMap = {
-  size: [10, 10],
-  gridDivision: 2,
-  items: [],
+const getDefaultMap = () => {
+  return {
+    size: [10, 10],
+    gridDivision: 2,
+    items: [],
+  };
 };
 
-const defaultGrid = new pathfinding.Grid(
-  defaultMap.size[0] * defaultMap.gridDivision,
-  defaultMap.size[1] * defaultMap.gridDivision
-);
+const getDefaultGrid = () => {
+  // size * gridDivision
+  return new pathfinding.Grid(10 * 2, 10 * 2);
+};
+
+const defItems = [
+  {
+    ...furnitures.showerRound,
+    gridPosition: [0, 0],
+  },
+  {
+    ...furnitures.toiletSquare,
+    gridPosition: [0, 3],
+    rotation: 1,
+  },
+  {
+    ...furnitures.washer,
+    gridPosition: [5, 0],
+  },
+  {
+    ...furnitures.bathroomSink,
+    gridPosition: [7, 0],
+  },
+  {
+    ...furnitures.trashcan,
+    gridPosition: [0, 5],
+    rotation: 1,
+  },
+  {
+    ...furnitures.bathroomCabinetDrawer,
+    gridPosition: [3, 0],
+  },
+  {
+    ...furnitures.bathtub,
+    gridPosition: [4, 4],
+  },
+  {
+    ...furnitures.bathtub,
+    gridPosition: [0, 8],
+    rotation: 3,
+  },
+  {
+    ...furnitures.bathroomCabinet,
+    gridPosition: [3, 0],
+  },
+  {
+    ...furnitures.bathroomMirror,
+    gridPosition: [0, 8],
+    rotation: 1,
+  },
+  {
+    ...furnitures.bathroomMirror,
+    gridPosition: [, 10],
+    rotation: 1,
+  },
+  {
+    ...furnitures.tableCoffee,
+    gridPosition: [10, 8],
+  },
+  {
+    ...furnitures.rugRectangle,
+    gridPosition: [8, 7],
+  },
+  {
+    ...furnitures.loungeSofaCorner,
+    gridPosition: [6, 10],
+  },
+  {
+    ...furnitures.bear,
+    gridPosition: [0, 3],
+    rotation: 1,
+  },
+  {
+    ...furnitures.plant,
+    gridPosition: [11, 13],
+  },
+  {
+    ...furnitures.cabinetBedDrawerTable,
+    gridPosition: [13, 19],
+  },
+  {
+    ...furnitures.cabinetBedDrawer,
+    gridPosition: [19, 19],
+  },
+  {
+    ...furnitures.bedDouble,
+    gridPosition: [14, 15],
+  },
+  {
+    ...furnitures.bookcaseClosedWide,
+    gridPosition: [12, 0],
+    rotation: 2,
+  },
+  {
+    ...furnitures.speaker,
+    gridPosition: [11, 0],
+  },
+  {
+    ...furnitures.speakerSmall,
+    gridPosition: [15, 0],
+  },
+  {
+    ...furnitures.loungeChair,
+    gridPosition: [10, 4],
+  },
+  {
+    ...furnitures.loungeSofaOttoman,
+    gridPosition: [14, 4],
+  },
+  {
+    ...furnitures.loungeDesignSofa,
+    gridPosition: [18, 0],
+    rotation: 1,
+  },
+  {
+    ...furnitures.kitchenCabinetCornerRound,
+    gridPosition: [2, 18],
+    rotation: 2,
+  },
+  {
+    ...furnitures.kitchenCabinetCornerInner,
+    gridPosition: [0, 18],
+    rotation: 2,
+  },
+  {
+    ...furnitures.kitchenStove,
+    gridPosition: [0, 16],
+    rotation: 1,
+  },
+  {
+    ...furnitures.dryer,
+    gridPosition: [0, 14],
+    rotation: 1,
+  },
+  {
+    ...furnitures.lampRoundFloor,
+    gridPosition: [0, 12],
+  },
+];
 
 module.exports = {
   furnitures,
-  defaultMap,
-  defaultGrid,
+  getDefaultGrid,
+  getDefaultMap,
 };
-
-// {
-//   ...furnitures.showerRound,
-//   gridPosition: [0, 0],
-// },
-// {
-//   ...furnitures.toiletSquare,
-//   gridPosition: [0, 3],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.washer,
-//   gridPosition: [5, 0],
-// },
-// {
-//   ...furnitures.bathroomSink,
-//   gridPosition: [7, 0],
-// },
-// {
-//   ...furnitures.trashcan,
-//   gridPosition: [0, 5],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.bathroomCabinetDrawer,
-//   gridPosition: [3, 0],
-// },
-// {
-//   ...furnitures.bathtub,
-//   gridPosition: [4, 4],
-// },
-// {
-//   ...furnitures.bathtub,
-//   gridPosition: [0, 8],
-//   rotation: 3,
-// },
-// {
-//   ...furnitures.bathroomCabinet,
-//   gridPosition: [3, 0],
-// },
-// {
-//   ...furnitures.bathroomMirror,
-//   gridPosition: [0, 8],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.bathroomMirror,
-//   gridPosition: [, 10],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.tableCoffee,
-//   gridPosition: [10, 8],
-// },
-// {
-//   ...furnitures.rugRectangle,
-//   gridPosition: [8, 7],
-// },
-// {
-//   ...furnitures.loungeSofaCorner,
-//   gridPosition: [6, 10],
-// },
-// {
-//   ...furnitures.bear,
-//   gridPosition: [0, 3],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.plant,
-//   gridPosition: [11, 13],
-// },
-// {
-//   ...furnitures.cabinetBedDrawerTable,
-//   gridPosition: [13, 19],
-// },
-// {
-//   ...furnitures.cabinetBedDrawer,
-//   gridPosition: [19, 19],
-// },
-// {
-//   ...furnitures.bedDouble,
-//   gridPosition: [14, 15],
-// },
-// {
-//   ...furnitures.bookcaseClosedWide,
-//   gridPosition: [12, 0],
-//   rotation: 2,
-// },
-// {
-//   ...furnitures.speaker,
-//   gridPosition: [11, 0],
-// },
-// {
-//   ...furnitures.speakerSmall,
-//   gridPosition: [15, 0],
-// },
-// {
-//   ...furnitures.loungeChair,
-//   gridPosition: [10, 4],
-// },
-// {
-//   ...furnitures.loungeSofaOttoman,
-//   gridPosition: [14, 4],
-// },
-// {
-//   ...furnitures.loungeDesignSofa,
-//   gridPosition: [18, 0],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.kitchenCabinetCornerRound,
-//   gridPosition: [2, 18],
-//   rotation: 2,
-// },
-// {
-//   ...furnitures.kitchenCabinetCornerInner,
-//   gridPosition: [0, 18],
-//   rotation: 2,
-// },
-// {
-//   ...furnitures.kitchenStove,
-//   gridPosition: [0, 16],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.dryer,
-//   gridPosition: [0, 14],
-//   rotation: 1,
-// },
-// {
-//   ...furnitures.lampRoundFloor,
-//   gridPosition: [0, 12],
-// },

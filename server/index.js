@@ -64,7 +64,7 @@ app.listen(process.env.PORT, () =>
 );
 
 // ================== Game Logic ==================
-const { furnitures, defaultMap, defaultGrid } = require("./data");
+const { furnitures, getDefaultMap, getDefaultGrid } = require("./data");
 const {
   generatedRandomHexColor,
   getWorldData,
@@ -94,8 +94,8 @@ const init = async () => {
 
   list.map((v, i) => {
     maps[v.id] = {
-      map: defaultMap,
-      grid: defaultGrid,
+      map: getDefaultMap(),
+      grid: getDefaultGrid(),
     };
     maps[v.id].map.items = JSON.parse(v.items) || [];
     characters.rooms[v.id] = {};
@@ -112,8 +112,8 @@ const addNewRoom = async (id) => {
 
   let world = list[0];
   maps[world.id] = {
-    map: defaultMap,
-    grid: defaultGrid,
+    map: getDefaultMap(),
+    grid: getDefaultGrid(),
   };
   maps[world.id].map.items = JSON.parse(world.items) || [];
   characters.rooms[world.id] = {};
@@ -150,7 +150,7 @@ io.on("connection", (socket) => {
 
     // 방에 참가한다.
     socket.join(roomId);
-    console.log(characters);
+    console.log(roomId, maps[roomId].map);
 
     // 룸에서 online 수치를 업데이트한다.
     let online = characters.rooms[roomId]?.length || 0;
@@ -195,23 +195,22 @@ io.on("connection", (socket) => {
     let rooms = characters.rooms[roomId];
     if (rooms) {
       rooms[socket.id].curAnim = animation;
-      socket.to(roomId).emit("character", socket.id, rooms[socket.id]);
+      socket.to(roomId).emit("characters", rooms);
     }
   });
 
   // 아이템 리스트가 변경된 경우, 해당 방의 모든 플레이어의 위치 정보를 다시 설정하고 가구 정보를 업데이트 한다.
   socket.on("itemsUpdate", (items) => {
-    // let roomId = characters.list[socket.id];
-    // let roomCharacters = characters.rooms[roomId];
-    // let map = maps[roomId]?.map;
-    // console.log("items", items);
-    // map.items = items;
-    // Object.values(roomCharacters).map((character) => {
-    //   character.position = generateRandomPosition(maps[roomId]);
-    // });
-    // // DB에 변경된 내용을 저장한다.
-    // // 개수별로 처리는 어떻게? 가구 수 증가 감소는?
-    // io.to(roomId).emit("mapUpdate", { map: map, characters: roomCharacters });
+    let roomId = characters.list[socket.id];
+    let map = maps[roomId].map;
+    map.items = [...items];
+
+    console.log("roomId", roomId);
+    console.log("items", map.items);
+
+    // DB에 변경된 내용을 저장한다.
+    // 개수별로 처리는 어떻게? 가구 수 증가 감소는?
+    io.to(roomId).emit("mapUpdate", map);
   });
 });
 

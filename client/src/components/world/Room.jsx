@@ -14,18 +14,20 @@ import {
   shopModeAtom,
 } from "./UI";
 import { Inventory } from "./Inventory";
+import { loginAtom } from "../../pages/MainPage";
 
 export const Room = () => {
   // 상점 여부, 빌드 모드 여부에 따라 처리를 진행한다.
   const [buildMode, setBuildMode] = useAtom(buildModeAtom);
-  const [inventoryMode, setShopMode] = useAtom(shopModeAtom);
+  const [shopMode, setShopMode] = useAtom(shopModeAtom);
+
+  // 캐릭터 정보, 맵 정보(size, gridDivision, items), 수정하는 아이템 정보
   const [characters] = useAtom(charactersAtom);
   const [map] = useAtom(mapAtom);
   const [items, setItems] = useState(map?.items);
-  const { vector3ToGrid, gridToVector3 } = useGrid();
 
-  const scene = useThree((state) => state.scene);
-  const [user] = useAtom(userAtom);
+  const { vector3ToGrid, gridToVector3 } = useGrid();
+  const [loginInfo] = useAtom(loginAtom);
 
   const onPlaneClick = (e) => {
     if (!buildMode || draggedItem === null) return;
@@ -37,6 +39,8 @@ export const Room = () => {
         delete newItems[draggedItem].tmp;
         newItems[draggedItem].gridPosition = vector3ToGrid(e.point);
         newItems[draggedItem].rotation = draggedItemRotation;
+
+        console.log("dragged: ", newItems[draggedItem]);
         return newItems;
       });
     }
@@ -137,25 +141,27 @@ export const Room = () => {
   const state = useThree((state) => state);
 
   useEffect(() => {
+    let hasGrant =
+      loginInfo.id === Number(window.location.pathname.split("/")[2]);
     if (buildMode) {
       setItems(map?.items || []);
       // cotrols가 카메라를 처리한다. (0, 0, 0)
       state.camera.position.set(8, 8, 8);
       controls.current.target.set(0, 0, 0);
-    } else {
+    } else if (hasGrant) {
       socket.emit("itemsUpdate", items);
     }
   }, [buildMode]);
 
   useEffect(() => {
-    if (inventoryMode) {
+    if (shopMode) {
       state.camera.position.set(0, 4, 8);
       controls.current.target.set(0, 0, 0);
     } else {
       state.camera.position.set(8, 8, 8);
       controls.current.target.set(0, 0, 0);
     }
-  }, [inventoryMode]);
+  }, [shopMode]);
 
   // 인벤토리에서 아이템을 선택한 경우
   const onItemSelected = (item) => {
@@ -169,11 +175,10 @@ export const Room = () => {
     ]);
 
     setDraggedItem(items.length);
+    console.log("setDraggedItem", items.length);
     setDraggedItemRotation(0);
     setShopMode(false);
   };
-
-  console.log(characters);
 
   return (
     <>
@@ -200,12 +205,12 @@ export const Room = () => {
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2}
         screenSpacePanning={false}
-        enableZoom={!inventoryMode}
+        enableZoom={!shopMode}
       />
 
-      {inventoryMode && <Inventory onItemSelected={onItemSelected} />}
+      {shopMode && <Inventory onItemSelected={onItemSelected} />}
 
-      {!inventoryMode &&
+      {!shopMode &&
         (buildMode ? items : map.items).map((v, idx) => {
           return (
             <FurnitureItem
@@ -215,6 +220,7 @@ export const Room = () => {
                 if (!buildMode) {
                   return;
                 }
+
                 setDraggedItem(idx);
                 setDraggedItemRotation(v.rotation || 0);
               }}
@@ -227,7 +233,7 @@ export const Room = () => {
         })}
 
       {/* 하단 메시(바닥)를 처리한다. */}
-      {!inventoryMode && (
+      {!shopMode && (
         <mesh
           rotation-x={-Math.PI / 2}
           position-y={-0.002}
@@ -257,7 +263,7 @@ export const Room = () => {
       )}
 
       {/* 가구 보기 모드 */}
-      {buildMode && !inventoryMode && (
+      {buildMode && !shopMode && (
         <Grid infiniteGrid fadeDistance={50} fadeStrength={5} />
       )}
 

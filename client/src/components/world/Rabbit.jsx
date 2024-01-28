@@ -29,6 +29,18 @@ export function Rabbit({
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes } = useGraph(clone);
 
+  // 다른 유저의 움직임이나 애니메이션을 동기화한다. (자신의 것은 자기가 직접 처리하고 나머지 정보는 서버로부터 받음)
+  useEffect(() => {
+    group.current.position.x = position[0];
+    group.current.position.z = position[1];
+    group.current.rotation.y = rotation;
+  }, [position, rotation]);
+
+  useEffect(() => {
+    setAnimation(curAnim);
+  }, [curAnim]);
+
+  // 현재 유저에 대한 애니메이션 변경 및 움직임을 처리한다.
   useEffect(() => {
     if (actions[animation]) {
       actions[animation].reset().fadeIn(0.32).play();
@@ -41,18 +53,25 @@ export function Rabbit({
     return () => actions[animation]?.fadeOut(0.32);
   }, [animation]);
 
-  // 유저의 움직임이나 애니메이션을 동기화한다.
+  // UI에서 던지는 애니메이션을 처리한다. (자기 캐릭터에만 등록)
   useEffect(() => {
-    group.current.position.x = position[0];
-    group.current.position.z = position[1];
-    group.current.rotation.y = rotation;
-  }, [position, rotation]);
+    const onMessage = async (event) => {
+      if (
+        event.data === "Wave" ||
+        event.data === "Yes" ||
+        event.data === "No" ||
+        event.data === "Punch"
+      ) {
+        setAnimation(getAnimName(event.data));
+      }
+    };
 
-  useEffect(() => {
-    setAnimation(curAnim);
-  }, [curAnim]);
+    if (id === user) window.addEventListener("message", onMessage);
+    return () => {
+      if (id === user) window.removeEventListener("message", onMessage);
+    };
+  }, []);
 
-  // Movement Logic
   const { forward, backward, left, right } = usePersonControls(id === user);
 
   useFrame((state) => {
@@ -94,7 +113,12 @@ export function Rabbit({
           [group.current.position.x, group.current.position.z],
           group.current.rotation.y
         );
-      } else {
+      } else if (
+        animation !== getAnimName("Punch") &&
+        animation !== getAnimName("Yes") &&
+        animation !== getAnimName("No") &&
+        animation !== getAnimName("Wave")
+      ) {
         setAnimation(getAnimName("Idle"));
       }
 

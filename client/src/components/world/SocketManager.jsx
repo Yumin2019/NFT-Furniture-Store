@@ -33,33 +33,17 @@ export const SocketManager = () => {
     }
 
     function onCharacters(characters) {
-      console.log(characters);
       setCharacters(characters);
     }
 
-    function onCharacter(socketId, character) {
-      console.log(character);
-      setCharacters((prev) => {
-        let keys = Object.keys(prev);
-        return keys.map((key) => {
-          if (socketId === key) {
-            return character;
-          }
-          return prev[key];
-        });
-      });
-    }
-
     function onMapUpdate(data) {
-      setMap(data.map);
-      setCharacters(data.characters);
+      setMap(data);
     }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("joinRes", onJoinRes);
     socket.on("characters", onCharacters);
-    socket.on("character", onCharacter);
     socket.on("mapUpdate", onMapUpdate);
 
     return () => {
@@ -67,7 +51,6 @@ export const SocketManager = () => {
       socket.off("disconnect", onDisconnect);
       socket.off("joinRes", onJoinRes);
       socket.off("characters", onCharacters);
-      socket.off("character", onCharacter);
       socket.off("mapUpdate", onMapUpdate);
     };
   }, []);
