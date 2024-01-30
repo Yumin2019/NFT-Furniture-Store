@@ -9,7 +9,6 @@ const {
   comparePassword,
   randomGenerator,
 } = require("../utils/helpers");
-const { addNewRoom } = require("..");
 
 // ======================== GET API ========================
 router.get("/loginStatus", async (req, res) => {
@@ -311,8 +310,6 @@ router.post("/register", async (req, res) => {
     console.log(roomResult);
 
     if (result.affectedRows && roomResult.affectedRows) {
-      // 새로운 룸 정보를 인메모리 맵에 추가한다.
-      addNewRoom(roomResult.insertId);
       res.send(200);
     }
   } catch (e) {

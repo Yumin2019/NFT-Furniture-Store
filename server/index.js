@@ -124,8 +124,13 @@ init();
 io.on("connection", (socket) => {
   console.log("someone connected");
 
-  socket.on("join", (roomId) => {
+  socket.on("join", async (roomId) => {
     console.log(`user joined roomId = ${roomId}`);
+
+    // 서버 실행 중간에 회원가입한 경우에는 방 정보가 없을 수 있어서 중간에 생성한다.
+    if (!characters.rooms[roomId]) {
+      await addNewRoom(roomId);
+    }
 
     // room에 자기 정보를 넣고 정보를 전달한다.
     characters.list[socket.id] = roomId;
@@ -228,7 +233,3 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("mapUpdate", map);
   });
 });
-
-module.exports = {
-  addNewRoom,
-};

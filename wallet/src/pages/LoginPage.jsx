@@ -56,11 +56,8 @@ export const LoginPage = () => {
   useEffect(() => {
     // 기존에 창이 떠 있는 경우에 창을 닫는다.
     sendWorkerEvent("closeWindow", {});
-    loadLoginInfo();
-  }, []);
 
-  useEffect(() => {
-    if (isExtension() && window.location.hash) {
+    if (isExtension() && window.location.hash.length > 0) {
       printLog(`${window.location.hash} hash on react`);
       if (window.location.hash === "#createWallet") {
         setIsTabAtom(true);
@@ -69,6 +66,8 @@ export const LoginPage = () => {
         setIsTabAtom(true);
         navigate("/importWallet");
       }
+    } else {
+      loadLoginInfo();
     }
   }, []);
 

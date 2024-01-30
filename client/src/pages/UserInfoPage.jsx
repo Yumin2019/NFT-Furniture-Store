@@ -373,7 +373,7 @@ export const UserInfoPage = () => {
             />
             <ColItem
               name="NFT"
-              count={100}
+              count={nftList.length}
               onClick={() => {
                 setTabIndex(0);
               }}
